@@ -5,6 +5,10 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
+### Config ###
+**/application-hidden.properties
+
+
 ### STS ###
 .apt_generated
 .classpath
