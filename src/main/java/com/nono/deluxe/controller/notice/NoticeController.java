@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -18,12 +19,9 @@ public class NoticeController {
     private final NoticeService noticeService;
 
     @PostMapping("/notice")
-    public ResponseEntity<Notice> createNotice(@RequestBody CreateNoticeRequestDto requestDto) {
+    public ResponseEntity<Notice> createNotice(@RequestBody CreateNoticeRequestDto requestDto   ) {
         try {
-            Notice notice = noticeService.createNotice(requestDto.getWriter(),
-                    requestDto.getTitle(),
-                    requestDto.getContent(),
-                    requestDto.isOnFocus());
+            Notice notice = noticeService.createNotice(requestDto);
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(notice);

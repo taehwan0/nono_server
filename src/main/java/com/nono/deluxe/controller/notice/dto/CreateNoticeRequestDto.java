@@ -1,5 +1,6 @@
 package com.nono.deluxe.controller.notice.dto;
 
+import com.nono.deluxe.domain.notice.Notice;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,4 +15,12 @@ public class CreateNoticeRequestDto {
     private String title;
     private String content;
     private boolean onFocus;
+
+    public Notice toEntity() {
+        return Notice.builder()
+                .title(title)
+                .writer(writer)
+                .content(content)
+                .build();
+    }
 }

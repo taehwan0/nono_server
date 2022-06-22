@@ -1,5 +1,6 @@
 package com.nono.deluxe.service;
 
+import com.nono.deluxe.controller.notice.dto.CreateNoticeRequestDto;
 import com.nono.deluxe.domain.notice.Notice;
 import com.nono.deluxe.domain.notice.NoticeRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,15 +16,8 @@ public class NoticeService {
     private final NoticeRepository noticeRepository;
 
     @Transactional
-    public Notice createNotice(String writer, String title, String content, boolean onFocus) {
-        Notice newNotice = Notice.builder()
-                .writer(writer)
-                .title(title)
-                .content(content)
-                .onFocus(onFocus)
-                .build();
-
-        return noticeRepository.save(newNotice);
+    public Notice createNotice(CreateNoticeRequestDto requestDto) {
+        return noticeRepository.save(requestDto.toEntity());
     }
 
     @Transactional(readOnly = true)
