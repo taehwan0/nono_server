@@ -7,21 +7,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter @Setter
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateNoticeRequestDto {
-    private User writer;
     private String title;
     private String content;
     private boolean onFocused;
-
-    public Notice toEntity() {
-        return Notice.builder()
-                .title(title)
-                .content(content)
-                .writer(writer)
-                .onFocused(onFocused)
-                .build();
-    }
 }

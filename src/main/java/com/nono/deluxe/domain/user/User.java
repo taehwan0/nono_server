@@ -1,5 +1,6 @@
 package com.nono.deluxe.domain.user;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -34,4 +35,11 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
+    @Builder
+    public User(String name, String email, String password, Role role) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+    }
 }
