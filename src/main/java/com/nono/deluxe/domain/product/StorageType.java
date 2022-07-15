@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum Storage {
+public enum StorageType {
 
     ICE("ICE"),
     COLD("COLD"),

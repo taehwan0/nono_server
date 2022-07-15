@@ -12,7 +12,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @Entity
-public class Company extends BaseTimeEntity {
+public class Company {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 

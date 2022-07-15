@@ -1,6 +1,5 @@
 package com.nono.deluxe.domain.product;
 
-import com.nono.deluxe.domain.BaseTimeEntity;
 import com.nono.deluxe.domain.record.Record;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,7 +11,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @Entity
-public class Product extends BaseTimeEntity {
+public class Product {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
@@ -36,7 +35,7 @@ public class Product extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Storage storage;
+    private StorageType storageType;
 
     @Column(nullable = true)
     private String barcode;
@@ -47,8 +46,11 @@ public class Product extends BaseTimeEntity {
     @Column(columnDefinition = "tinyint(1) default 1")
     private boolean onActivated;
 
+    /*
+    delete true -> join 용, 이력남기기 데이터로 쓰이며 외부로 노출되지 않음.
+     */
     @Column(columnDefinition = "tinyint(1) default 0")
-    private boolean isDeleted; // delete true -> join data, 이력용으로 쓰이며 외부로 노출되지 않음
+    private boolean isDeleted;
 
     @Column(nullable = true)
     private String imageUri;

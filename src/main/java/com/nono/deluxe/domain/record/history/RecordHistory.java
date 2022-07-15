@@ -1,8 +1,9 @@
-package com.nono.deluxe.domain.record;
+package com.nono.deluxe.domain.record.history;
 
 import com.nono.deluxe.domain.BaseTimeEntity;
 import com.nono.deluxe.domain.document.Document;
 import com.nono.deluxe.domain.product.Product;
+import com.nono.deluxe.domain.record.Record;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,18 +12,14 @@ import javax.persistence.*;
 @Getter
 @NoArgsConstructor
 @Entity
-public class Record extends BaseTimeEntity {
+public class RecordHistory extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "document_id", nullable = false)
-    private Document document;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    @JoinColumn(name = "record_id", nullable = false)
+    private Record record;
 
     @Column(nullable = false)
     private long quantity;
@@ -32,5 +29,4 @@ public class Record extends BaseTimeEntity {
 
     @Column(nullable = false)
     private long price;
-
 }

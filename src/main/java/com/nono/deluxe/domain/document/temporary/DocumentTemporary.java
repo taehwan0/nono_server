@@ -1,7 +1,8 @@
-package com.nono.deluxe.domain.document;
+package com.nono.deluxe.domain.document.temporary;
 
 import com.nono.deluxe.domain.BaseTimeEntity;
 import com.nono.deluxe.domain.company.Company;
+import com.nono.deluxe.domain.document.DocumentType;
 import com.nono.deluxe.domain.record.Record;
 import com.nono.deluxe.domain.user.User;
 import lombok.Getter;
@@ -14,9 +15,10 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @Entity
-public class Document extends BaseTimeEntity {
+public class DocumentTemporary extends BaseTimeEntity {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @Enumerated(EnumType.STRING)
@@ -34,5 +36,4 @@ public class Document extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
-
 }

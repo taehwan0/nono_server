@@ -1,7 +1,8 @@
-package com.nono.deluxe.domain.record;
+package com.nono.deluxe.domain.record.temporary;
 
 import com.nono.deluxe.domain.BaseTimeEntity;
 import com.nono.deluxe.domain.document.Document;
+import com.nono.deluxe.domain.document.temporary.DocumentTemporary;
 import com.nono.deluxe.domain.product.Product;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,14 +12,15 @@ import javax.persistence.*;
 @Getter
 @NoArgsConstructor
 @Entity
-public class Record extends BaseTimeEntity {
+public class RecordTemporary extends BaseTimeEntity {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "document_id", nullable = false)
-    private Document document;
+    @JoinColumn(name = "document_temporary_id", nullable = false)
+    private DocumentTemporary document;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
@@ -32,5 +34,4 @@ public class Record extends BaseTimeEntity {
 
     @Column(nullable = false)
     private long price;
-
 }
