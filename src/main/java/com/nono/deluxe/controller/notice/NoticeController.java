@@ -66,7 +66,7 @@ public class NoticeController {
                     id,
                     requestDto.getTitle(),
                     requestDto.getContent(),
-                    requestDto.isOnFocus());
+                    requestDto.isOnFocused());
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(responseDto);

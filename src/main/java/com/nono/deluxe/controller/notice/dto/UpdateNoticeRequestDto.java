@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 public class UpdateNoticeRequestDto {
     private String title;
     private String content;
-    private boolean onFocus;
+    private boolean onFocused;
 }

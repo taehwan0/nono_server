@@ -54,11 +54,16 @@ public class NoticeService {
         return new NoticeResponseDto(notice);
     }
 
+    /*
+    save(update query) 이후에 @LastModifiedAt 실행이 되는데 @Transactional 때문에 동시 실행 되기 때문에 수정이 안됐음.
+    saveAndFlush 로 명시적인 저장을 하면 @LastModifiedAt 이 정상적으로 동작함
+     */
     @Transactional
     public NoticeResponseDto updateNotice(long id, String title, String content, boolean onFocus) {
         Notice notice = noticeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Not Found Notice"));
         notice.updateNoticeContents(title, content, onFocus);
+        noticeRepository.saveAndFlush(notice);
         return new NoticeResponseDto(notice);
     }
 
