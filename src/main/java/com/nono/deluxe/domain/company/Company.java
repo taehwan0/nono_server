@@ -1,6 +1,5 @@
 package com.nono.deluxe.domain.company;
 
-import com.nono.deluxe.domain.BaseTimeEntity;
 import com.nono.deluxe.domain.document.Document;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,7 +26,7 @@ public class Company {
     private String category;
 
     @Column(columnDefinition = "tinyint(1) default 1")
-    private boolean onActivated;
+    private boolean activate;
 
     @OneToMany(mappedBy = "company")
     List<Document> documentList = new ArrayList<>();

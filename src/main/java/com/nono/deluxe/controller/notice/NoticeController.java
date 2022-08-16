@@ -57,7 +57,6 @@ public class NoticeController {
                     .status(HttpStatus.BAD_REQUEST)
                     .build();
         }
-
     }
 
     @GetMapping("/notice/{id}")

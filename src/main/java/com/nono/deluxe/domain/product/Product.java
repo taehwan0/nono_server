@@ -1,5 +1,6 @@
 package com.nono.deluxe.domain.product;
 
+import com.nono.deluxe.domain.S3File.S3File;
 import com.nono.deluxe.domain.record.Record;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -44,20 +45,23 @@ public class Product {
     private long stock;
 
     @Column(columnDefinition = "tinyint(1) default 1")
-    private boolean onActivated;
+    private boolean activate;
 
-    /*
-    delete true -> join 용, 이력남기기 데이터로 쓰이며 외부로 노출되지 않음.
-     */
-    @Column(columnDefinition = "tinyint(1) default 0")
-    private boolean isDeleted;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "file_id", nullable = true)
+    private S3File file;
 
+    // 미확정
     @Column(nullable = true)
-    private String imageUri;
-
-    @Column(nullable = false)
     private long price;
 
+    // 미확정
+    @Column(nullable = true)
+    private long margin;
+
+    // 이런 방식으로 갈지 쿼리로 갈지
+    // 해당 방식은 유용 할 수 있으나 헷갈림 -> 내부적으로는 쿼리 전송이랑 거의 비슷하거나 같음
+    // 쿼리는 코드가 좀 더 쓰이겠지?
     @OneToMany(mappedBy = "product",
             fetch = FetchType.LAZY)
     private List<Record> recordList = new ArrayList<>();

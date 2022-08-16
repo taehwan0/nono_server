@@ -19,7 +19,7 @@ public class NoticeResponseDto {
         this.noticeId = notice.getId();
         this.title = notice.getTitle();
         this.content = notice.getContent();
-        this.onFocused = notice.isOnFocused();
+        this.onFocused = notice.isFocus();
         this.createAt = notice.getCreatedAt();
         this.updateAt = notice.getUpdatedAt();
         this.writer = notice.getWriter().getName();

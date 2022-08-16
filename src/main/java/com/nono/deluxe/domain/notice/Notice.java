@@ -22,23 +22,23 @@ public class Notice extends BaseTimeEntity {
     @Column(nullable = false, length = 100)
     private String title;
 
-    @Column(nullable = true, length = 500)
+    @Column(nullable = true, columnDefinition = "text")
     private String content;
 
     @Column(nullable = false)
-    boolean onFocused;
+    boolean focus;
 
     @Builder
     public Notice(User writer, String title, String content, boolean onFocused) {
         this.writer = writer;
         this.title = title;
         this.content = content;
-        this.onFocused = onFocused;
+        this.focus = onFocused;
     }
 
     public void updateNoticeContents(String title, String content, boolean onFocus) {
         this.title = title;
         this.content = content;
-        this.onFocused = onFocus;
+        this.focus = onFocus;
     }
 }
