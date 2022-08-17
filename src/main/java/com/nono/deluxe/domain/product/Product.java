@@ -1,6 +1,6 @@
 package com.nono.deluxe.domain.product;
 
-import com.nono.deluxe.domain.S3File.S3File;
+import com.nono.deluxe.domain.imagefile.ImageFile;
 import com.nono.deluxe.domain.record.Record;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,29 +16,30 @@ public class Product {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true, length = 20)
     private String productCode;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     private String name;
 
-    @Column(nullable = true)
+    @Column(nullable = true, length = 255)
     private String description;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     private String category;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     private String maker;
 
-    @Column(nullable = false)
-    private String standard;
+    // standard -> unit
+    @Column(nullable = false, length = 30)
+    private String unit;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private StorageType storageType;
 
-    @Column(nullable = true)
+    @Column(nullable = true, length = 50)
     private String barcode;
 
     @Column(nullable = false)
@@ -49,13 +50,11 @@ public class Product {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "file_id", nullable = true)
-    private S3File file;
+    private ImageFile file;
 
-    // 미확정
     @Column(nullable = true)
     private long price;
 
-    // 미확정
     @Column(nullable = true)
     private long margin;
 

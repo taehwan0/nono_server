@@ -27,4 +27,7 @@ public class TempRecord extends BaseTimeEntity {
 
     @Column(nullable = false)
     private long quantity;
+
+    @Column(nullable = false)
+    private long price;
 }

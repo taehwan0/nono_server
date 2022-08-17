@@ -8,8 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -27,12 +25,7 @@ public class Document extends BaseTimeEntity {
     @JoinColumn(name = "writer_id", nullable = false)
     private User writer;
 
-    @OneToMany(mappedBy = "document",
-            fetch = FetchType.LAZY)
-    private List<Record> DocumentItemList = new ArrayList<>();
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
-
 }

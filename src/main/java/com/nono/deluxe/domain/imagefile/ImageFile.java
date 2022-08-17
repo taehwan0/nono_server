@@ -1,4 +1,4 @@
-package com.nono.deluxe.domain.S3File;
+package com.nono.deluxe.domain.imagefile;
 
 
 import lombok.Getter;
@@ -9,7 +9,7 @@ import javax.persistence.*;
 @Getter
 @NoArgsConstructor
 @Entity
-public class S3File {
+public class ImageFile {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;

@@ -32,5 +32,4 @@ public class Record extends BaseTimeEntity {
 
     @Column(nullable = false)
     private long price;
-
 }
