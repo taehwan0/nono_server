@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
+import static org.apache.coyote.http11.Constants.a;
+
 @Slf4j
 @Component
 public class AuthManagerImplV1 implements AuthManager{
@@ -20,19 +22,16 @@ public class AuthManagerImplV1 implements AuthManager{
     @Value("${auth.issuer}")
     private String issuer;
 
-
-
-
-
     // token 시간 입력 받아 생성해서 리턴하기
     @Override
     public String getToken(String username, long tokenActiveSeconds) {
         Algorithm algorithm = getAlgorithm(key);
-        return JWT.create()
+        String jwtToken = JWT.create()
                 .withExpiresAt(new Date(System.currentTimeMillis() + (1000 * tokenActiveSeconds)))
                 .withIssuer(issuer)
                 .withClaim("username", username)
                 .sign(algorithm);
+        return "Bearer ".concat(jwtToken);
     }
 
     //  token 검사하고 권한 확인하기
@@ -41,11 +40,21 @@ public class AuthManagerImplV1 implements AuthManager{
         Algorithm algorithm = getAlgorithm(key);
         JWTVerifier verifier = getVerifier(algorithm);
         try {
-            DecodedJWT decodedJWT = verifier.verify(token);
+            String extractedToken = extractToken(token);
+            DecodedJWT decodedJWT = verifier.verify(extractedToken);
             log.info(decodedJWT.getClaim("username").toString());
         } catch (Exception e) {
             log.error(e.getMessage());
-            throw new RuntimeException("token is expired");
+            throw new RuntimeException("invalid token");
+        }
+    }
+
+    @Override
+    public String extractToken(String token) {
+        if(token.matches("(^Bearer [A-Za-z0-9-_]*\\.[A-Za-z0-9-_]*\\.[A-Za-z0-9-_]*$)")) {
+            return token.split(" ")[1];
+        } else {
+            throw new RuntimeException("is not bearer token");
         }
     }
 
