@@ -1,9 +1,6 @@
 package com.nono.deluxe.controller.company;
 
-import com.nono.deluxe.controller.company.dto.CreateCompanyRequestDto;
-import com.nono.deluxe.controller.company.dto.CreateCompanyResponseDto;
-import com.nono.deluxe.controller.company.dto.UpdateCompanyRequestDto;
-import com.nono.deluxe.controller.company.dto.UpdateCompanyResponseDto;
+import com.nono.deluxe.controller.company.dto.*;
 import com.nono.deluxe.service.CompanyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +26,20 @@ public class CompanyController {
                     requestDto.getType(),
                     requestDto.getCategory()
             );
+
+            return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
+    @GetMapping("/company/{companyId}")
+    public ResponseEntity<ReadCompanyResponseDto> readCompany(@RequestHeader(name = "Authorization") String token,
+                                                              @PathVariable(name = "companyId") long companyId) {
+        try {
+            ReadCompanyResponseDto responseDto = companyService.readCompany(companyId);
 
             return ResponseEntity.status(HttpStatus.OK).body(responseDto);
         } catch (Exception e) {
