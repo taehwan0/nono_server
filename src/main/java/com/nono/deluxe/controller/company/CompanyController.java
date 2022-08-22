@@ -35,6 +35,25 @@ public class CompanyController {
         }
     }
 
+    @GetMapping("/company")
+    public ResponseEntity<ReadCompanyListResponseDto> readCompanyList(@RequestHeader(name = "Authorization") String token,
+                                                                      @RequestParam(required = false, defaultValue = "") String query,
+                                                                      @RequestParam(required = false, defaultValue = "name") String column,
+                                                                      @RequestParam(required = false, defaultValue = "ASC") String order,
+                                                                      @RequestParam(required = false, defaultValue = "10") int size,
+                                                                      @RequestParam(required = false, defaultValue = "0") int page,
+                                                                      @RequestParam(required = false, defaultValue = "false") boolean active) {
+        try {
+            ReadCompanyListResponseDto responseDto = companyService.readCompanyList(query, column, order, size, page, active);
+
+            return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
     @GetMapping("/company/{companyId}")
     public ResponseEntity<ReadCompanyResponseDto> readCompany(@RequestHeader(name = "Authorization") String token,
                                                               @PathVariable(name = "companyId") long companyId) {
