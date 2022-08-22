@@ -68,4 +68,18 @@ public class CompanyController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
+
+    @DeleteMapping("/company/{companyId}")
+    public ResponseEntity<DeleteCompanyResponseDto> updateCompany(@RequestHeader(name = "Authorization") String token,
+                                                                  @PathVariable(name = "companyId") long companyId) {
+        try {
+            DeleteCompanyResponseDto responseDto = companyService.deleteCompany(companyId);
+
+            return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
 }

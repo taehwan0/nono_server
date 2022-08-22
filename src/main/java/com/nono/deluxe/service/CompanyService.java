@@ -1,6 +1,7 @@
 package com.nono.deluxe.service;
 
 import com.nono.deluxe.controller.company.dto.CreateCompanyResponseDto;
+import com.nono.deluxe.controller.company.dto.DeleteCompanyResponseDto;
 import com.nono.deluxe.controller.company.dto.ReadCompanyResponseDto;
 import com.nono.deluxe.controller.company.dto.UpdateCompanyResponseDto;
 import com.nono.deluxe.domain.company.Company;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -45,5 +47,14 @@ public class CompanyService {
         company.update(name, type, category, active);
 
         return new UpdateCompanyResponseDto(company);
+    }
+
+    @DeleteMapping
+    public DeleteCompanyResponseDto deleteCompany(long companyId) {
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new RuntimeException("Company: not found id"));
+        companyRepository.delete(company);
+
+        return new DeleteCompanyResponseDto(true, "deleted");
     }
 }
