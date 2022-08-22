@@ -29,6 +29,14 @@ public class Company {
     @Column(columnDefinition = "tinyint(1) default 1")
     private boolean activate;
 
+    public void update(String name, CompanyType type, String category, boolean active) {
+        this.name = name;
+        this.type = type;
+        this.category = category;
+        this.activate = active;
+    }
+
+
     @Builder
     public Company(String name, CompanyType type, String category) {
         this.name = name;
