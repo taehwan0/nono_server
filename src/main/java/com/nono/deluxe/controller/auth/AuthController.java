@@ -1,6 +1,5 @@
 package com.nono.deluxe.controller.auth;
 
-import com.nono.deluxe.auth.AuthManager;
 import com.nono.deluxe.controller.auth.dto.LoginRequestDto;
 import com.nono.deluxe.service.AuthService;
 import lombok.RequiredArgsConstructor;
