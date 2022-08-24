@@ -64,7 +64,8 @@ public class CompanyService {
         return new UpdateCompanyResponseDto(company);
     }
 
-    @DeleteMapping
+
+    @Transactional
     public DeleteCompanyResponseDto deleteCompany(long companyId) {
         Company company = companyRepository.findById(companyId)
                 .orElseThrow(() -> new RuntimeException("Company: not found id"));
