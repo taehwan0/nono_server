@@ -1,10 +1,9 @@
 package com.nono.deluxe.controller.notice;
 
-import com.nono.deluxe.auth.AuthManager;
 import com.nono.deluxe.controller.notice.dto.NoticeResponseDto;
-import com.nono.deluxe.domain.notice.Notice;
 import com.nono.deluxe.controller.notice.dto.CreateNoticeRequestDto;
 import com.nono.deluxe.controller.notice.dto.UpdateNoticeRequestDto;
+import com.nono.deluxe.service.AuthService;
 import com.nono.deluxe.service.NoticeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,13 +20,13 @@ import java.util.List;
 public class NoticeController {
 
     private final NoticeService noticeService;
-    private final AuthManager authManager;
+    private final AuthService authService;
 
     @PostMapping("/notice")
     public ResponseEntity<NoticeResponseDto> createNotice(@RequestHeader(value = "Authorization") String token,
                                                           @RequestBody CreateNoticeRequestDto requestDto) {
         try {
-            authManager.isUser(token);
+            authService.isUser(token);
             NoticeResponseDto responseDto = noticeService.createNotice(
                     requestDto.getTitle(),
                     requestDto.getContent(),
@@ -46,7 +45,7 @@ public class NoticeController {
     @GetMapping("/notice")
     public ResponseEntity<List<NoticeResponseDto>> readNoticeList(@RequestHeader(value = "Authorization") String token) {
         try {
-            authManager.isUser(token);
+            authService.isUser(token);
             List<NoticeResponseDto> responseDtoList = noticeService.readNoticeList();
             return ResponseEntity
                     .status(HttpStatus.OK)
@@ -63,7 +62,7 @@ public class NoticeController {
     public ResponseEntity<NoticeResponseDto> readNotice(@RequestHeader(value = "Authorization") String token,
                                                         @PathVariable(name = "id")long id) {
         try{
-            authManager.isUser(token);
+            authService.isUser(token);
             NoticeResponseDto responseDto = noticeService.readNotice(id);
             return ResponseEntity
                     .status(HttpStatus.OK)
@@ -81,7 +80,7 @@ public class NoticeController {
                                                           @PathVariable(name = "id")long id,
                                                           @RequestBody UpdateNoticeRequestDto requestDto) {
         try {
-            authManager.isUser(token);
+            authService.isUser(token);
             NoticeResponseDto responseDto = noticeService.updateNotice(
                     id,
                     requestDto.getTitle(),
@@ -102,7 +101,7 @@ public class NoticeController {
     public ResponseEntity<String> deleteNotice(@RequestHeader(value = "Authorization") String token,
                                                @PathVariable(name = "id")long id) {
         try {
-            authManager.isUser(token);
+            authService.isUser(token);
             noticeService.deleteNotice(id);
             return ResponseEntity
                     .status(HttpStatus.OK)
