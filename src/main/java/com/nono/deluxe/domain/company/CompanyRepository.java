@@ -1,5 +1,6 @@
 package com.nono.deluxe.domain.company;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -9,10 +10,10 @@ import java.util.List;
 
 public interface CompanyRepository extends JpaRepository<Company, Long> {
     @Query(value = "SELECT c FROM Company c WHERE c.name LIKE concat('%', :query, '%')")
-    List<Company> readCompanyList(@Param("query") String query,
-                                     Pageable limit);
+    Page<Company> readCompanyList(@Param("query") String query,
+                           Pageable limit);
 
     @Query(value = "SELECT c FROM Company c WHERE c.name LIKE concat('%', :query, '%') and c.activate = true")
-    List<Company> readActiveCompanyList(@Param("query") String query,
+    Page<Company> readActiveCompanyList(@Param("query") String query,
                                   Pageable limit);
 }

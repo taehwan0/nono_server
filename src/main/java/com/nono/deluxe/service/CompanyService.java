@@ -6,6 +6,7 @@ import com.nono.deluxe.domain.company.CompanyRepository;
 import com.nono.deluxe.domain.company.CompanyType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -47,12 +48,12 @@ public class CompanyService {
     @Transactional(readOnly = true)
     public ReadCompanyListResponseDto readCompanyList(String query, String column, String order, int size, int page, boolean active) {
         Pageable limit = PageRequest.of(page, size, Sort.by(new Sort.Order(Sort.Direction.valueOf(order.toUpperCase(Locale.ROOT)), column)));
-        List<Company> companyList;
+        Page<Company> companyPage;
 
-        if(active) companyList = companyRepository.readCompanyList(query, limit);
-        else companyList = companyRepository.readActiveCompanyList(query, limit);
+        if(active) companyPage = companyRepository.readCompanyList(query, limit);
+        else companyPage = companyRepository.readActiveCompanyList(query, limit);
 
-        return new ReadCompanyListResponseDto(page, companyList);
+        return new ReadCompanyListResponseDto(companyPage);
     }
 
     @Transactional
