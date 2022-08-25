@@ -52,7 +52,6 @@ class NoticeControllerTest {
     public void createNotice() throws Exception {
         //given
         CreateNoticeRequestDto createNoticeRequestDto = new CreateNoticeRequestDto(
-                "writer",
                 "title",
                 "한글도 잘 들어가나요",
                 true
