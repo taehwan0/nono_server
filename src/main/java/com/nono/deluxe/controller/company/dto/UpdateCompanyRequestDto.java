@@ -1,5 +1,6 @@
 package com.nono.deluxe.controller.company.dto;
 
+import com.nono.deluxe.domain.company.Company;
 import com.nono.deluxe.domain.company.CompanyType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

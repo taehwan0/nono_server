@@ -1,5 +1,6 @@
 package com.nono.deluxe.controller.company.dto;
 
+import com.nono.deluxe.domain.company.Company;
 import com.nono.deluxe.domain.company.CompanyType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,5 +35,13 @@ public class CreateCompanyRequestDto {
         this.name = name;
         this.type = type;
         this.category = category;
+    }
+
+    public Company toEntity() {
+        return Company.builder()
+                .name(this.name)
+                .type(this.type)
+                .category(this.category)
+                .build();
     }
 }

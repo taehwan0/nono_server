@@ -26,12 +26,8 @@ public class CompanyService {
     private final CompanyRepository companyRepository;
 
     @Transactional
-    public CreateCompanyResponseDto createCompany(String name, CompanyType type, String category) {
-        Company company = Company.builder()
-                .name(name)
-                .type(type)
-                .category(category)
-                .build();
+    public CreateCompanyResponseDto createCompany(CreateCompanyRequestDto requestDto) {
+        Company company = requestDto.toEntity();
         companyRepository.save(company);
 
         return new CreateCompanyResponseDto(company);
@@ -57,10 +53,15 @@ public class CompanyService {
     }
 
     @Transactional
-    public UpdateCompanyResponseDto updateCompany(long companyId, String name, CompanyType type, String category, boolean active) {
+    public UpdateCompanyResponseDto updateCompany(long companyId, UpdateCompanyRequestDto requestDto) {
         Company company = companyRepository.findById(companyId)
                 .orElseThrow(() -> new RuntimeException("Company: not found id"));
-        company.update(name, type, category, active);
+        company.update(
+                requestDto.getName(),
+                requestDto.getType(),
+                requestDto.getCategory(),
+                requestDto.isActive()
+        );
 
         return new UpdateCompanyResponseDto(company);
     }

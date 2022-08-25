@@ -21,11 +21,7 @@ public class CompanyController {
     public ResponseEntity<CreateCompanyResponseDto> createCompany(@RequestHeader(name = "Authorization") String token,
                                                                   @Validated @RequestBody CreateCompanyRequestDto requestDto) {
         try {
-            CreateCompanyResponseDto responseDto = companyService.createCompany(
-                    requestDto.getName(),
-                    requestDto.getType(),
-                    requestDto.getCategory()
-            );
+            CreateCompanyResponseDto responseDto = companyService.createCompany(requestDto);
 
             return ResponseEntity.status(HttpStatus.OK).body(responseDto);
         } catch (Exception e) {
@@ -73,12 +69,7 @@ public class CompanyController {
                                                                   @Validated @RequestBody UpdateCompanyRequestDto requestDto,
                                                                   @PathVariable(name = "companyId") long companyId) {
         try {
-            UpdateCompanyResponseDto responseDto = companyService.updateCompany(companyId,
-                    requestDto.getName(),
-                    requestDto.getType(),
-                    requestDto.getCategory(),
-                    requestDto.isActive()
-            );
+            UpdateCompanyResponseDto responseDto = companyService.updateCompany(companyId, requestDto);
 
             return ResponseEntity.status(HttpStatus.OK).body(responseDto);
         } catch (Exception e) {
