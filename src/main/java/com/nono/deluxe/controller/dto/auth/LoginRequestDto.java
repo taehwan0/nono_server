@@ -1,4 +1,4 @@
-package com.nono.deluxe.controller.auth.dto;
+package com.nono.deluxe.controller.dto.auth;
 
 import lombok.Data;
 import lombok.Getter;

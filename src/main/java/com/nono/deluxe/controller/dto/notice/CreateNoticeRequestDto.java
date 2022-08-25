@@ -1,4 +1,4 @@
-package com.nono.deluxe.controller.notice.dto;
+package com.nono.deluxe.controller.dto.notice;
 
 import com.nono.deluxe.domain.notice.Notice;
 import com.nono.deluxe.domain.user.User;

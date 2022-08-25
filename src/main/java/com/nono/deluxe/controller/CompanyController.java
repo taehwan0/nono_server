@@ -1,6 +1,6 @@
-package com.nono.deluxe.controller.company;
+package com.nono.deluxe.controller;
 
-import com.nono.deluxe.controller.company.dto.*;
+import com.nono.deluxe.controller.dto.company.*;
 import com.nono.deluxe.service.CompanyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

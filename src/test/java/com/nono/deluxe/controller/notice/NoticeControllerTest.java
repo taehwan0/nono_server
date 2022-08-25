@@ -1,7 +1,7 @@
 package com.nono.deluxe.controller.notice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nono.deluxe.controller.notice.dto.CreateNoticeRequestDto;
+import com.nono.deluxe.controller.dto.notice.CreateNoticeRequestDto;
 import com.nono.deluxe.domain.notice.NoticeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

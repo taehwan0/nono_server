@@ -1,4 +1,4 @@
-package com.nono.deluxe.controller.user;
+package com.nono.deluxe.controller;
 
 import com.nono.deluxe.domain.user.User;
 import com.nono.deluxe.service.UserService;

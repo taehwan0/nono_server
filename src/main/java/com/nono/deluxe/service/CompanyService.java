@@ -1,9 +1,8 @@
 package com.nono.deluxe.service;
 
-import com.nono.deluxe.controller.company.dto.*;
+import com.nono.deluxe.controller.dto.company.*;
 import com.nono.deluxe.domain.company.Company;
 import com.nono.deluxe.domain.company.CompanyRepository;
-import com.nono.deluxe.domain.company.CompanyType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -12,10 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.DeleteMapping;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 @Slf4j

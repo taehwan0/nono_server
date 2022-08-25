@@ -1,6 +1,6 @@
-package com.nono.deluxe.controller.auth;
+package com.nono.deluxe.controller;
 
-import com.nono.deluxe.controller.auth.dto.LoginRequestDto;
+import com.nono.deluxe.controller.dto.auth.LoginRequestDto;
 import com.nono.deluxe.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;

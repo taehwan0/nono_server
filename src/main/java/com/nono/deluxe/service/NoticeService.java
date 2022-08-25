@@ -1,13 +1,10 @@
 package com.nono.deluxe.service;
 
-import com.nono.deluxe.controller.notice.dto.CreateNoticeRequestDto;
-import com.nono.deluxe.controller.notice.dto.NoticeResponseDto;
+import com.nono.deluxe.controller.dto.notice.NoticeResponseDto;
 import com.nono.deluxe.domain.notice.Notice;
 import com.nono.deluxe.domain.notice.NoticeRepository;
-import com.nono.deluxe.domain.user.User;
 import com.nono.deluxe.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

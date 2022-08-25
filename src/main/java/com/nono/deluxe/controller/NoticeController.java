@@ -1,8 +1,8 @@
-package com.nono.deluxe.controller.notice;
+package com.nono.deluxe.controller;
 
-import com.nono.deluxe.controller.notice.dto.NoticeResponseDto;
-import com.nono.deluxe.controller.notice.dto.CreateNoticeRequestDto;
-import com.nono.deluxe.controller.notice.dto.UpdateNoticeRequestDto;
+import com.nono.deluxe.controller.dto.notice.NoticeResponseDto;
+import com.nono.deluxe.controller.dto.notice.CreateNoticeRequestDto;
+import com.nono.deluxe.controller.dto.notice.UpdateNoticeRequestDto;
 import com.nono.deluxe.service.AuthService;
 import com.nono.deluxe.service.NoticeService;
 import lombok.RequiredArgsConstructor;

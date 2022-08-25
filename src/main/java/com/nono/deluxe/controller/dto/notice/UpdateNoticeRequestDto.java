@@ -1,4 +1,4 @@
-package com.nono.deluxe.controller.notice.dto;
+package com.nono.deluxe.controller.dto.notice;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
