@@ -1,5 +1,6 @@
 package com.nono.deluxe.service;
 
+import com.nono.deluxe.controller.dto.DeleteApiResponseDto;
 import com.nono.deluxe.controller.dto.company.*;
 import com.nono.deluxe.domain.company.Company;
 import com.nono.deluxe.domain.company.CompanyRepository;
@@ -64,11 +65,11 @@ public class CompanyService {
 
 
     @Transactional
-    public DeleteCompanyResponseDto deleteCompany(long companyId) {
+    public DeleteApiResponseDto deleteCompany(long companyId) {
         Company company = companyRepository.findById(companyId)
                 .orElseThrow(() -> new RuntimeException("Company: not found id"));
         companyRepository.delete(company);
 
-        return new DeleteCompanyResponseDto(true, "deleted");
+        return new DeleteApiResponseDto(true, "deleted");
     }
 }

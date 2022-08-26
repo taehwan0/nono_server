@@ -1,5 +1,6 @@
 package com.nono.deluxe.controller;
 
+import com.nono.deluxe.controller.dto.DeleteApiResponseDto;
 import com.nono.deluxe.controller.dto.company.*;
 import com.nono.deluxe.service.CompanyService;
 import lombok.RequiredArgsConstructor;
@@ -80,10 +81,10 @@ public class CompanyController {
     }
 
     @DeleteMapping("/company/{companyId}")
-    public ResponseEntity<DeleteCompanyResponseDto> updateCompany(@RequestHeader(name = "Authorization") String token,
-                                                                  @PathVariable(name = "companyId") long companyId) {
+    public ResponseEntity<DeleteApiResponseDto> updateCompany(@RequestHeader(name = "Authorization") String token,
+                                                              @PathVariable(name = "companyId") long companyId) {
         try {
-            DeleteCompanyResponseDto responseDto = companyService.deleteCompany(companyId);
+            DeleteApiResponseDto responseDto = companyService.deleteCompany(companyId);
 
             return ResponseEntity.status(HttpStatus.OK).body(responseDto);
         } catch (Exception e) {

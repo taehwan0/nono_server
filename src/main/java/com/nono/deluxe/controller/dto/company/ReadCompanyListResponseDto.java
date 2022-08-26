@@ -1,8 +1,8 @@
 package com.nono.deluxe.controller.dto.company;
 
+import com.nono.deluxe.controller.dto.Meta;
 import com.nono.deluxe.domain.company.Company;
 import lombok.Data;
-import lombok.Getter;
 import org.springframework.data.domain.Page;
 
 import java.util.ArrayList;
@@ -29,22 +29,5 @@ public class ReadCompanyListResponseDto {
                 companyPage.getTotalElements(),
                 companyPage.isLast()
         );
-    }
-}
-
-@Getter
-class Meta {
-    private long page;
-    private long count;
-    private long totalPages;
-    private long totalCount;
-    private boolean lastPage;
-
-    protected Meta(long page, long count, long totalPages, long totalCount, boolean lastPage) {
-        this.page = page;
-        this.count = count;
-        this.totalPages = totalPages;
-        this.totalCount = totalCount;
-        this.lastPage = lastPage;
     }
 }
