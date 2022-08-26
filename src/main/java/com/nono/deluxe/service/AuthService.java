@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.nono.deluxe.domain.user.Role;
 import com.nono.deluxe.domain.user.User;
 import com.nono.deluxe.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +38,7 @@ public class AuthService {
     public String loginUser(String email, String password, long tokenActiveSeconds) {
         User user = userRepository.findByEmailAndPassword(email, password)
                 .orElseThrow(() -> new RuntimeException("Not Found User"));
-        return getToken(user.getName(), user.getId(), tokenActiveSeconds);
+        return createToken(user.getName(), user.getId(), user.getRole(), tokenActiveSeconds);
     }
 
     /**
@@ -46,21 +47,23 @@ public class AuthService {
      * @param tokenActiveSeconds
      * @return
      */
-    public String getToken(String username, long userId, long tokenActiveSeconds) {
+    public String createToken(String username, long userId, Role userRole, long tokenActiveSeconds) {
         Algorithm algorithm = getAlgorithm(key);
         return JWT.create()
                 .withExpiresAt(new Date(System.currentTimeMillis() + (1000 * tokenActiveSeconds)))
                 .withIssuer(issuer)
                 .withClaim("username", username)
                 .withClaim("userId", userId)
+                .withClaim("ROLE", userRole.toString())
                 .sign(algorithm);
     }
 
     /**
-     * 유효한 유저인지 확인
+     * 유효한 유저인지 확인하고, User 객체를 반환
      * @param token
+     * @return
      */
-    public void isUser(String token) {
+    public DecodedJWT decodeToken(String token) {
         Algorithm algorithm = getAlgorithm(key);
         JWTVerifier verifier = getVerifier(algorithm);
         try {
@@ -70,11 +73,29 @@ public class AuthService {
             userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("Not Found User"));
             log.info("user Login : {}", decodedJWT.getClaim("username").toString());
+            return decodedJWT;
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new RuntimeException("invalid token");
         }
     }
+
+    public boolean isStranger(DecodedJWT jwt) {
+        return jwt.getClaim("ROLE").toString().equals(Role.ROLE_STRANGER.toString());
+    }
+
+    public boolean isParticipant(DecodedJWT jwt) {
+        return jwt.getClaim("ROLE").toString().equals(Role.ROLE_PARTICIPANT.toString());
+    }
+
+    public boolean isManager(DecodedJWT jwt) {
+        return jwt.getClaim("ROLE").toString().equals(Role.ROLE_MANAGER.toString());
+    }
+
+    public boolean isAdmin(DecodedJWT jwt) {
+        return jwt.getClaim("ROLE").toString().equals(Role.ROLE_ADMIN.toString());
+    }
+
 
     /**
      * bearer token 형식 검증 및 토큰 추출
@@ -85,7 +106,7 @@ public class AuthService {
         if(token.matches("(^Bearer [A-Za-z0-9-_]*\\.[A-Za-z0-9-_]*\\.[A-Za-z0-9-_]*$)")) {
             return token.split(" ")[1];
         } else {
-            throw new RuntimeException("is not bearer token");
+            throw new RuntimeException("is not bearer token: " + token);
         }
     }
 
