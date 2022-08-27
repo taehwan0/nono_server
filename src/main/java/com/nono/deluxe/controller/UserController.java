@@ -26,9 +26,17 @@ public class UserController {
         }
     }
 
-    @PostMapping("/user")
-    public ResponseEntity<User> createUser(@RequestBody String temp) {
-        User user = userService.createUser(temp);
+    @PostMapping("/user/admin")
+    public ResponseEntity<User> createAdmin(@RequestBody String temp) {
+        User user = userService.createAdmin(temp);
+
+        return ResponseEntity.status(HttpStatus.OK).body(user);
+    }
+
+    @PostMapping("/user/participant")
+    public ResponseEntity<User> createParticipant(@RequestBody String temp) {
+        User user = userService.createParticipant(temp);
+
         return ResponseEntity.status(HttpStatus.OK).body(user);
     }
 }

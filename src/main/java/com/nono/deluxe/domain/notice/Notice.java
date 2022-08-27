@@ -29,16 +29,16 @@ public class Notice extends BaseTimeEntity {
     boolean focus;
 
     @Builder
-    public Notice(User writer, String title, String content, boolean onFocused) {
+    public Notice(User writer, String title, String content, boolean focus) {
         this.writer = writer;
         this.title = title;
         this.content = content;
-        this.focus = onFocused;
+        this.focus = focus;
     }
 
-    public void updateNoticeContents(String title, String content, boolean onFocus) {
+    public void update(String title, String content, boolean focus) {
         this.title = title;
         this.content = content;
-        this.focus = onFocus;
+        this.focus = focus;
     }
 }

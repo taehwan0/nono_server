@@ -1,15 +1,24 @@
 package com.nono.deluxe.service;
 
-import com.nono.deluxe.controller.dto.notice.NoticeResponseDto;
+import com.nono.deluxe.controller.dto.DeleteApiResponseDto;
+import com.nono.deluxe.controller.dto.company.ReadCompanyListResponseDto;
+import com.nono.deluxe.controller.dto.notice.*;
+import com.nono.deluxe.domain.company.Company;
 import com.nono.deluxe.domain.notice.Notice;
 import com.nono.deluxe.domain.notice.NoticeRepository;
+import com.nono.deluxe.domain.user.User;
 import com.nono.deluxe.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @RequiredArgsConstructor
 @Service
@@ -19,36 +28,30 @@ public class NoticeService {
     private final UserRepository userRepository;
 
     @Transactional
-    public NoticeResponseDto createNotice(String title, String content, boolean onFocused) {
+    public CreateNoticeResponseDto createNotice(long userId, CreateNoticeRequestDto requestDto) {
+        User writer = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Notice: Not Found User"));
+        Notice notice = requestDto.toEntity(writer);
 
-        Notice notice = Notice.builder()
-                .title(title)
-                .content(content)
-                .onFocused(onFocused)
-                .writer(userRepository.findById(1L)
-                        .orElseThrow(() -> new RuntimeException("Not Found User")))
-                .build();
-
-         return new NoticeResponseDto(noticeRepository.save(notice));
+        return new CreateNoticeResponseDto(noticeRepository.save(notice));
     }
 
     @Transactional(readOnly = true)
-    public List<NoticeResponseDto> readNoticeList() {
-        List<Notice> noticeList = noticeRepository.findAll();
-        List<NoticeResponseDto> responseDtoList = new ArrayList<>();
+    public ReadNoticeListResponseDto readNoticeList(String query, String column, String order, int size, int page, boolean focus) {
+        Pageable limit = PageRequest.of(page, size, Sort.by(new Sort.Order(Sort.Direction.valueOf(order.toUpperCase(Locale.ROOT)), column)));
+        Page<Notice> noticePage;
 
-        for (Notice notice : noticeList) {
-            responseDtoList.add(new NoticeResponseDto(notice));
-        }
+        if(focus) noticePage = noticeRepository.readNoticeListFocus(query, limit);
+        else noticePage = noticeRepository.readNoticeList(query, limit);
 
-        return responseDtoList;
+        return new ReadNoticeListResponseDto(noticePage);
     }
 
     @Transactional(readOnly = true)
-    public NoticeResponseDto readNotice(long id) {
-        Notice notice = noticeRepository.findById(id).
+    public ReadNoticeResponseDto readNotice(long noticeId) {
+        Notice notice = noticeRepository.findById(noticeId).
                 orElseThrow(() -> new RuntimeException("Not Found Notice"));
-        return new NoticeResponseDto(notice);
+        return new ReadNoticeResponseDto(notice);
     }
 
     /*
@@ -56,18 +59,25 @@ public class NoticeService {
     saveAndFlush 로 명시적인 저장을 하면 @LastModifiedAt 이 정상적으로 동작함
      */
     @Transactional
-    public NoticeResponseDto updateNotice(long id, String title, String content, boolean onFocus) {
-        Notice notice = noticeRepository.findById(id)
+    public UpdateNoticeResponseDto updateNotice(long noticeId, UpdateNoticeRequestDto requestDto) {
+        Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new RuntimeException("Not Found Notice"));
-        notice.updateNoticeContents(title, content, onFocus);
+        notice.update(
+                requestDto.getTitle(),
+                requestDto.getContent(),
+                requestDto.isFocus()
+        );
         noticeRepository.saveAndFlush(notice);
-        return new NoticeResponseDto(notice);
+
+        return new UpdateNoticeResponseDto(notice);
     }
 
     @Transactional
-    public void deleteNotice(long id) {
-        Notice notice = noticeRepository.findById(id)
+    public DeleteApiResponseDto deleteNotice(long noticeId) {
+        Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new RuntimeException("Not Found Notice"));
         noticeRepository.delete(notice);
+
+        return new DeleteApiResponseDto(true, "deleted");
     }
 }

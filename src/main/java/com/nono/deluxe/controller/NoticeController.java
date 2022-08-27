@@ -1,9 +1,8 @@
 package com.nono.deluxe.controller;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.nono.deluxe.controller.dto.notice.NoticeResponseDto;
-import com.nono.deluxe.controller.dto.notice.CreateNoticeRequestDto;
-import com.nono.deluxe.controller.dto.notice.UpdateNoticeRequestDto;
+import com.nono.deluxe.controller.dto.DeleteApiResponseDto;
+import com.nono.deluxe.controller.dto.notice.*;
 import com.nono.deluxe.service.AuthService;
 import com.nono.deluxe.service.NoticeService;
 import lombok.RequiredArgsConstructor;
@@ -11,8 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Slf4j
 @RequestMapping("/api/v1")
@@ -30,19 +27,15 @@ public class NoticeController {
      * @return
      */
     @PostMapping("/notice")
-    public ResponseEntity<NoticeResponseDto> createNotice(@RequestHeader(value = "Authorization") String token,
-                                                          @RequestBody CreateNoticeRequestDto requestDto) {
+    public ResponseEntity<CreateNoticeResponseDto> createNotice(@RequestHeader(value = "Authorization") String token,
+                                                                @RequestBody CreateNoticeRequestDto requestDto) {
         try {
             DecodedJWT jwt = authService.decodeToken(token);
             if(authService.isAdmin(jwt)) {
-                NoticeResponseDto responseDto = noticeService.createNotice(
-                        requestDto.getTitle(),
-                        requestDto.getContent(),
-                        requestDto.isOnFocused());
+                long userId = authService.getUserIdByDecodedToken(jwt);
+                CreateNoticeResponseDto responseDto = noticeService.createNotice(userId, requestDto);
 
-                return ResponseEntity
-                        .status(HttpStatus.OK)
-                        .body(responseDto);
+                return ResponseEntity.status(HttpStatus.OK).body(responseDto);
             } else {
                 log.error("Notice: forbidden create notice {}", jwt.getId());
 
@@ -50,9 +43,8 @@ public class NoticeController {
             }
         } catch (RuntimeException e) {
             log.error(e.getMessage());
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .build();
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
 
@@ -62,15 +54,19 @@ public class NoticeController {
      * @return
      */
     @GetMapping("/notice")
-    public ResponseEntity<List<NoticeResponseDto>> readNoticeList(@RequestHeader(value = "Authorization") String token) {
+    public ResponseEntity<ReadNoticeListResponseDto> readNoticeList(@RequestHeader(value = "Authorization") String token,
+                                                                    @RequestParam(required = false, defaultValue = "") String query,
+                                                                    @RequestParam(required = false, defaultValue = "createdAt") String column,
+                                                                    @RequestParam(required = false, defaultValue = "DESC") String order,
+                                                                    @RequestParam(required = false, defaultValue = "10") int size,
+                                                                    @RequestParam(required = false, defaultValue = "0") int page,
+                                                                    @RequestParam(required = false, defaultValue = "false") boolean focus) {
         try {
             DecodedJWT jwt = authService.decodeToken(token);
             if(authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
-                List<NoticeResponseDto> responseDtoList = noticeService.readNoticeList();
+                ReadNoticeListResponseDto responseDto  = noticeService.readNoticeList(query, column, order, size, page, focus);
 
-                return ResponseEntity
-                        .status(HttpStatus.OK)
-                        .body(responseDtoList);
+                return ResponseEntity.status(HttpStatus.OK).body(responseDto);
             } else {
                 log.error("Notice: forbidden read notice {}", jwt.getId());
 
@@ -79,29 +75,25 @@ public class NoticeController {
         } catch (Exception e) {
             log.error(e.getMessage());
 
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
 
     /**
      * 필요권한: participant, manager, admin
      * @param token
-     * @param id
+     * @param noticeId
      * @return
      */
-    @GetMapping("/notice/{id}")
-    public ResponseEntity<NoticeResponseDto> readNotice(@RequestHeader(value = "Authorization") String token,
-                                                        @PathVariable(name = "id")long id) {
+    @GetMapping("/notice/{noticeId}")
+    public ResponseEntity<ReadNoticeResponseDto> readNotice(@RequestHeader(value = "Authorization") String token,
+                                                              @PathVariable(name = "noticeId") long noticeId) {
         try{
             DecodedJWT jwt = authService.decodeToken(token);
             if(authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
-                NoticeResponseDto responseDto = noticeService.readNotice(id);
+                ReadNoticeResponseDto responseDto = noticeService.readNotice(noticeId);
 
-                return ResponseEntity
-                        .status(HttpStatus.OK)
-                        .body(responseDto);
+                return ResponseEntity.status(HttpStatus.OK).body(responseDto);
             } else {
                 log.error("Notice: forbidden read notice {}", jwt.getId());
 
@@ -110,35 +102,27 @@ public class NoticeController {
         } catch (RuntimeException e) {
             log.error(e.getMessage());
 
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
 
     /**
      * 필요권한: admin
      * @param token
-     * @param id
+     * @param noticeId
      * @param requestDto
      * @return
      */
-    @PutMapping("/notice/{id}")
-    public ResponseEntity<NoticeResponseDto> updateNotice(@RequestHeader(value = "Authorization") String token,
-                                                          @PathVariable(name = "id")long id,
-                                                          @RequestBody UpdateNoticeRequestDto requestDto) {
+    @PutMapping("/notice/{noticeId}")
+    public ResponseEntity<UpdateNoticeResponseDto> updateNotice(@RequestHeader(value = "Authorization") String token,
+                                                                @PathVariable(name = "noticeId") long noticeId,
+                                                                @RequestBody UpdateNoticeRequestDto requestDto) {
         try {
             DecodedJWT jwt = authService.decodeToken(token);
             if(authService.isAdmin(jwt)) {
-                NoticeResponseDto responseDto = noticeService.updateNotice(
-                        id,
-                        requestDto.getTitle(),
-                        requestDto.getContent(),
-                        requestDto.isOnFocused());
+                UpdateNoticeResponseDto responseDto = noticeService.updateNotice(noticeId, requestDto);
 
-                return ResponseEntity
-                        .status(HttpStatus.OK)
-                        .body(responseDto);
+                return ResponseEntity.status(HttpStatus.OK).body(responseDto);
             } else {
                 log.error("Notice: forbidden update notice {}", jwt.getId());
 
@@ -147,29 +131,25 @@ public class NoticeController {
         } catch (RuntimeException e) {
             log.error(e.getMessage());
 
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
 
     /**
      * 필요권한: admin
      * @param token
-     * @param id
+     * @param noticeId
      * @return
      */
-    @DeleteMapping("/notice/{id}")
-    public ResponseEntity<String> deleteNotice(@RequestHeader(value = "Authorization") String token,
-                                               @PathVariable(name = "id")long id) {
+    @DeleteMapping("/notice/{noticeId}")
+    public ResponseEntity<DeleteApiResponseDto> deleteNotice(@RequestHeader(value = "Authorization") String token,
+                                                             @PathVariable(name = "noticeId") long noticeId) {
         try {
             DecodedJWT jwt = authService.decodeToken(token);
             if(authService.isAdmin(jwt)) {
-                noticeService.deleteNotice(id);
+                DeleteApiResponseDto responseDto = noticeService.deleteNotice(noticeId);
 
-                return ResponseEntity
-                        .status(HttpStatus.OK)
-                        .body("Notice Deleted");
+                return ResponseEntity.status(HttpStatus.OK).body(responseDto);
             } else {
                 log.error("Notice: forbidden delete notice {}", jwt.getId());
 
@@ -178,9 +158,7 @@ public class NoticeController {
         } catch (RuntimeException e) {
             log.error(e.getMessage());
 
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
 }

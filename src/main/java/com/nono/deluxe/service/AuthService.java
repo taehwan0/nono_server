@@ -80,20 +80,24 @@ public class AuthService {
         }
     }
 
+    public long getUserIdByDecodedToken(DecodedJWT jwt) {
+        return Long.parseLong(jwt.getClaim("userId").toString());
+    }
+
     public boolean isStranger(DecodedJWT jwt) {
-        return jwt.getClaim("ROLE").toString().equals(Role.ROLE_STRANGER.toString());
+        return jwt.getClaim("ROLE").toString().replaceAll("\"", "").equals(Role.ROLE_STRANGER.toString());
     }
 
     public boolean isParticipant(DecodedJWT jwt) {
-        return jwt.getClaim("ROLE").toString().equals(Role.ROLE_PARTICIPANT.toString());
+        return jwt.getClaim("ROLE").toString().replaceAll("\"", "").equals(Role.ROLE_PARTICIPANT.toString());
     }
 
     public boolean isManager(DecodedJWT jwt) {
-        return jwt.getClaim("ROLE").toString().equals(Role.ROLE_MANAGER.toString());
+        return jwt.getClaim("ROLE").toString().replaceAll("\"", "").equals(Role.ROLE_MANAGER.toString());
     }
 
     public boolean isAdmin(DecodedJWT jwt) {
-        return jwt.getClaim("ROLE").toString().equals(Role.ROLE_ADMIN.toString());
+        return jwt.getClaim("ROLE").toString().replaceAll("\"", "").equals(Role.ROLE_ADMIN.toString());
     }
 
 

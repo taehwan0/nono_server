@@ -36,7 +36,6 @@ public class Company {
         this.activate = active;
     }
 
-
     @Builder
     public Company(String name, CompanyType type, String category) {
         this.name = name;

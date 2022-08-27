@@ -21,12 +21,22 @@ public class UserService {
     }
 
     @Transactional
-    public User createUser(String temp) {
+    public User createAdmin(String temp) {
         User user = User.builder()
                 .name(temp)
                 .email(temp)
                 .password(temp)
                 .role(Role.ROLE_ADMIN)
+                .build();
+        return userRepository.save(user);
+    }
+
+    public User createParticipant(String temp) {
+        User user = User.builder()
+                .name(temp)
+                .email(temp)
+                .password(temp)
+                .role(Role.ROLE_PARTICIPANT)
                 .build();
         return userRepository.save(user);
     }

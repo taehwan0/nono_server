@@ -7,11 +7,29 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
+
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateNoticeRequestDto {
+
+    @NotBlank(message = "noticeTitle can not Blank")
+    @Size(max = 100, message = "noticeTitle max size = 100")
     private String title;
+
     private String content;
-    private boolean onFocused;
+
+    @NotBlank(message = "noticeFocus can not Blank")
+    private boolean focus;
+
+    public Notice toEntity(User writer) {
+        return Notice.builder()
+                .title(this.title)
+                .content(this.content)
+                .focus(this.focus)
+                .writer(writer)
+                .build();
+    }
 }
