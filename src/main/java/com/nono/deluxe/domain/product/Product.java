@@ -2,6 +2,7 @@ package com.nono.deluxe.domain.product;
 
 import com.nono.deluxe.domain.imagefile.ImageFile;
 import com.nono.deluxe.domain.record.Record;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -64,4 +65,49 @@ public class Product {
     @OneToMany(mappedBy = "product",
             fetch = FetchType.LAZY)
     private List<Record> recordList = new ArrayList<>();
+
+    @Builder
+    public Product(String productCode, String name, String description, String category, String maker, String unit, StorageType storageType, String barcode, long stock, boolean activate, ImageFile file, long price, long margin) {
+        this.productCode = productCode;
+        this.name = name;
+        this.description = description;
+        this.category = category;
+        this.maker = maker;
+        this.unit = unit;
+        this.storageType = storageType;
+        this.barcode = barcode;
+        this.stock = stock;
+        this.activate = activate;
+        this.file = file;
+        this.price = price;
+        this.margin = margin;
+    }
+
+    public void update(String productCode,
+                       String name,
+                       String description,
+                       String category,
+                       String maker,
+                       String unit,
+                       StorageType storageType,
+                       String barcode,
+                       long stock,
+                       boolean activate,
+                       ImageFile file,
+                       long price,
+                       long margin) {
+        this.productCode = productCode;
+        this.name = name;
+        this.description = description;
+        this.category = category;
+        this.maker = maker;
+        this.unit = unit;
+        this.storageType = storageType;
+        this.barcode = barcode;
+        this.stock = stock;
+        this.activate = activate;
+        this.file = file;
+        this.price = price;
+        this.margin = margin;
+    }
 }
