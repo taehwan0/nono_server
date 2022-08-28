@@ -1,6 +1,7 @@
 package com.nono.deluxe.domain.imagefile;
 
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -19,4 +20,10 @@ public class ImageFile {
 
     @Column(nullable = false)
     private String fileName;
+
+    @Builder
+    public ImageFile(String url, String fileName) {
+        this.url = url;
+        this.fileName = fileName;
+    }
 }
