@@ -37,7 +37,7 @@ public class NoticeController {
 
                 return ResponseEntity.status(HttpStatus.OK).body(responseDto);
             } else {
-                log.error("Notice: forbidden create notice {}", jwt.getId());
+                log.error("Notice: forbidden create notice {}", jwt.getClaim("userId"));
 
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
@@ -68,7 +68,7 @@ public class NoticeController {
 
                 return ResponseEntity.status(HttpStatus.OK).body(responseDto);
             } else {
-                log.error("Notice: forbidden read notice {}", jwt.getId());
+                log.error("Notice: forbidden read notice {}", jwt.getClaim("userId"));
 
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
@@ -95,7 +95,7 @@ public class NoticeController {
 
                 return ResponseEntity.status(HttpStatus.OK).body(responseDto);
             } else {
-                log.error("Notice: forbidden read notice {}", jwt.getId());
+                log.error("Notice: forbidden read notice {}", jwt.getClaim("userId"));
 
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
@@ -124,7 +124,7 @@ public class NoticeController {
 
                 return ResponseEntity.status(HttpStatus.OK).body(responseDto);
             } else {
-                log.error("Notice: forbidden update notice {}", jwt.getId());
+                log.error("Notice: forbidden update notice {}", jwt.getClaim("userId"));
 
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
@@ -151,7 +151,7 @@ public class NoticeController {
 
                 return ResponseEntity.status(HttpStatus.OK).body(responseDto);
             } else {
-                log.error("Notice: forbidden delete notice {}", jwt.getId());
+                log.error("Notice: forbidden delete notice {}", jwt.getClaim("userId"));
 
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }

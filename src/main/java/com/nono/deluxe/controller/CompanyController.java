@@ -37,7 +37,7 @@ public class CompanyController {
 
                 return ResponseEntity.status(HttpStatus.OK).body(responseDto);
             } else {
-                log.error("Company: forbidden create company {}", jwt.getId());
+                log.error("Company: forbidden create company {}", jwt.getClaim("userId"));
 
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
@@ -74,7 +74,7 @@ public class CompanyController {
 
                 return ResponseEntity.status(HttpStatus.OK).body(responseDto);
             } else {
-                log.error("Company: forbidden read company {}", jwt.getId());
+                log.error("Company: forbidden read company {}", jwt.getClaim("userId"));
 
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
@@ -101,7 +101,7 @@ public class CompanyController {
 
                 return ResponseEntity.status(HttpStatus.OK).body(responseDto);
             } else {
-                log.error("Company: forbidden read company {}", jwt.getId());
+                log.error("Company: forbidden read company {}", jwt.getClaim("userId"));
 
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
@@ -130,7 +130,7 @@ public class CompanyController {
 
                 return ResponseEntity.status(HttpStatus.OK).body(responseDto);
             } else {
-                log.error("Company: forbidden update company {}", jwt.getId());
+                log.error("Company: forbidden update company {}", jwt.getClaim("userId"));
 
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
@@ -157,7 +157,7 @@ public class CompanyController {
 
                 return ResponseEntity.status(HttpStatus.OK).body(responseDto);
             } else {
-                log.error("Company: forbidden delete company {}", jwt.getId());
+                log.error("Company: forbidden delete company {}", jwt.getClaim("userId"));
 
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
