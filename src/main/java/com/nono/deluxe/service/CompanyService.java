@@ -13,7 +13,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -61,6 +64,22 @@ public class CompanyService {
         );
 
         return new UpdateCompanyResponseDto(company);
+    }
+
+    @Transactional
+    public UpdateCompanyActiveResponseDto updateCompanyActive(UpdateCompanyActiveRequestDto requestDto) {
+        List<UpdateCompanyActiveDto> companyList = requestDto.getCompanyList();
+        List<Company> updatedCompanyList = new ArrayList<>();
+
+        for (UpdateCompanyActiveDto dto : companyList) {
+            Company company = companyRepository.findById(dto.getCompanyId())
+                    .orElseThrow(() -> new RuntimeException("Not Found Company"));
+            company.setActive(dto.isActive());
+
+            updatedCompanyList.add(company);
+        }
+
+        return new UpdateCompanyActiveResponseDto(updatedCompanyList);
     }
 
 

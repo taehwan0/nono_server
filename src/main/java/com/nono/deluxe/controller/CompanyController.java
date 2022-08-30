@@ -141,6 +141,27 @@ public class CompanyController {
         }
     }
 
+    @PutMapping("/company/active")
+    public ResponseEntity<UpdateCompanyActiveResponseDto> updateCompanyActive(@RequestHeader(name = "Authorization") String token,
+                                                                  @Validated @RequestBody UpdateCompanyActiveRequestDto requestDto) {
+        try {
+            DecodedJWT jwt = authService.decodeToken(token);
+            if(authService.isAdmin(jwt)) {
+                UpdateCompanyActiveResponseDto responseDto = companyService.updateCompanyActive(requestDto);
+
+                return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+            } else {
+                log.error("Company: forbidden update company {}", jwt.getClaim("userId"));
+
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
     /**
      * 필요권한: admin
      * @param token
