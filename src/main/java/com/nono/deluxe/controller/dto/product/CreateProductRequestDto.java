@@ -6,10 +6,16 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * RequestDto 에 전부 Validation 적용이 필요한데 이 부분은 회의를 거치고 할 필요가 있는 것 같습니다.
+ * storageType 은 enum 으로 만든 데이터를 사용하려고 합니다.
+ * 이미지 데이터는 프론트에서 확장자, 크기 검증 후 base64 인코딩, String 으로 변환되어 이곳으로 와서 Service 에서 처리.. 의 프로세스가 맞을까요?
+ */
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateProductRequestDto {
+
     /// 상품 코드
     private String productCode;
     /// 상품 이름

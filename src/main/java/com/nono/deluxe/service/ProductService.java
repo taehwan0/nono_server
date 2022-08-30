@@ -19,6 +19,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Pageable 적용 필요
+ * 연도, 월별 record 불러오기의 날짜 비교 또한 쿼리로 처리할 예정
+ */
 @RequiredArgsConstructor
 @Service
 public class ProductService {

@@ -9,12 +9,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+/**
+ * 에러 로그의 정보나 형식에 대해서는 추후 회의를 하고 규격을 정하기로..
+ * 현재는 Controller 에서는 아래와 같이 if, else 로 나누어 권한에 따른 동작을 하고 catch 에서 로직의 에러를 잡으면 될 것 같습니다.
+ * 403 Forbidden 의 경우 '권한이 없는 것이지 페이지가 존재한다는 것을 의미하는 보안 취약점이 될 수 있다.' 라고 들은적이 없어 사용을 지양하려 했는데,
+ * 프론트엔드에서 권한에 따라 UI 가 visible 이 변경되는 방식으로 1차 방지를 하고 있고, 이에따라 403 을 클라이언트가 받게 될 상황이 없지 않을까 생각하여,
+ * 저의 코드에서는 403 을 반영을 했습니다. 상태 코드가 주어지는 편이 프론트에서 대응하기가 좋지 않을까 판단했습니다.
+ */
 @Slf4j
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
 @RestController
 public class ProductController {
+
     ProductService productService;
     AuthService authService;
 
@@ -40,8 +47,9 @@ public class ProductController {
         }
     }
 
+
     /// product 리스트 가져오기.
-    @GetMapping("/product/")
+    @GetMapping("/product") // -> path 수정, active 사용 방법 & page 의 시작은 0? 1? 결정필요
     public ResponseEntity<GetProductListResponseDTO> getProductList(@RequestHeader(value = "Authorization") String token,
                                                                     @RequestParam(value = "query", defaultValue = "") String query,
                                                                     @RequestParam(value = "column", defaultValue = "name") String column,
@@ -57,7 +65,7 @@ public class ProductController {
                         .status(HttpStatus.OK)
                         .body(responseDTO);
             }  else {
-                log.error("Product: forbidden getProductList {}", jwt.getId());
+                log.error("Product: forbidden getProductList {}", jwt.getId()); // -> 이거 에러납니다....ㅋㅋㅋ jwt.getClaim("userId") 방식으로 수정해야 합니다. 저의 실수!
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
         } catch (RuntimeException exception) {
