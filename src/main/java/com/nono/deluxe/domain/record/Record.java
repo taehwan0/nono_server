@@ -11,7 +11,7 @@ import javax.persistence.*;
 @Getter
 @NoArgsConstructor
 @Entity
-public class Record extends BaseTimeEntity {
+public class Record {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
