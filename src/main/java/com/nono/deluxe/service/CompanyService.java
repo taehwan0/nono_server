@@ -1,6 +1,5 @@
 package com.nono.deluxe.service;
 
-import com.nono.deluxe.controller.dto.DeleteApiResponseDto;
 import com.nono.deluxe.controller.dto.company.*;
 import com.nono.deluxe.domain.company.Company;
 import com.nono.deluxe.domain.company.CompanyRepository;
@@ -16,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor

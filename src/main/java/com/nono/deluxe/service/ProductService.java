@@ -9,14 +9,18 @@ import com.nono.deluxe.domain.product.StorageType;
 import com.nono.deluxe.domain.record.Record;
 import com.nono.deluxe.domain.record.RecordRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 /**
@@ -36,40 +40,21 @@ public class ProductService {
         return new ProductResponseDTO(productRepository.save(product));
     }
 
-    public GetProductListResponseDTO getProductList(String query, String column, String order, int size, int page, String active) {
-        List<Product> filteredProductList;
-        //Step 1. 조건에 맞는 데이터 가져오기.
-        if (active.toLowerCase().equals("true")) {
-            filteredProductList = productRepository.findProductList(query, true, column, order);
-        } else if (active.toLowerCase().equals("false")) {
-            //Step 1. 조건에 맞는 데이터 가져오기.
-            filteredProductList = productRepository.findProductList(query, false, column, order);
+    /**
+     from.hj.yang
+     해당 부분 Pageable 사용하여 변경 완료.
+     */
+    public GetProductListResponseDTO getProductList(String query, String column, String order, int size, int page, boolean active) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(new Sort.Order(Sort.Direction.valueOf(order.toUpperCase(Locale.ROOT)), column)));
+        Page<Product> productPage;
+
+        if (active) {
+            productPage = productRepository.getActiveProductList(query, pageable);
         } else {
-            filteredProductList = productRepository.findProductList(query, column, order);
+            productPage = productRepository.getProductList(query, pageable);
         }
 
-        //Step 2.  해당 페이지에서 return 해야할 데이터 추출.
-        int total = filteredProductList.size();
-        int nextPage = page + 1;
-        int lastIndex = total - 1;
-        int startIndex = size * (page - 1);
-        if (lastIndex < startIndex) {
-            // 현재 원하는 부분의 데이터가 마지막 데이터 인덱스보다 뒷부분의 데이터를 요구함.
-            filteredProductList = new ArrayList<>();
-            nextPage = -1;
-        } else {
-            int tempLastIndex = startIndex + size - 1;
-            if (lastIndex > tempLastIndex) {
-                // 만약 return 해야 하는 데이터가 마지막 데이터 인덱스보다 적은 경우 마지막 인덱스를 변경.
-                lastIndex = tempLastIndex;
-                nextPage = -1;
-            }
-            filteredProductList = filteredProductList.subList(startIndex, lastIndex);
-        }
-
-        // step 3. 리스트 추출.
-        List<ProductResponseDTO> responseDTOList = filteredProductList.stream().map(ProductResponseDTO::new).collect(Collectors.toList());
-        return new GetProductListResponseDTO(total, nextPage, responseDTOList);
+        return new GetProductListResponseDTO(productPage);
     }
 
     public ProductResponseDTO getProductInfo(long productId) {
@@ -79,6 +64,10 @@ public class ProductService {
         return new ProductResponseDTO(product);
     }
 
+    /**
+    from.hj.yang
+    1. 해당 부분에 대하여 Query만으로 해당 부분의 데이터를 추출하여 처리하는 부분에 대한 공부 필요.
+     */
     public GetRecordListResponseDTO getProductRecordList(long productId, int year, int month) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Not Exist Product."));

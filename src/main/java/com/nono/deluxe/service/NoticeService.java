@@ -1,9 +1,6 @@
 package com.nono.deluxe.service;
 
-import com.nono.deluxe.controller.dto.DeleteApiResponseDto;
-import com.nono.deluxe.controller.dto.company.ReadCompanyListResponseDto;
 import com.nono.deluxe.controller.dto.notice.*;
-import com.nono.deluxe.domain.company.Company;
 import com.nono.deluxe.domain.notice.Notice;
 import com.nono.deluxe.domain.notice.NoticeRepository;
 import com.nono.deluxe.domain.user.User;
@@ -16,8 +13,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 @RequiredArgsConstructor
