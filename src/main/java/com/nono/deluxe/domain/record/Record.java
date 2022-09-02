@@ -3,6 +3,7 @@ package com.nono.deluxe.domain.record;
 import com.nono.deluxe.domain.BaseTimeEntity;
 import com.nono.deluxe.domain.document.Document;
 import com.nono.deluxe.domain.product.Product;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -32,4 +33,13 @@ public class Record {
 
     @Column(nullable = false)
     private long price;
+
+    @Builder
+    public Record(Document document, Product product, long quantity, long stock, long price) {
+        this.document = document;
+        this.product = product;
+        this.quantity = quantity;
+        this.stock = stock;
+        this.price = price;
+    }
 }

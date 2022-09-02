@@ -1,7 +1,15 @@
 package com.nono.deluxe.controller;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.nono.deluxe.controller.dto.document.CreateDocumentRequestDto;
+import com.nono.deluxe.controller.dto.document.DocumentResponseDto;
+import com.nono.deluxe.service.AuthService;
+import com.nono.deluxe.service.DocumentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -10,9 +18,30 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class DocumentController {
 
-    @PostMapping("")
-    public void createDocument() {
+    private final DocumentService documentService;
+    private final AuthService authService;
 
+
+    @PostMapping("")
+    public ResponseEntity<Object> createDocument(@RequestHeader(name = "Authorization") String token,
+                                                 @Validated @RequestBody CreateDocumentRequestDto requestDto) {
+        try {
+            DecodedJWT jwt = authService.decodeToken(token);
+            if(authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
+                long userId = authService.getUserIdByDecodedToken(jwt);
+                DocumentResponseDto responseDto = documentService.createDocument(userId, requestDto);
+
+                return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+            } else {
+                log.error("Document: forbidden");
+
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
     @GetMapping("/{documentId}")

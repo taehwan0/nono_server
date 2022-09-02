@@ -4,6 +4,7 @@ import com.nono.deluxe.domain.BaseTimeEntity;
 import com.nono.deluxe.domain.company.Company;
 import com.nono.deluxe.domain.record.Record;
 import com.nono.deluxe.domain.user.User;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -32,4 +33,12 @@ public class Document extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
+
+    @Builder
+    public Document(LocalDate date, DocumentType type, User writer, Company company) {
+        this.date = date;
+        this.type = type;
+        this.writer = writer;
+        this.company = company;
+    }
 }
