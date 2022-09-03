@@ -30,8 +30,8 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class ProductController {
 
-    ProductService productService;
-    AuthService authService;
+    private final ProductService productService;
+    private final AuthService authService;
 
     /// product 생성
     @PostMapping("/product")

@@ -1,5 +1,6 @@
 package com.nono.deluxe.service;
 
+import com.nono.deluxe.controller.dto.DeleteApiResponseDto;
 import com.nono.deluxe.controller.dto.company.*;
 import com.nono.deluxe.domain.company.Company;
 import com.nono.deluxe.domain.company.CompanyRepository;

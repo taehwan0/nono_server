@@ -1,6 +1,7 @@
 package com.nono.deluxe.controller;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.nono.deluxe.controller.dto.DeleteApiResponseDto;
 import com.nono.deluxe.controller.dto.company.*;
 import com.nono.deluxe.service.AuthService;
 import com.nono.deluxe.service.CompanyService;

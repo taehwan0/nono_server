@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
 @Service
 public class ProductService {
     private final ProductRepository productRepository;
-
     private final RecordRepository recordRepository;
 
     @Transactional

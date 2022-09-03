@@ -18,19 +18,9 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
-//    @Query(value = "SELECT u FROM Product u WHERE u.name LIKE :productName and u.activate = :active ORDER BY :columnName :order")
-//    List<Product> findProductList(@Param("productName") String productName,
-//                                  @Param("active") boolean active,
-//                                  @Param("columnName") String order,
-//                                  @Param("order") String orderWay);
-//
-//    @Query("SELECT u FROM Product u WHERE u.name LIKE :productName ORDER BY :columnName :order")
-//    List<Product> findProductList(@Param("productName") String productName,
-//                                  @Param("columnName") String order,
-//                                  @Param("order") String orderWay);
-    @Query(value = "SELECT c FROM Product c WHERE c.productName LIKE concat('%', :query, '%') and c.activate = true")
+    @Query(value = "SELECT p FROM Product p WHERE p.name LIKE concat('%', :query, '%') and p.activate = true")
     Page<Product> getActiveProductList(String query, Pageable pageable);
 
-    @Query(value = "SELECT c FROM Product c WHERE c.productName LIKE concat('%', :query, '%')")
+    @Query(value = "SELECT p FROM Product p WHERE p.name LIKE concat('%', :query, '%')")
     Page<Product> getProductList(String query, Pageable pageable);
 }
