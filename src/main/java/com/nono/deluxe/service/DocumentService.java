@@ -164,14 +164,7 @@ public class DocumentService {
             long productId = product.getId();
 
             if(!updateProductIdList.contains(productId)) {
-                // update 된 productId List 에 없는 record 의 경우 실행(삭제로직)
-                int deleteTypeSwitch = getTypeSwitch(document) * -1;
-                // stock 에 다시 보충되어야 하는 개수
-                long changeQuantity = documentRecord.getQuantity() * deleteTypeSwitch;
-
-                product.updateStock(product.getStock() + changeQuantity);
-                recordRepository.updateStockFutureDateRecord(productId, document.getDate(), changeQuantity);
-                recordRepository.delete(documentRecord);
+                deleteRecord(documentRecord);
             }
         }
 
@@ -221,6 +214,21 @@ public class DocumentService {
         }
 
         return record;
+    }
+
+    private void deleteRecord(Record record) {
+        Document document = record.getDocument();
+        Product product = record.getProduct();
+        long productId = product.getId();
+
+        // update 된 productId List 에 없는 record 의 경우 실행(삭제로직)
+        int deleteTypeSwitch = getTypeSwitch(document) * -1;
+        // stock 에 다시 보충되어야 하는 개수
+        long changeQuantity = record.getQuantity() * deleteTypeSwitch;
+
+        product.updateStock(product.getStock() + changeQuantity);
+        recordRepository.updateStockFutureDateRecord(productId, document.getDate(), changeQuantity);
+        recordRepository.delete(record);
     }
 
     private int getTypeSwitch(Document document) {
