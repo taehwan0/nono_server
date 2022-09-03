@@ -54,8 +54,8 @@ public class DocumentService {
             Product product = productRepository.findById(productId)
                     .orElseThrow(() -> new RuntimeException("Product Not Found"));
 
+            // record response 가 필요하면 여기서 리턴받아 사용 가능
             Record record = createRecord(document, product, recordRequestDto);
-
         }
 
         long[] totalCountAndPrice = getTotalCountAndPrice(document);
@@ -149,6 +149,12 @@ public class DocumentService {
         return new DeleteApiResponseDto(true, "deleted");
     }
 
+    /**
+     * document 에 해당하는 record 를 모두 찾아,
+     * 개수와 총 가격 (quantity * price) 을 연산하여 반환
+     * @param document
+     * @return long[] // totalRecordCount, totalPrice
+     */
     private long[] getTotalCountAndPrice(Document document) {
         List<Record> finalRecord = recordRepository.findByDocumentId(document.getId());
         int totalCount = finalRecord.size();
@@ -160,6 +166,16 @@ public class DocumentService {
         return new long[]{totalCount, totalPrice};
     }
 
+    /**
+     * document 의 product 에 해당하는 record 를 생성함,
+     * 입력한 document 의 날짜가 최신 날짜일 시 record 생성 및 product stock 에 반영,
+     * 최신 날짜가 아닐시 입력 날짜 이후의 record 중 가장 오래된 record 의 quantity, stock 을 통하여
+     * 해당 시점의 product stock 을 구하고 record 생성 및 product stock, 입력 날짜 이후의 record stock 에 반영
+     * @param document
+     * @param product
+     * @param recordRequestDto
+     * @return record
+     */
     private Record createRecord(Document document, Product product, RecordRequestDto recordRequestDto) {
         List<Record> futureDateRecordList = recordRepository.findFutureDateRecordList(product.getId(), document.getDate());
 
@@ -198,6 +214,12 @@ public class DocumentService {
         return record;
     }
 
+    /**
+     * 입력받은 record 를 삭제하고,
+     * 삭제된 record 에 해당하는 product stock, 이후 날짜에 해당하는 record stock 에 삭제 내용을 반영 후
+     * 해당 record 를 삭제
+     * @param record
+     */
     private void deleteRecord(Record record) {
         Document document = record.getDocument();
         Product product = record.getProduct();
@@ -213,6 +235,11 @@ public class DocumentService {
         recordRepository.delete(record);
     }
 
+    /**
+     * 문서의 타입을 통해 + 또는 - 하기 위한 switch 반환
+     * @param document
+     * @return
+     */
     private int getTypeSwitch(Document document) {
         if(document.getType().equals(DocumentType.INPUT)) return 1;
         return -1;
