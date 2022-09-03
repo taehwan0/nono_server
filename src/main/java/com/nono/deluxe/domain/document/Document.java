@@ -41,4 +41,8 @@ public class Document extends BaseTimeEntity {
         this.writer = writer;
         this.company = company;
     }
+
+    public void updateCompany(Company company) {
+        this.company = company;
+    }
 }
