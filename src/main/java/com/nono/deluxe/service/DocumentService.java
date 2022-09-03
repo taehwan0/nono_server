@@ -5,6 +5,7 @@ import com.nono.deluxe.controller.dto.document.CreateDocumentRequestDto;
 import com.nono.deluxe.controller.dto.document.DocumentResponseDto;
 import com.nono.deluxe.controller.dto.document.UpdateDocumentRequestDto;
 import com.nono.deluxe.controller.dto.record.RecordRequestDto;
+import com.nono.deluxe.controller.dto.record.RecordResponseDto;
 import com.nono.deluxe.domain.company.Company;
 import com.nono.deluxe.domain.company.CompanyRepository;
 import com.nono.deluxe.domain.document.Document;
@@ -47,6 +48,7 @@ public class DocumentService {
         documentRepository.save(document);
 
         List<RecordRequestDto> recordRequestDtoList = requestDto.getRecordList();
+        List<Record> createdRecordList = new ArrayList<>();
 
         for(RecordRequestDto recordRequestDto : recordRequestDtoList) {
             long productId = recordRequestDto.getProductId();
@@ -56,13 +58,27 @@ public class DocumentService {
 
             // record response 가 필요하면 여기서 리턴받아 사용 가능
             Record record = createRecord(document, product, recordRequestDto);
+            createdRecordList.add(record);
         }
 
         long[] totalCountAndPrice = getTotalCountAndPrice(document);
-        int totalCount = (int) totalCountAndPrice[0];
+        long totalCount = totalCountAndPrice[0];
         long totalPrice = totalCountAndPrice[1];
 
-        return new DocumentResponseDto(document, totalCount, totalPrice);
+        return new DocumentResponseDto(document, totalCount, totalPrice, createdRecordList);
+    }
+
+    @Transactional(readOnly = true)
+    public DocumentResponseDto readDocument(long documentId) {
+        Document document = documentRepository.findById(documentId)
+                .orElseThrow(() -> new RuntimeException("Not Found Document"));
+        List<Record> recordList = recordRepository.findByDocumentId(documentId);
+
+        long[] totalCountAndPrice = getTotalCountAndPrice(document);
+        long totalCount = totalCountAndPrice[0];
+        long totalPrice = totalCountAndPrice[1];
+
+        return new DocumentResponseDto(document, totalCount, totalPrice, recordList);
     }
 
     @Transactional
@@ -126,12 +142,14 @@ public class DocumentService {
         }
 
         long[] totalCountAndPrice = getTotalCountAndPrice(document);
-        int totalCount = (int) totalCountAndPrice[0];
+        long totalCount = totalCountAndPrice[0];
         long totalPrice = totalCountAndPrice[1];
+
+        List<Record> finalRecordList = recordRepository.findByDocumentId(documentId);
 
         document.setUpdatedAt(LocalDateTime.now());
 
-        return new DocumentResponseDto(document, totalCount, totalPrice);
+        return new DocumentResponseDto(document, totalCount, totalPrice, finalRecordList);
     }
 
     @Transactional

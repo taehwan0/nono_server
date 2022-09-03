@@ -47,8 +47,24 @@ public class DocumentController {
     }
 
     @GetMapping("/{documentId}")
-    public void readDocument() {
+    public ResponseEntity<DocumentResponseDto> readDocument(@RequestHeader(name = "Authorization") String token,
+                                            @PathVariable(name = "documentId") long documentId) {
+        try {
+            DecodedJWT jwt = authService.decodeToken(token);
+            if(authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
+                DocumentResponseDto responseDto = documentService.readDocument(documentId);
 
+                return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+            } else {
+                log.error("Document: forbidden");
+
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
     @GetMapping("")
