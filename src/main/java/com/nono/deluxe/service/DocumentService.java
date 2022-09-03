@@ -46,15 +46,8 @@ public class DocumentService {
         Document document = requestDto.toEntity(writer, company);
         documentRepository.save(document);
 
-//        LocalDate date = document.getDate();
-        List<Record> createdRecordList = new ArrayList<>();
-        long totalPrice = 0;
-
         List<RecordRequestDto> recordRequestDtoList = requestDto.getRecordList();
-        /**
-         * 지금 들어온 날짜가 마지막 날짜라면 product 의 stock 을 가져와서 record 에 추가
-         * 지금 들어온 날짜 이이후 데이터가 존재한다면, 최근의 이전 데이터를 가져와서 계산하고 이후의 record 모두 변경
-         */
+
         for(RecordRequestDto recordRequestDto : recordRequestDtoList) {
             long productId = recordRequestDto.getProductId();
             // update 대상 product
@@ -63,50 +56,13 @@ public class DocumentService {
 
             Record record = createRecord(document, product, recordRequestDto);
 
-            /* 여기부터
-            // update 대상 record 의 list 를 불러옴
-            List<Record> futureDateRecordList = recordRepository.findFutureDateRecordList(productId, date);
-
-            Record record;
-            if(futureDateRecordList.size() == 0) {
-                // 입력된 날짜가 product-record 의 가장 마지막 날짜인 경우 (일반적인 생성)
-                // == update 대상 record 가 없음
-                long nextStock = (document.getType().equals(DocumentType.INPUT))
-                        ? product.getStock() + recordRequestDto.getQuantity()
-                        : product.getStock() - recordRequestDto.getQuantity();
-                record = recordRequestDto.toEntity(document, product, nextStock);
-                recordRepository.save(record);
-
-                product.updateStock(nextStock);
-            }  else {
-                // 입력된 날짜가 마지막 날짜가 아닌 경우 (이후 날짜의 데이터들이 업데이트가 필요한 경우)
-                // 입력된 것 보다 미래의 날짜를 가진 레코드 중 가장 앞의 데이터 가져오기
-                Record oldRecord = futureDateRecordList.get(0);
-                long tempStock = (oldRecord.getDocument().getType().equals(DocumentType.INPUT))
-                        ? oldRecord.getStock() - oldRecord.getQuantity()
-                        : oldRecord.getStock() + oldRecord.getQuantity();
-
-                // 입고 출고에 따라 + 또는 - 연산을 스위칭 하기 위함
-                int typeSwitch = getTypeSwitch(document);
-                long nextStock = tempStock + (recordRequestDto.getQuantity() * typeSwitch);
-                record = recordRequestDto.toEntity(document, product, nextStock);
-                // 추가되는 날짜의 이후 레코드중 가장 오래된 것을 가져와 stock 을 계산하여 추가할 record 의 stock 을 결정
-                recordRepository.save(record);
-
-                long updateStock = product.getStock() + (recordRequestDto.getQuantity() * typeSwitch);
-                product.updateStock(updateStock);
-                // 현재 생성된 record 의 date 이후 날짜가 되는 모든 레코드 stock 에 연산
-                recordRepository.updateStockFutureDateRecord(productId, date, (recordRequestDto.getQuantity() * typeSwitch));
-
-                여기까지 */
-
-            totalPrice = totalPrice + (record.getQuantity() * record.getPrice());
-            createdRecordList.add(record);
         }
 
-        int recordCount = createdRecordList.size();
+        long[] totalCountAndPrice = getTotalCountAndPrice(document);
+        int totalCount = (int) totalCountAndPrice[0];
+        long totalPrice = totalCountAndPrice[1];
 
-        return new DocumentResponseDto(document, recordCount, totalPrice);
+        return new DocumentResponseDto(document, totalCount, totalPrice);
     }
 
     @Transactional
@@ -119,7 +75,6 @@ public class DocumentService {
                 .orElseThrow(() -> new RuntimeException("Not Found Company"));
 
         document.updateCompany(company);
-        // 여기서 company 가 바뀌지 않더라도 record 가 변경됨에 따라 document.createdAt 이 갱신될 방법을 찾아야 함
 
         List<RecordRequestDto> recordList = requestDto.getRecordList();
         List<Long> updateProductIdList = new ArrayList<>(); // 새로이 변경될 record 들의 productId List
@@ -164,17 +119,15 @@ public class DocumentService {
             Product product = documentRecord.getProduct();
             long productId = product.getId();
 
+            // requestDto 에 속하지 않는 record 는 삭제처리
             if(!updateProductIdList.contains(productId)) {
                 deleteRecord(documentRecord);
             }
         }
 
-        List<Record> finalRecord = recordRepository.findByDocumentId(documentId);
-        int totalCount = finalRecord.size();
-        long totalPrice = 0;
-        for (Record record : finalRecord) {
-            totalPrice += (record.getQuantity() * record.getPrice());
-        }
+        long[] totalCountAndPrice = getTotalCountAndPrice(document);
+        int totalCount = (int) totalCountAndPrice[0];
+        long totalPrice = totalCountAndPrice[1];
 
         document.setUpdatedAt(LocalDateTime.now());
 
@@ -194,6 +147,17 @@ public class DocumentService {
         documentRepository.delete(document);
 
         return new DeleteApiResponseDto(true, "deleted");
+    }
+
+    private long[] getTotalCountAndPrice(Document document) {
+        List<Record> finalRecord = recordRepository.findByDocumentId(document.getId());
+        int totalCount = finalRecord.size();
+        long totalPrice = 0;
+        for (Record record : finalRecord) {
+            totalPrice += (record.getQuantity() * record.getPrice());
+        }
+
+        return new long[]{totalCount, totalPrice};
     }
 
     private Record createRecord(Document document, Product product, RecordRequestDto recordRequestDto) {
