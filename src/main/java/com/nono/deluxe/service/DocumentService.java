@@ -3,6 +3,7 @@ package com.nono.deluxe.service;
 import com.nono.deluxe.controller.dto.DeleteApiResponseDto;
 import com.nono.deluxe.controller.dto.document.CreateDocumentRequestDto;
 import com.nono.deluxe.controller.dto.document.DocumentResponseDto;
+import com.nono.deluxe.controller.dto.document.ReadDocumentListResponseDTO;
 import com.nono.deluxe.controller.dto.document.UpdateDocumentRequestDto;
 import com.nono.deluxe.controller.dto.record.RecordRequestDto;
 import com.nono.deluxe.controller.dto.record.RecordResponseDto;
@@ -19,12 +20,17 @@ import com.nono.deluxe.domain.user.User;
 import com.nono.deluxe.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 @Slf4j
@@ -79,6 +85,17 @@ public class DocumentService {
         long totalPrice = totalCountAndPrice[1];
 
         return new DocumentResponseDto(document, totalCount, totalPrice, recordList);
+    }
+
+    @Transactional(readOnly = true)
+    public ReadDocumentListResponseDTO readDocumentList(String query, String column, String order, int size, int page) {
+        Pageable limit = PageRequest.of(page, size, Sort.by(
+                new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), column),
+                new Sort.Order(Sort.Direction.ASC, "createdAt")));
+
+        Page<Document> documentPage = documentRepository.readDocumentList(query, limit);
+
+        return new ReadDocumentListResponseDTO(documentPage);
     }
 
     @Transactional
