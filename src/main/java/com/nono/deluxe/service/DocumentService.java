@@ -1,5 +1,6 @@
 package com.nono.deluxe.service;
 
+import com.nono.deluxe.controller.dto.DeleteApiResponseDto;
 import com.nono.deluxe.controller.dto.document.CreateDocumentRequestDto;
 import com.nono.deluxe.controller.dto.document.DocumentResponseDto;
 import com.nono.deluxe.controller.dto.document.UpdateDocumentRequestDto;
@@ -20,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -176,6 +176,21 @@ public class DocumentService {
         }
 
         return new DocumentResponseDto(document, totalCount, totalPrice);
+    }
+
+    @Transactional
+    public DeleteApiResponseDto deleteDocument(long documentId) {
+        Document document = documentRepository.findById(documentId)
+                .orElseThrow(() -> new RuntimeException("Not Found Document"));
+        List<Record> documentRecordList = recordRepository.findByDocumentId(documentId);
+
+        for (Record record : documentRecordList) {
+            deleteRecord(record);
+        }
+
+        documentRepository.delete(document);
+
+        return new DeleteApiResponseDto(true, "deleted");
     }
 
     private Record createRecord(Document document, Product product, RecordRequestDto recordRequestDto) {

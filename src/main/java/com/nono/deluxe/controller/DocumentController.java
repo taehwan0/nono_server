@@ -1,6 +1,7 @@
 package com.nono.deluxe.controller;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.nono.deluxe.controller.dto.DeleteApiResponseDto;
 import com.nono.deluxe.controller.dto.document.CreateDocumentRequestDto;
 import com.nono.deluxe.controller.dto.document.DocumentResponseDto;
 import com.nono.deluxe.controller.dto.document.UpdateDocumentRequestDto;
@@ -80,8 +81,26 @@ public class DocumentController {
     }
 
     @DeleteMapping("/{documentId}")
-    public void deleteDocument() {
+    public ResponseEntity<DeleteApiResponseDto> deleteDocument(@RequestHeader(name = "Authorization") String token,
+                                                              @PathVariable(name = "documentId") long documentId) {
+        try {
+            DecodedJWT jwt = authService.decodeToken(token);
+            if(authService.isAdmin(jwt)) {
+                long userId = authService.getUserIdByDecodedToken(jwt);
+                log.info("Document: {} document deleted By {}", documentId, userId);
+                DeleteApiResponseDto responseDto = documentService.deleteDocument(documentId);
 
+                return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+            } else {
+                log.error("Document: forbidden");
+
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
     /**
