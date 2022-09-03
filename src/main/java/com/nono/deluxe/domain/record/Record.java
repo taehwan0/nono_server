@@ -1,8 +1,10 @@
 package com.nono.deluxe.domain.record;
 
+import com.nono.deluxe.controller.dto.record.RecordRequestDto;
 import com.nono.deluxe.domain.BaseTimeEntity;
 import com.nono.deluxe.domain.document.Document;
 import com.nono.deluxe.domain.product.Product;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +13,7 @@ import javax.persistence.*;
 @Getter
 @NoArgsConstructor
 @Entity
-public class Record extends BaseTimeEntity {
+public class Record {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -32,4 +34,22 @@ public class Record extends BaseTimeEntity {
 
     @Column(nullable = false)
     private long price;
+
+    public void updateRecord(RecordRequestDto requestDto) {
+        this.quantity = requestDto.getQuantity();
+        this.price = requestDto.getPrice();
+    }
+
+    public void updateStock(long stock) {
+        this.stock = stock;
+    }
+
+    @Builder
+    public Record(Document document, Product product, long quantity, long stock, long price) {
+        this.document = document;
+        this.product = product;
+        this.quantity = quantity;
+        this.stock = stock;
+        this.price = price;
+    }
 }
