@@ -1,7 +1,6 @@
 package com.nono.deluxe.domain.record;
 
-import com.nono.deluxe.controller.dto.record.RecordRequestDto;
-import com.nono.deluxe.domain.BaseTimeEntity;
+import com.nono.deluxe.controller.dto.record.RecordRequestDTO;
 import com.nono.deluxe.domain.document.Document;
 import com.nono.deluxe.domain.product.Product;
 import lombok.Builder;
@@ -19,11 +18,11 @@ public class Record {
     private long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "document_id", nullable = false)
+    @JoinColumn(name = "document_id", nullable = false, foreignKey = @ForeignKey(name = "record_document"))
     private Document document;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
+    @JoinColumn(name = "product_id", nullable = false, foreignKey = @ForeignKey(name = "record_product"))
     private Product product;
 
     @Column(nullable = false)
@@ -35,9 +34,9 @@ public class Record {
     @Column(nullable = false)
     private long price;
 
-    public void updateRecord(RecordRequestDto requestDto) {
-        this.quantity = requestDto.getQuantity();
-        this.price = requestDto.getPrice();
+    public void updateRecord(RecordRequestDTO requestDTO) {
+        this.quantity = requestDTO.getQuantity();
+        this.price = requestDTO.getPrice();
     }
 
     public void updateStock(long stock) {

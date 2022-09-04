@@ -3,17 +3,15 @@ package com.nono.deluxe.controller.dto.record;
 import com.nono.deluxe.domain.document.Document;
 import com.nono.deluxe.domain.product.Product;
 import com.nono.deluxe.domain.record.Record;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Value;
 
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotBlank;
 
 @Getter
 @NoArgsConstructor
-public class RecordRequestDto {
+public class RecordRequestDTO {
 
     @NotBlank
     long productId;

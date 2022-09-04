@@ -46,10 +46,10 @@ public class Product {
     private long stock;
 
     @Column(columnDefinition = "tinyint(1) default 1")
-    private boolean activate;
+    private boolean active;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "file_id", nullable = true)
+    @JoinColumn(name = "file_id", nullable = true, foreignKey = @ForeignKey(name = "product_image"))
     private ImageFile file;
 
     @Column(nullable = true)
@@ -57,13 +57,6 @@ public class Product {
 
     @Column(nullable = true)
     private long margin;
-
-    // 이런 방식으로 갈지 쿼리로 갈지
-    // 해당 방식은 유용 할 수 있으나 헷갈림 -> 내부적으로는 쿼리 전송이랑 거의 비슷하거나 같음
-    // 쿼리는 코드가 좀 더 쓰이겠지?
-    @OneToMany(mappedBy = "product",
-            fetch = FetchType.LAZY)
-    private List<Record> recordList = new ArrayList<>();
 
     public void updateStock(long stock) {
         this.stock = stock;

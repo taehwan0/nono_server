@@ -13,7 +13,7 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     Page<Company> readCompanyList(@Param("query") String query,
                            Pageable limit);
 
-    @Query(value = "SELECT c FROM Company c WHERE c.name LIKE concat('%', :query, '%') and c.activate = true")
+    @Query(value = "SELECT c FROM Company c WHERE c.name LIKE concat('%', :query, '%') and c.active = true")
     Page<Company> readActiveCompanyList(@Param("query") String query,
                                   Pageable limit);
 }

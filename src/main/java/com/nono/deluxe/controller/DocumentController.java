@@ -1,11 +1,11 @@
 package com.nono.deluxe.controller;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.nono.deluxe.controller.dto.DeleteApiResponseDto;
-import com.nono.deluxe.controller.dto.document.CreateDocumentRequestDto;
-import com.nono.deluxe.controller.dto.document.DocumentResponseDto;
+import com.nono.deluxe.controller.dto.MessageResponseDTO;
+import com.nono.deluxe.controller.dto.document.CreateDocumentRequestDTO;
+import com.nono.deluxe.controller.dto.document.DocumentResponseDTO;
 import com.nono.deluxe.controller.dto.document.ReadDocumentListResponseDTO;
-import com.nono.deluxe.controller.dto.document.UpdateDocumentRequestDto;
+import com.nono.deluxe.controller.dto.document.UpdateDocumentRequestDTO;
 import com.nono.deluxe.service.AuthService;
 import com.nono.deluxe.service.DocumentService;
 import lombok.RequiredArgsConstructor;
@@ -27,12 +27,12 @@ public class DocumentController {
 
     @PostMapping("")
     public ResponseEntity<Object> createDocument(@RequestHeader(name = "Authorization") String token,
-                                                 @Validated @RequestBody CreateDocumentRequestDto requestDto) {
+                                                 @Validated @RequestBody CreateDocumentRequestDTO requestDto) {
         try {
             DecodedJWT jwt = authService.decodeToken(token);
             if(authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
                 long userId = authService.getUserIdByDecodedToken(jwt);
-                DocumentResponseDto responseDto = documentService.createDocument(userId, requestDto);
+                DocumentResponseDTO responseDto = documentService.createDocument(userId, requestDto);
 
                 return ResponseEntity.status(HttpStatus.OK).body(responseDto);
             } else {
@@ -48,12 +48,12 @@ public class DocumentController {
     }
 
     @GetMapping("/{documentId}")
-    public ResponseEntity<DocumentResponseDto> readDocument(@RequestHeader(name = "Authorization") String token,
-                                            @PathVariable(name = "documentId") long documentId) {
+    public ResponseEntity<DocumentResponseDTO> readDocument(@RequestHeader(name = "Authorization") String token,
+                                                            @PathVariable(name = "documentId") long documentId) {
         try {
             DecodedJWT jwt = authService.decodeToken(token);
             if(authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
-                DocumentResponseDto responseDto = documentService.readDocument(documentId);
+                DocumentResponseDTO responseDto = documentService.readDocument(documentId);
 
                 return ResponseEntity.status(HttpStatus.OK).body(responseDto);
             } else {
@@ -94,15 +94,15 @@ public class DocumentController {
     }
 
     @PutMapping("/{documentId}")
-    public ResponseEntity<DocumentResponseDto> updateDocument(@RequestHeader(name = "Authorization") String token,
-                               @PathVariable(name = "documentId") long documentId,
-                               @Validated @RequestBody UpdateDocumentRequestDto requestDto) {
+    public ResponseEntity<DocumentResponseDTO> updateDocument(@RequestHeader(name = "Authorization") String token,
+                                                              @PathVariable(name = "documentId") long documentId,
+                                                              @Validated @RequestBody UpdateDocumentRequestDTO requestDto) {
         try {
             DecodedJWT jwt = authService.decodeToken(token);
             if(authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
                 long userId = authService.getUserIdByDecodedToken(jwt);
                 log.info("Document: {} document updated By {}", documentId, userId);
-                DocumentResponseDto responseDto = documentService.updateDocument(documentId, requestDto);
+                DocumentResponseDTO responseDto = documentService.updateDocument(documentId, requestDto);
 
                 return ResponseEntity.status(HttpStatus.OK).body(responseDto);
             } else {
@@ -118,14 +118,14 @@ public class DocumentController {
     }
 
     @DeleteMapping("/{documentId}")
-    public ResponseEntity<DeleteApiResponseDto> deleteDocument(@RequestHeader(name = "Authorization") String token,
-                                                              @PathVariable(name = "documentId") long documentId) {
+    public ResponseEntity<MessageResponseDTO> deleteDocument(@RequestHeader(name = "Authorization") String token,
+                                                             @PathVariable(name = "documentId") long documentId) {
         try {
             DecodedJWT jwt = authService.decodeToken(token);
             if(authService.isAdmin(jwt)) {
                 long userId = authService.getUserIdByDecodedToken(jwt);
                 log.info("Document: {} document deleted By {}", documentId, userId);
-                DeleteApiResponseDto responseDto = documentService.deleteDocument(documentId);
+                MessageResponseDTO responseDto = documentService.deleteDocument(documentId);
 
                 return ResponseEntity.status(HttpStatus.OK).body(responseDto);
             } else {

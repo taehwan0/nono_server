@@ -5,7 +5,7 @@ import com.nono.deluxe.domain.record.Record;
 import lombok.Data;
 
 @Data
-public class RecordResponseDto {
+public class RecordResponseDTO {
 
     private long recordId;
     private long quantity;
@@ -13,7 +13,7 @@ public class RecordResponseDto {
     private long price;
     private ProductResponseDTO product;
 
-    public RecordResponseDto(Record record) {
+    public RecordResponseDTO(Record record) {
         this.recordId = record.getId();
         this.quantity = record.getQuantity();
         this.stock = record.getStock();

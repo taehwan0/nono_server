@@ -1,12 +1,11 @@
 package com.nono.deluxe.service;
 
-import com.nono.deluxe.controller.dto.DeleteApiResponseDto;
-import com.nono.deluxe.controller.dto.document.CreateDocumentRequestDto;
-import com.nono.deluxe.controller.dto.document.DocumentResponseDto;
+import com.nono.deluxe.controller.dto.MessageResponseDTO;
+import com.nono.deluxe.controller.dto.document.CreateDocumentRequestDTO;
+import com.nono.deluxe.controller.dto.document.DocumentResponseDTO;
 import com.nono.deluxe.controller.dto.document.ReadDocumentListResponseDTO;
-import com.nono.deluxe.controller.dto.document.UpdateDocumentRequestDto;
-import com.nono.deluxe.controller.dto.record.RecordRequestDto;
-import com.nono.deluxe.controller.dto.record.RecordResponseDto;
+import com.nono.deluxe.controller.dto.document.UpdateDocumentRequestDTO;
+import com.nono.deluxe.controller.dto.record.RecordRequestDTO;
 import com.nono.deluxe.domain.company.Company;
 import com.nono.deluxe.domain.company.CompanyRepository;
 import com.nono.deluxe.domain.document.Document;
@@ -30,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 @Slf4j
@@ -45,7 +43,7 @@ public class DocumentService {
     private final ProductRepository productRepository;
 
     @Transactional
-    public DocumentResponseDto createDocument(long userId, CreateDocumentRequestDto requestDto) {
+    public DocumentResponseDTO createDocument(long userId, CreateDocumentRequestDTO requestDto) {
         User writer = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Not Found User"));
         Company company = companyRepository.findById(requestDto.getCompanyId())
@@ -53,10 +51,10 @@ public class DocumentService {
         Document document = requestDto.toEntity(writer, company);
         documentRepository.save(document);
 
-        List<RecordRequestDto> recordRequestDtoList = requestDto.getRecordList();
+        List<RecordRequestDTO> recordRequestDtoList = requestDto.getRecordList();
         List<Record> createdRecordList = new ArrayList<>();
 
-        for(RecordRequestDto recordRequestDto : recordRequestDtoList) {
+        for(RecordRequestDTO recordRequestDto : recordRequestDtoList) {
             long productId = recordRequestDto.getProductId();
             // update 대상 product
             Product product = productRepository.findById(productId)
@@ -71,11 +69,11 @@ public class DocumentService {
         long totalCount = totalCountAndPrice[0];
         long totalPrice = totalCountAndPrice[1];
 
-        return new DocumentResponseDto(document, totalCount, totalPrice, createdRecordList);
+        return new DocumentResponseDTO(document, totalCount, totalPrice, createdRecordList);
     }
 
     @Transactional(readOnly = true)
-    public DocumentResponseDto readDocument(long documentId) {
+    public DocumentResponseDTO readDocument(long documentId) {
         Document document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new RuntimeException("Not Found Document"));
         List<Record> recordList = recordRepository.findByDocumentId(documentId);
@@ -84,7 +82,7 @@ public class DocumentService {
         long totalCount = totalCountAndPrice[0];
         long totalPrice = totalCountAndPrice[1];
 
-        return new DocumentResponseDto(document, totalCount, totalPrice, recordList);
+        return new DocumentResponseDTO(document, totalCount, totalPrice, recordList);
     }
 
     @Transactional(readOnly = true)
@@ -99,7 +97,7 @@ public class DocumentService {
     }
 
     @Transactional
-    public DocumentResponseDto updateDocument(long documentId, UpdateDocumentRequestDto requestDto) {
+    public DocumentResponseDTO updateDocument(long documentId, UpdateDocumentRequestDTO requestDto) {
         Document document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new RuntimeException("Not Found Document"));
 
@@ -109,10 +107,10 @@ public class DocumentService {
 
         document.updateCompany(company);
 
-        List<RecordRequestDto> recordList = requestDto.getRecordList();
+        List<RecordRequestDTO> recordList = requestDto.getRecordList();
         List<Long> updateProductIdList = new ArrayList<>(); // 새로이 변경될 record 들의 productId List
 
-        for(RecordRequestDto recordRequestDto : recordList) {
+        for(RecordRequestDTO recordRequestDto : recordList) {
             // update 목록에 있는 record 가 db 에 존재하면 update
             // 존재하지 않는다면 create
             // db 에는 존재하나 request 목록에 없으면 delete
@@ -166,11 +164,11 @@ public class DocumentService {
 
         document.setUpdatedAt(LocalDateTime.now());
 
-        return new DocumentResponseDto(document, totalCount, totalPrice, finalRecordList);
+        return new DocumentResponseDTO(document, totalCount, totalPrice, finalRecordList);
     }
 
     @Transactional
-    public DeleteApiResponseDto deleteDocument(long documentId) {
+    public MessageResponseDTO deleteDocument(long documentId) {
         Document document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new RuntimeException("Not Found Document"));
         List<Record> documentRecordList = recordRepository.findByDocumentId(documentId);
@@ -181,7 +179,7 @@ public class DocumentService {
 
         documentRepository.delete(document);
 
-        return new DeleteApiResponseDto(true, "deleted");
+        return new MessageResponseDTO(true, "deleted");
     }
 
     /**
@@ -211,7 +209,7 @@ public class DocumentService {
      * @param recordRequestDto
      * @return record
      */
-    private Record createRecord(Document document, Product product, RecordRequestDto recordRequestDto) {
+    private Record createRecord(Document document, Product product, RecordRequestDTO recordRequestDto) {
         List<Record> futureDateRecordList = recordRepository.findFutureDateRecordList(product.getId(), document.getDate());
 
         Record record;

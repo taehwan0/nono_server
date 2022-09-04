@@ -6,7 +6,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class CreateNoticeResponseDto {
+public class NoticeResponseDTO {
     private long noticeId;
     private String title;
     private String content;
@@ -15,7 +15,7 @@ public class CreateNoticeResponseDto {
     private LocalDateTime updatedAt;
     private String writer;
 
-    public CreateNoticeResponseDto(Notice notice) {
+    public NoticeResponseDTO(Notice notice) {
         this.noticeId = notice.getId();
         this.title = notice.getTitle();
         this.content = notice.getContent();

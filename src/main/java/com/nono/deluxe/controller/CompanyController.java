@@ -1,7 +1,7 @@
 package com.nono.deluxe.controller;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.nono.deluxe.controller.dto.DeleteApiResponseDto;
+import com.nono.deluxe.controller.dto.MessageResponseDTO;
 import com.nono.deluxe.controller.dto.company.*;
 import com.nono.deluxe.service.AuthService;
 import com.nono.deluxe.service.CompanyService;
@@ -28,12 +28,12 @@ public class CompanyController {
      * @return
      */
     @PostMapping("/company")
-    public ResponseEntity<CreateCompanyResponseDto> createCompany(@RequestHeader(name = "Authorization") String token,
-                                                                  @Validated @RequestBody CreateCompanyRequestDto requestDto) {
+    public ResponseEntity<CompanyResponseDTO> createCompany(@RequestHeader(name = "Authorization") String token,
+                                                                  @Validated @RequestBody CreateCompanyRequestDTO requestDto) {
         try {
             DecodedJWT jwt = authService.decodeToken(token);
             if(authService.isManager(jwt) || authService.isAdmin(jwt)) {
-                CreateCompanyResponseDto responseDto = companyService.createCompany(requestDto);
+                CompanyResponseDTO responseDto = companyService.createCompany(requestDto);
 
                 return ResponseEntity.status(HttpStatus.OK).body(responseDto);
             } else {
@@ -60,7 +60,7 @@ public class CompanyController {
      * @return
      */
     @GetMapping("/company")
-    public ResponseEntity<ReadCompanyListResponseDto> readCompanyList(@RequestHeader(name = "Authorization") String token,
+    public ResponseEntity<ReadCompanyListResponseDTO> readCompanyList(@RequestHeader(name = "Authorization") String token,
                                                                       @RequestParam(required = false, defaultValue = "") String query,
                                                                       @RequestParam(required = false, defaultValue = "name") String column,
                                                                       @RequestParam(required = false, defaultValue = "ASC") String order,
@@ -70,7 +70,7 @@ public class CompanyController {
         try {
             DecodedJWT jwt = authService.decodeToken(token);
             if(authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
-                ReadCompanyListResponseDto responseDto = companyService.readCompanyList(query, column, order, size, page, active);
+                ReadCompanyListResponseDTO responseDto = companyService.readCompanyList(query, column, order, size, page, active);
 
                 return ResponseEntity.status(HttpStatus.OK).body(responseDto);
             } else {
@@ -92,12 +92,12 @@ public class CompanyController {
      * @return
      */
     @GetMapping("/company/{companyId}")
-    public ResponseEntity<ReadCompanyResponseDto> readCompany(@RequestHeader(name = "Authorization") String token,
-                                                              @PathVariable(name = "companyId") long companyId) {
+    public ResponseEntity<CompanyResponseDTO> readCompany(@RequestHeader(name = "Authorization") String token,
+                                                          @PathVariable(name = "companyId") long companyId) {
         try {
             DecodedJWT jwt = authService.decodeToken(token);
             if(authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
-                ReadCompanyResponseDto responseDto = companyService.readCompany(companyId);
+                CompanyResponseDTO responseDto = companyService.readCompany(companyId);
 
                 return ResponseEntity.status(HttpStatus.OK).body(responseDto);
             } else {
@@ -120,13 +120,13 @@ public class CompanyController {
      * @return
      */
     @PutMapping("/company/{companyId}")
-    public ResponseEntity<UpdateCompanyResponseDto> updateCompany(@RequestHeader(name = "Authorization") String token,
-                                                                  @Validated @RequestBody UpdateCompanyRequestDto requestDto,
+    public ResponseEntity<CompanyResponseDTO> updateCompany(@RequestHeader(name = "Authorization") String token,
+                                                                  @Validated @RequestBody UpdateCompanyRequestDTO requestDto,
                                                                   @PathVariable(name = "companyId") long companyId) {
         try {
             DecodedJWT jwt = authService.decodeToken(token);
             if(authService.isAdmin(jwt)) {
-                UpdateCompanyResponseDto responseDto = companyService.updateCompany(companyId, requestDto);
+                CompanyResponseDTO responseDto = companyService.updateCompany(companyId, requestDto);
 
                 return ResponseEntity.status(HttpStatus.OK).body(responseDto);
             } else {
@@ -142,12 +142,12 @@ public class CompanyController {
     }
 
     @PutMapping("/company/active")
-    public ResponseEntity<UpdateCompanyActiveResponseDto> updateCompanyActive(@RequestHeader(name = "Authorization") String token,
-                                                                  @Validated @RequestBody UpdateCompanyActiveRequestDto requestDto) {
+    public ResponseEntity<UpdateCompanyActiveResponseDTO> updateCompanyActive(@RequestHeader(name = "Authorization") String token,
+                                                                              @Validated @RequestBody UpdateCompanyActiveRequestDTO requestDto) {
         try {
             DecodedJWT jwt = authService.decodeToken(token);
             if(authService.isAdmin(jwt)) {
-                UpdateCompanyActiveResponseDto responseDto = companyService.updateCompanyActive(requestDto);
+                UpdateCompanyActiveResponseDTO responseDto = companyService.updateCompanyActive(requestDto);
 
                 return ResponseEntity.status(HttpStatus.OK).body(responseDto);
             } else {
@@ -169,12 +169,12 @@ public class CompanyController {
      * @return
      */
     @DeleteMapping("/company/{companyId}")
-    public ResponseEntity<DeleteApiResponseDto> updateCompany(@RequestHeader(name = "Authorization") String token,
-                                                              @PathVariable(name = "companyId") long companyId) {
+    public ResponseEntity<MessageResponseDTO> updateCompany(@RequestHeader(name = "Authorization") String token,
+                                                            @PathVariable(name = "companyId") long companyId) {
         try {
             DecodedJWT jwt = authService.decodeToken(token);
             if(authService.isAdmin(jwt)) {
-                DeleteApiResponseDto responseDto = companyService.deleteCompany(companyId);
+                MessageResponseDTO responseDto = companyService.deleteCompany(companyId);
 
                 return ResponseEntity.status(HttpStatus.OK).body(responseDto);
             } else {

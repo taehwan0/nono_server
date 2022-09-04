@@ -1,6 +1,5 @@
 package com.nono.deluxe.controller.dto.company;
 
-import com.nono.deluxe.domain.company.Company;
 import com.nono.deluxe.domain.company.CompanyType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,7 +10,7 @@ import javax.validation.constraints.Size;
 
 @Getter
 @NoArgsConstructor
-public class UpdateCompanyRequestDto {
+public class UpdateCompanyRequestDTO {
 
     @NotBlank(message = "Company: name can not Blank")
     @Size(max = 30, message = "companyName max size = 30")
