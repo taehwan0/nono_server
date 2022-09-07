@@ -107,6 +107,32 @@ public class NoticeController {
     }
 
     /**
+     * 필요권한: participant, manager, admin
+     * @param token
+     * @param noticeId
+     * @return
+     */
+    @GetMapping("/notice/recent")
+    public ResponseEntity<NoticeResponseDTO> readNoticeRecent(@RequestHeader(value = "Authorization") String token) {
+        try{
+            DecodedJWT jwt = authService.decodeToken(token);
+            if(authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
+                NoticeResponseDTO responseDto = noticeService.readNoticeRecent();
+
+                return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+            } else {
+                log.error("Notice: forbidden read notice {}", jwt.getClaim("userId"));
+
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+        } catch (RuntimeException e) {
+            log.error(e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
+    /**
      * 필요권한: admin
      * @param token
      * @param noticeId

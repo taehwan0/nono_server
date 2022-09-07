@@ -14,7 +14,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -47,6 +49,22 @@ public class NoticeService {
     public NoticeResponseDTO readNotice(long noticeId) {
         Notice notice = noticeRepository.findById(noticeId).
                 orElseThrow(() -> new RuntimeException("Not Found Notice"));
+        return new NoticeResponseDTO(notice);
+    }
+
+    /**
+     * 최근 공지사항 1개만 조회
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public NoticeResponseDTO readNoticeRecent() {
+        Pageable limit = PageRequest.of(0, 1, Sort.by(new Sort.Order(Sort.Direction.valueOf("DESC"), "createdAt")));
+        Page<Notice> noticePage;
+
+        Page<Notice> notices = noticeRepository.readNoticeList("", limit);
+        List<Notice> content = notices.getContent();
+        Notice notice = content.get(0);
+
         return new NoticeResponseDTO(notice);
     }
 

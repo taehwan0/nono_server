@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface NoticeRepository extends JpaRepository<Notice, Long> {
     @Query(value = "SELECT n FROM Notice n WHERE n.title LIKE concat('%', :query, '%')")
