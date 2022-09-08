@@ -40,8 +40,8 @@ public class ProductService {
     }
 
     /**
-     from.hj.yang
-     해당 부분 Pageable 사용하여 변경 완료.
+     * from.hj.yang
+     * 해당 부분 Pageable 사용하여 변경 완료.
      */
     public GetProductListResponseDTO getProductList(String query, String column, String order, int size, int page, boolean active) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(new Sort.Order(Sort.Direction.valueOf(order.toUpperCase(Locale.ROOT)), column)));
@@ -64,8 +64,8 @@ public class ProductService {
     }
 
     /**
-    from.hj.yang
-    1. 해당 부분에 대하여 Query만으로 해당 부분의 데이터를 추출하여 처리하는 부분에 대한 공부 필요.
+     * from.hj.yang
+     * 1. 해당 부분에 대하여 Query만으로 해당 부분의 데이터를 추출하여 처리하는 부분에 대한 공부 필요.
      */
     public GetRecordListResponseDTO getProductRecordList(long productId, int year, int month) {
         Product product = productRepository.findById(productId)
@@ -88,10 +88,11 @@ public class ProductService {
                 .orElseThrow(() -> new RuntimeException("Not Exist product."));
 
         StorageType storageType = StorageType.valueOf(requestDTO.getStorageType());
-        ImageFile imageFile = ImageFile.builder()
-                .url(requestDTO.getImage())
-                .fileName(requestDTO.getName())
-                .build();
+
+        ImageFile imageFile = updatedProduct.getFile();
+        if (imageFile != null) {
+            imageFile.update(requestDTO.getImage(), requestDTO.getName());
+        }
 
         updatedProduct.update(
                 requestDTO.getProductCode(),
@@ -103,7 +104,7 @@ public class ProductService {
                 storageType,
                 requestDTO.getBarcode(),
                 requestDTO.getStock(),
-                requestDTO.isActivate(),
+                requestDTO.isActive(),
                 imageFile,
                 requestDTO.getPrice(),
                 requestDTO.getMargin()

@@ -31,7 +31,7 @@ public class GetRecordListResponseDTO {
     /// 마진율
     private long margin;
     /// 활성화 여부
-    private boolean activate;
+    private boolean active;
     // 이미지 데이터
     private String image;
     // 입출고 기록
@@ -50,7 +50,7 @@ public class GetRecordListResponseDTO {
         this.stock = product.getStock();
         this.price = product.getPrice();
         this.margin = product.getMargin();
-        this.activate = product.isActivate();
+        this.active = product.isActive();
         //TODO: 이미지 파일 변환
         this.image = product.getFile().getUrl();
         this.recordList = recordList;

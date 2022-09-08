@@ -52,7 +52,7 @@ public class ProductResponseDTO {
     /// 마진율
     private long margin;
     /// 활성화 여부
-    private boolean activate;
+    private boolean active;
     // 이미지 데이터
     private String image;
 
@@ -69,8 +69,9 @@ public class ProductResponseDTO {
         this.stock = product.getStock();
         this.price = product.getPrice();
         this.margin = product.getMargin();
-        this.activate = product.isActivate();
+        this.active = product.isActive();
         //TODO: 이미지 파일 변환
-        this.image = product.getFile().getUrl();
+        this.image = "";
+//        this.image = product.getFile().getUrl();
     }
 }

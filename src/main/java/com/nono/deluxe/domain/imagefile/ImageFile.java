@@ -26,4 +26,9 @@ public class ImageFile {
         this.url = url;
         this.fileName = fileName;
     }
+
+    public void update(String url, String fileName) {
+        this.url = url;
+        this.fileName = fileName;
+    }
 }

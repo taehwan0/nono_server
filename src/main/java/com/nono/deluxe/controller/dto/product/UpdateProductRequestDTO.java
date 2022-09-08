@@ -25,7 +25,7 @@ public class UpdateProductRequestDTO {
     /// 바코드
     private String barcode;
     /// 활성화 여부
-    private boolean activate;
+    private boolean active;
     /// 생성시 가지고 있는 재고.
     private int stock;
     /// 기준 가격
