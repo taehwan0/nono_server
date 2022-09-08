@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.Getter;
 import org.springframework.data.domain.Page;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,10 +29,10 @@ import java.util.List;
 @Data
 public class GetProductListResponseDTO {
     private Meta meta;
-    private List<ProductResponseDTO> productList;
+    private List<ProductResponseDTO> productList = new ArrayList<>();
 
     public GetProductListResponseDTO(Page<Product> productPage) {
-        this.meta = new Meta(productPage.getNumber(),
+        this.meta = new Meta(productPage.getNumber() + 1,
                 productPage.getNumberOfElements(),
                 productPage.getTotalPages(),
                 productPage.getTotalElements(),

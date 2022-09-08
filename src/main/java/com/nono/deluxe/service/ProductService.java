@@ -87,7 +87,7 @@ public class ProductService {
         Product updatedProduct = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Not Exist product."));
 
-        StorageType storageType = StorageType.valueOf(requestDTO.getStorageType());
+        StorageType storageType = StorageType.valueOf(requestDTO.getStorageType().toUpperCase());
 
         ImageFile imageFile = updatedProduct.getFile();
         if (imageFile != null) {

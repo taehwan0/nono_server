@@ -88,7 +88,7 @@ public class ProductController {
         try {
             DecodedJWT jwt = authService.decodeToken(token);
             if (authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
-                GetProductListResponseDTO responseDTO = productService.getProductList(query, column, order, size, page, active);
+                GetProductListResponseDTO responseDTO = productService.getProductList(query, column, order, size, (page -1), active);
                 return ResponseEntity
                         .status(HttpStatus.OK)
                         .body(responseDTO);

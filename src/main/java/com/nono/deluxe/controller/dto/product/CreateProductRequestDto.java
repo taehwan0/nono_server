@@ -54,7 +54,7 @@ public class CreateProductRequestDto {
 
 
     public Product toEntity() {
-        StorageType storage = StorageType.valueOf(storageType);
+        StorageType storage = StorageType.valueOf(storageType.toUpperCase());
         return Product.builder()
                 .productCode(productCode)
                 .name(name)
