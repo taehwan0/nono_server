@@ -57,7 +57,6 @@ public class CompanyService {
                 .orElseThrow(() -> new RuntimeException("Company: not found id"));
         company.update(
                 requestDto.getName(),
-                requestDto.getType(),
                 requestDto.getCategory(),
                 requestDto.isActive()
         );

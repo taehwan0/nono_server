@@ -18,9 +18,10 @@ public class UpdateCompanyRequestDTO {
 
     /**
      * enum 값은 blank 쓸 때 에러가 났다. 왜?
+     * 불변으로 수정
      */
-    @NotNull(message = "Company: type can not Null")
-    private CompanyType type;
+//    @NotNull(message = "Company: type can not Null")
+//    private CompanyType type;
 
     @NotNull(message = "Company: category can not Null")
     private String category;

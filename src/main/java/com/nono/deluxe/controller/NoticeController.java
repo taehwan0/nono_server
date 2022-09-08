@@ -109,7 +109,6 @@ public class NoticeController {
     /**
      * 필요권한: participant, manager, admin
      * @param token
-     * @param noticeId
      * @return
      */
     @GetMapping("/notice/recent")

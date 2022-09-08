@@ -26,9 +26,8 @@ public class Company {
     @Column(columnDefinition = "tinyint(1) default 1")
     private boolean active;
 
-    public void update(String name, CompanyType type, String category, boolean active) {
+    public void update(String name, String category, boolean active) {
         this.name = name;
-        this.type = type;
         this.category = category;
         this.active = active;
     }
