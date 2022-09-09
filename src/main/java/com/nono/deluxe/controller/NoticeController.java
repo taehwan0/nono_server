@@ -60,11 +60,12 @@ public class NoticeController {
                                                                     @RequestParam(required = false, defaultValue = "DESC") String order,
                                                                     @RequestParam(required = false, defaultValue = "10") int size,
                                                                     @RequestParam(required = false, defaultValue = "0") int page,
-                                                                    @RequestParam(required = false, defaultValue = "false") boolean focus) {
+                                                                    @RequestParam(required = false, defaultValue = "false") boolean focus,
+                                                                    @RequestParam(required = false, defaultValue = "false") boolean content) {
         try {
             DecodedJWT jwt = authService.decodeToken(token);
             if(authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
-                ReadNoticeListResponseDTO responseDto  = noticeService.readNoticeList(query, column, order, size, page, focus);
+                ReadNoticeListResponseDTO responseDto  = noticeService.readNoticeList(query, column, order, size, page, focus, content);
 
                 return ResponseEntity.status(HttpStatus.OK).body(responseDto);
             } else {

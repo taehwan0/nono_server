@@ -24,4 +24,15 @@ public class NoticeResponseDTO {
         this.updatedAt = notice.getUpdatedAt();
         this.writer = notice.getWriter().getName();
     }
+
+    public NoticeResponseDTO(Notice notice, boolean content) {
+        this.noticeId = notice.getId();
+        this.title = notice.getTitle();
+        if(content) this.content = notice.getContent();
+        else this.content = null;
+        this.focus = notice.isFocus();
+        this.createdAt = notice.getCreatedAt();
+        this.updatedAt = notice.getUpdatedAt();
+        this.writer = notice.getWriter().getName();
+    }
 }
