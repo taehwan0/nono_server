@@ -1,13 +1,11 @@
 package com.nono.deluxe.controller.dto.auth;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class LoginRequestDto {
+public class LoginRequestDTO {
     private String email;
     private String password;
     private long tokenActiveSeconds;

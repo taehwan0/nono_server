@@ -2,7 +2,7 @@ package com.nono.deluxe.controller.company;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nono.deluxe.controller.dto.company.CreateCompanyRequestDto;
+import com.nono.deluxe.controller.dto.company.CreateCompanyRequestDTO;
 import com.nono.deluxe.domain.company.CompanyType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ public class CompanyControllerTest {
         String category = "world";
 
         //when
-        CreateCompanyRequestDto requestDto = new CreateCompanyRequestDto(name, type, category);
+        CreateCompanyRequestDTO requestDto = new CreateCompanyRequestDTO(name, type, category);
         String jsonBody = objectMapper.writeValueAsString(requestDto);
 
 
@@ -56,7 +56,7 @@ public class CompanyControllerTest {
         String category = "";
 
         //when
-        CreateCompanyRequestDto requestDto = new CreateCompanyRequestDto(name, type, category);
+        CreateCompanyRequestDTO requestDto = new CreateCompanyRequestDTO(name, type, category);
         String jsonBody = objectMapper.writeValueAsString(requestDto);
 
 

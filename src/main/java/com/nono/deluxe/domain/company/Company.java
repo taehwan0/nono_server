@@ -1,13 +1,10 @@
 package com.nono.deluxe.domain.company;
 
-import com.nono.deluxe.domain.document.Document;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -27,13 +24,16 @@ public class Company {
     private String category;
 
     @Column(columnDefinition = "tinyint(1) default 1")
-    private boolean activate;
+    private boolean active;
 
-    public void update(String name, CompanyType type, String category, boolean active) {
+    public void update(String name, String category, boolean active) {
         this.name = name;
-        this.type = type;
         this.category = category;
-        this.activate = active;
+        this.active = active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     @Builder
@@ -41,6 +41,6 @@ public class Company {
         this.name = name;
         this.type = type;
         this.category = category;
-        this.activate = true; // 적용이 안되서 일단 넣음.
+        this.active = true; // 적용이 안되서 일단 넣음.
     }
 }

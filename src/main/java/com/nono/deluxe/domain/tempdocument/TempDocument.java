@@ -25,7 +25,7 @@ public class TempDocument extends BaseTimeEntity {
     private DocumentType type;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "writer_id", nullable = false)
+    @JoinColumn(name = "writer_id", nullable = false, foreignKey = @ForeignKey(name = "temp_document_user"))
     private User writer;
 
     @OneToMany(mappedBy = "document",
@@ -33,6 +33,6 @@ public class TempDocument extends BaseTimeEntity {
     private List<TempRecord> DocumentItemList = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "company_id", nullable = false)
+    @JoinColumn(name = "company_id", nullable = false, foreignKey = @ForeignKey(name = "temp_document_company"))
     private Company company;
 }

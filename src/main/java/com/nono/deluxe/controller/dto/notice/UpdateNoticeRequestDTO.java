@@ -10,7 +10,7 @@ import javax.validation.constraints.Size;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdateNoticeRequestDto {
+public class UpdateNoticeRequestDTO {
 
     @NotBlank(message = "noticeTitle can not Blank")
     @Size(max = 100, message = "noticeTitle max size = 100")

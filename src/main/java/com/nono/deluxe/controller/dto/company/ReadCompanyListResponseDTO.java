@@ -9,14 +9,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class ReadCompanyListResponseDto {
+public class ReadCompanyListResponseDTO {
     private Meta meta;
-    private List<ReadCompanyResponseDto> companyList = new ArrayList<>();
+    private List<CompanyResponseDTO> companyList = new ArrayList<>();
 
-    public ReadCompanyListResponseDto(Page<Company> companyPage) {
+    public ReadCompanyListResponseDTO(Page<Company> companyPage) {
         List<Company> companyList = companyPage.getContent();
         companyList.forEach(company -> {
-            this.companyList.add(new ReadCompanyResponseDto(company));
+            this.companyList.add(new CompanyResponseDTO(company));
         });
         companyPage.getTotalElements();
         companyPage.getTotalPages();

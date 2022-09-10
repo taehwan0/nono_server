@@ -16,7 +16,7 @@ public class Notice extends BaseTimeEntity {
     private long id;
 
     @ManyToOne
-    @JoinColumn(name = "writer_id", nullable = false)
+    @JoinColumn(name = "writer_id", nullable = false, foreignKey = @ForeignKey(name = "notice_user"))
     private User writer;
 
     @Column(nullable = false, length = 100)

@@ -47,10 +47,10 @@ public class Product {
     private long stock;
 
     @Column(columnDefinition = "tinyint(1) default 1")
-    private boolean activate;
+    private boolean active;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "file_id", nullable = true)
+    @JoinColumn(name = "file_id", nullable = true, foreignKey = @ForeignKey(name = "product_image"))
     private ImageFile file;
 
     @Column(nullable = true)
@@ -109,5 +109,8 @@ public class Product {
         this.file = file;
         this.price = price;
         this.margin = margin;
+        
+    public void updateStock(long stock) {
+        this.stock = stock;
     }
 }
