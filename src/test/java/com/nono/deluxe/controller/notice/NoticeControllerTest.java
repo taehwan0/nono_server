@@ -1,7 +1,7 @@
 package com.nono.deluxe.controller.notice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nono.deluxe.controller.dto.notice.CreateNoticeRequestDto;
+import com.nono.deluxe.controller.dto.notice.CreateNoticeRequestDTO;
 import com.nono.deluxe.domain.notice.NoticeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,7 +51,7 @@ class NoticeControllerTest {
     @Test
     public void createNotice() throws Exception {
         //given
-        CreateNoticeRequestDto createNoticeRequestDto = new CreateNoticeRequestDto(
+        CreateNoticeRequestDTO createNoticeRequestDto = new CreateNoticeRequestDTO(
                 "title",
                 "한글도 잘 들어가나요",
                 true

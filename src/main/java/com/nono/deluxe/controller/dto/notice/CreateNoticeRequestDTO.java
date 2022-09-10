@@ -5,7 +5,6 @@ import com.nono.deluxe.domain.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
@@ -13,7 +12,7 @@ import javax.validation.constraints.Size;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateNoticeRequestDto {
+public class CreateNoticeRequestDTO {
 
     @NotBlank(message = "noticeTitle can not Blank")
     @Size(max = 100, message = "noticeTitle max size = 100")

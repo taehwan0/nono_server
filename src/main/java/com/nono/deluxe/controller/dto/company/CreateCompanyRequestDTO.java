@@ -11,7 +11,7 @@ import javax.validation.constraints.Size;
 
 @Getter
 @NoArgsConstructor
-public class CreateCompanyRequestDto {
+public class CreateCompanyRequestDTO {
 
     @NotBlank(message = "Company: companyName can not Blank")
     @Size(max = 30, message = "companyName max size = 30")
@@ -31,7 +31,7 @@ public class CreateCompanyRequestDto {
      * @param type
      * @param category
      */
-    public CreateCompanyRequestDto(String name, CompanyType type, String category) {
+    public CreateCompanyRequestDTO(String name, CompanyType type, String category) {
         this.name = name;
         this.type = type;
         this.category = category;

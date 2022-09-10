@@ -1,8 +1,6 @@
 package com.nono.deluxe.controller.dto.notice;
 
 import com.nono.deluxe.controller.dto.Meta;
-import com.nono.deluxe.controller.dto.company.ReadCompanyResponseDto;
-import com.nono.deluxe.domain.company.Company;
 import com.nono.deluxe.domain.notice.Notice;
 import lombok.Data;
 import org.springframework.data.domain.Page;
@@ -11,15 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class ReadNoticeListResponseDto {
+public class ReadNoticeListResponseDTO {
     private Meta meta;
-    private List<ReadNoticeResponseDto> noticeList = new ArrayList<>();
+    private List<NoticeResponseDTO> noticeList = new ArrayList<>();
 
-    public ReadNoticeListResponseDto(Page<Notice> noticePage) {
+    public ReadNoticeListResponseDTO(Page<Notice> noticePage, boolean content) {
         List<Notice> noticeList = noticePage.getContent();
-        noticeList.forEach(notice -> {
-            this.noticeList.add(new ReadNoticeResponseDto(notice));
-        });
+        noticeList.forEach(notice -> this.noticeList.add(new NoticeResponseDTO(notice, content)));
         noticePage.getTotalElements();
         noticePage.getTotalPages();
         noticePage.isLast();

@@ -18,11 +18,11 @@ public class TempRecord extends BaseTimeEntity {
     private long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "document_id", nullable = false)
+    @JoinColumn(name = "document_id", nullable = false, foreignKey = @ForeignKey(name = "temp_record_document"))
     private TempDocument document;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
+    @JoinColumn(name = "product_id", nullable = false, foreignKey = @ForeignKey(name = "temp_record_product"))
     private Product product;
 
     @Column(nullable = false)

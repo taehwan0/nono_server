@@ -1,6 +1,6 @@
 package com.nono.deluxe.service;
 
-import com.nono.deluxe.controller.dto.DeleteApiResponseDto;
+import com.nono.deluxe.controller.dto.MessageResponseDTO;
 import com.nono.deluxe.controller.dto.notice.*;
 import com.nono.deluxe.domain.notice.Notice;
 import com.nono.deluxe.domain.notice.NoticeRepository;
@@ -14,7 +14,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -24,30 +26,46 @@ public class NoticeService {
     private final UserRepository userRepository;
 
     @Transactional
-    public CreateNoticeResponseDto createNotice(long userId, CreateNoticeRequestDto requestDto) {
+    public NoticeResponseDTO createNotice(long userId, CreateNoticeRequestDTO requestDto) {
         User writer = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Notice: Not Found User"));
         Notice notice = requestDto.toEntity(writer);
 
-        return new CreateNoticeResponseDto(noticeRepository.save(notice));
+        return new NoticeResponseDTO(noticeRepository.save(notice));
     }
 
     @Transactional(readOnly = true)
-    public ReadNoticeListResponseDto readNoticeList(String query, String column, String order, int size, int page, boolean focus) {
+    public ReadNoticeListResponseDTO readNoticeList(String query, String column, String order, int size, int page, boolean focus, boolean content) {
         Pageable limit = PageRequest.of(page, size, Sort.by(new Sort.Order(Sort.Direction.valueOf(order.toUpperCase(Locale.ROOT)), column)));
         Page<Notice> noticePage;
 
         if(focus) noticePage = noticeRepository.readNoticeListFocus(query, limit);
         else noticePage = noticeRepository.readNoticeList(query, limit);
 
-        return new ReadNoticeListResponseDto(noticePage);
+        return new ReadNoticeListResponseDTO(noticePage, content);
     }
 
     @Transactional(readOnly = true)
-    public ReadNoticeResponseDto readNotice(long noticeId) {
+    public NoticeResponseDTO readNotice(long noticeId) {
         Notice notice = noticeRepository.findById(noticeId).
                 orElseThrow(() -> new RuntimeException("Not Found Notice"));
-        return new ReadNoticeResponseDto(notice);
+        return new NoticeResponseDTO(notice);
+    }
+
+    /**
+     * 최근 공지사항 1개만 조회
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public NoticeResponseDTO readNoticeRecent() {
+        Pageable limit = PageRequest.of(0, 1, Sort.by(new Sort.Order(Sort.Direction.valueOf("DESC"), "createdAt")));
+        Page<Notice> noticePage;
+
+        Page<Notice> notices = noticeRepository.readNoticeList("", limit);
+        List<Notice> content = notices.getContent();
+        Notice notice = content.get(0);
+
+        return new NoticeResponseDTO(notice);
     }
 
     /*
@@ -55,7 +73,7 @@ public class NoticeService {
     saveAndFlush 로 명시적인 저장을 하면 @LastModifiedAt 이 정상적으로 동작함
      */
     @Transactional
-    public UpdateNoticeResponseDto updateNotice(long noticeId, UpdateNoticeRequestDto requestDto) {
+    public NoticeResponseDTO updateNotice(long noticeId, UpdateNoticeRequestDTO requestDto) {
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new RuntimeException("Not Found Notice"));
         notice.update(
@@ -65,15 +83,15 @@ public class NoticeService {
         );
         noticeRepository.saveAndFlush(notice);
 
-        return new UpdateNoticeResponseDto(notice);
+        return new NoticeResponseDTO(notice);
     }
 
     @Transactional
-    public DeleteApiResponseDto deleteNotice(long noticeId) {
+    public MessageResponseDTO deleteNotice(long noticeId) {
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new RuntimeException("Not Found Notice"));
         noticeRepository.delete(notice);
 
-        return new DeleteApiResponseDto(true, "deleted");
+        return new MessageResponseDTO(true, "deleted");
     }
 }

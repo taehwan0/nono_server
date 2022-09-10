@@ -7,7 +7,7 @@ import javax.validation.constraints.NotNull;
 
 @Getter
 @NoArgsConstructor
-public class UpdateCompanyActiveDto {
+public class UpdateCompanyActiveDTO {
     @NotNull(message = "companyId can not Null")
     private long companyId;
 

@@ -9,12 +9,12 @@ import lombok.Data;
  * 클래스명은 변경해도 좋지 않을까 싶네요.
  */
 @Data
-public class DeleteApiResponseDto {
+public class MessageResponseDTO {
 
     private boolean result;
     private String message;
 
-    public DeleteApiResponseDto(boolean result, String message) {
+    public MessageResponseDTO(boolean result, String message) {
         this.result = result;
         this.message = message;
     }

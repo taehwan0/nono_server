@@ -1,6 +1,6 @@
 package com.nono.deluxe.controller;
 
-import com.nono.deluxe.controller.dto.auth.LoginRequestDto;
+import com.nono.deluxe.controller.dto.auth.LoginRequestDTO;
 import com.nono.deluxe.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,7 +15,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public String login(@RequestBody LoginRequestDto loginRequestDto) {
+    public String login(@RequestBody LoginRequestDTO loginRequestDto) {
         return authService.loginUser(
                 loginRequestDto.getEmail(),
                 loginRequestDto.getPassword(),

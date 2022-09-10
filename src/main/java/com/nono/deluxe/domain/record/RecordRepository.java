@@ -4,13 +4,28 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
-/**
- * intellij 에서 잡아주는 에러로는 아래와 같이 u.product.id 로 사용한다고 합니다.
- * 데이터베이스에서 사용하는 컬럼의 이름을 직접적으로 사용하지 않고 객체의 프로퍼티들과 매칭되기 때문인 것 같습니다.
- */
 public interface RecordRepository extends JpaRepository<Record, Long> {
-    @Query("SELECT u FROM Record u WHERE u.product.id = :productId ")
-    List<Record> findRecordList(@Param("productId") long productId);
+    @Query("SELECT r FROM Record r WHERE r.product.id = :productId AND r.document.date > :date ORDER BY r.document.date ASC, r.document.createdAt ASC")
+    List<Record> findFutureDateRecordList(@Param("productId") long productId, @Param("date") LocalDate date);
+
+    @Query(value = "UPDATE record  r INNER JOIN document d ON r.document_id = d.id SET r.stock = r.stock + :updateStock WHERE r.product_id = :productId AND d.date > :date", nativeQuery = true)
+    void updateStockFutureDateRecord(@Param("productId") long productId, @Param("date") LocalDate date, @Param("updateStock") long updateStock);
+
+    /**
+     * productId, documentId 로 record 를 특정해서 반환
+     * @param productId
+     * @param documentId
+     * @return Optional<Record>
+     */
+    @Query("SELECT r FROM Record r WHERE r.product.id = :productId AND r.document.id = :documentId")
+    Optional<Record> findUpdateTargetRecord(@Param("productId") long productId, @Param("documentId") long documentId);
+
+    List<Record> findByDocumentId(long documentId);
+
+    @Query("SELECT r FROM Record r WHERE r.document.company.id = :companyId AND r.document.date BETWEEN :fromMonth AND :toMonth ORDER BY r.document.date DESC")
+    List<Record> findByCompanyId(@Param("companyId") long companyId, @Param("fromMonth") LocalDate fromMonth, @Param("toMonth") LocalDate toMonth);
 }
