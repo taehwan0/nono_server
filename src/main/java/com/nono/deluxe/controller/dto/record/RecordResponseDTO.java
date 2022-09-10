@@ -2,6 +2,7 @@ package com.nono.deluxe.controller.dto.record;
 
 import com.nono.deluxe.controller.dto.product.ProductResponseDTO;
 import com.nono.deluxe.domain.record.Record;
+import com.nono.deluxe.domain.temprecord.TempRecord;
 import lombok.Data;
 
 @Data
@@ -19,6 +20,14 @@ public class RecordResponseDTO {
         this.stock = record.getStock();
         this.price = record.getPrice();
         this.product = new ProductResponseDTO(record.getProduct());
+    }
+
+    public RecordResponseDTO(TempRecord tempRecord) {
+        this.recordId = tempRecord.getId();
+        this.quantity = tempRecord.getQuantity();
+        this.stock = 0; // Temp 기록은 저장된 양을 기록하지 않음.
+        this.price = tempRecord.getPrice();
+        this.product = new ProductResponseDTO(tempRecord.getProduct());
     }
 
 }
