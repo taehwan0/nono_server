@@ -126,12 +126,16 @@ public class TempDocumentService {
         Company company = companyRepository.findById(companyId)
                 .orElseThrow(() -> new RuntimeException("Not Found Company"));
 
-        TempDocument updatedDocument = updateDocumentInfo(document,
+        updateDocumentInfo(document,
                 writer,
                 company,
                 requestDto);
 
-        List<TempRecord> updatedRecordList = updatedDocument.getDocumentItemList();
+        TempDocument updatedDocument = tempDocumentRepository.findById(documentId)
+                .orElseThrow(() -> new RuntimeException("Not Found Document"));
+        List<TempRecord> updatedRecordList = tempRecordRepository.findByDocumentId(documentId);
+
+
         long recordCount = updatedRecordList.size();
         long totalPrice = getTotalPrice(updatedRecordList);
 
@@ -140,16 +144,14 @@ public class TempDocumentService {
                 totalPrice,
                 updatedRecordList
                 );
-
-
     }
 
-    private TempDocument updateDocumentInfo(TempDocument tempDocument,
+    private void updateDocumentInfo(TempDocument tempDocument,
                                             User writer,
                                             Company company,
                                             UpdateTempDocumentRequestDTO requestDto) {
         // 기존 tempRecord 삭제
-        List<TempRecord> originRecordList = tempDocument.getDocumentItemList();
+        List<TempRecord> originRecordList = tempRecordRepository.findByDocumentId(tempDocument.getId());
         originRecordList.forEach(tempRecordRepository::delete);
 
         // 새로운 Record 데이터 등록
@@ -159,15 +161,20 @@ public class TempDocumentService {
             Product recordProductInfo = productRepository.findById(recordRequestDTO.getProductId())
                     .orElseThrow(() -> new RuntimeException("Not found product Info."));
             TempRecord tempRecord = recordRequestDTO.toTempEntity(tempDocument, recordProductInfo);
+
+            long recordPrice = tempRecord.getPrice();
+            if (recordPrice == 0) {
+                long productPrice = recordProductInfo.getPrice();
+                tempRecord.updatePrice(productPrice);
+            }
+
+            tempRecordRepository.save(tempRecord);
             updatedRecordList.add(tempRecord);
         }
 
         // 데이터 업데이트
         tempDocument.updateDocumentInfo(requestDto, writer, company, updatedRecordList);
         tempDocumentRepository.save(tempDocument);
-
-        // 업데잍트한 데이터 return.
-        return tempDocument;
     }
 
     @Transactional

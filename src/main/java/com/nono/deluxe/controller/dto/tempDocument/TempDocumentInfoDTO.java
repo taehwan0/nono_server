@@ -43,5 +43,7 @@ public class TempDocumentInfoDTO {
             totalPrice += record.getPrice() * record.getQuantity();
         }
         this.totalPrice = totalPrice;
+        this.createdAt = document.getCreatedAt();
+        this.updatedAt = document.getUpdatedAt();
     }
 }

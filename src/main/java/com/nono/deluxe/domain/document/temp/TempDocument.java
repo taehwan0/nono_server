@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,5 +64,6 @@ public class TempDocument extends BaseTimeEntity {
         this.company = company;
         this.writer = writer;
         this.documentItemList = updatedRecordList;
+        setUpdatedAt(LocalDateTime.now());
     }
 }
