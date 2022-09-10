@@ -9,10 +9,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface RecordRepository extends JpaRepository<Record, Long> {
-
-    @Query("SELECT u FROM Record u WHERE u.product_id = :productId ")
-    List<Record> findRecordList(@Param("productId") long productId);
-
     @Query("SELECT r FROM Record r WHERE r.product.id = :productId AND r.document.date > :date ORDER BY r.document.date ASC, r.document.createdAt ASC")
     List<Record> findFutureDateRecordList(@Param("productId") long productId, @Param("date") LocalDate date);
 
