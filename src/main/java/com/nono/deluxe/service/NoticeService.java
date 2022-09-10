@@ -35,14 +35,14 @@ public class NoticeService {
     }
 
     @Transactional(readOnly = true)
-    public ReadNoticeListResponseDTO readNoticeList(String query, String column, String order, int size, int page, boolean focus) {
+    public ReadNoticeListResponseDTO readNoticeList(String query, String column, String order, int size, int page, boolean focus, boolean content) {
         Pageable limit = PageRequest.of(page, size, Sort.by(new Sort.Order(Sort.Direction.valueOf(order.toUpperCase(Locale.ROOT)), column)));
         Page<Notice> noticePage;
 
         if(focus) noticePage = noticeRepository.readNoticeListFocus(query, limit);
         else noticePage = noticeRepository.readNoticeList(query, limit);
 
-        return new ReadNoticeListResponseDTO(noticePage);
+        return new ReadNoticeListResponseDTO(noticePage, content);
     }
 
     @Transactional(readOnly = true)

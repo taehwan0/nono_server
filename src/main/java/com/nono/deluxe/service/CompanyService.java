@@ -4,6 +4,8 @@ import com.nono.deluxe.controller.dto.MessageResponseDTO;
 import com.nono.deluxe.controller.dto.company.*;
 import com.nono.deluxe.domain.company.Company;
 import com.nono.deluxe.domain.company.CompanyRepository;
+import com.nono.deluxe.domain.record.Record;
+import com.nono.deluxe.domain.record.RecordRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -13,6 +15,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -23,6 +26,7 @@ import java.util.Locale;
 public class CompanyService {
 
     private final CompanyRepository companyRepository;
+    private final RecordRepository recordRepository;
 
     @Transactional
     public CompanyResponseDTO createCompany(CreateCompanyRequestDTO requestDto) {
@@ -50,6 +54,28 @@ public class CompanyService {
 
         return new ReadCompanyListResponseDTO(companyPage);
     }
+
+    @Transactional(readOnly = true)
+    public CompanyRecordResponseDTO readCompanyRecord(long companyId, int year, int month) {
+
+        if(year == 0) year = LocalDate.now().getYear();
+        int toMonth = month;
+        if(month == 0) {
+            month = 1;
+            toMonth = 12;
+        }
+
+        LocalDate fromDate = LocalDate.of(year, month, 1);
+        LocalDate toDate = LocalDate.of(year, toMonth, LocalDate.of(year, toMonth, 1).lengthOfMonth());
+
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new RuntimeException("Not Found Company"));
+        List<Record> recordList = recordRepository.findByCompanyId(companyId, fromDate, toDate);
+
+        return new CompanyRecordResponseDTO(company, recordList);
+    }
+
+
 
     @Transactional
     public CompanyResponseDTO updateCompany(long companyId, UpdateCompanyRequestDTO requestDto) {

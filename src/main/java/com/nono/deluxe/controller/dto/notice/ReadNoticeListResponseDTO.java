@@ -13,11 +13,9 @@ public class ReadNoticeListResponseDTO {
     private Meta meta;
     private List<NoticeResponseDTO> noticeList = new ArrayList<>();
 
-    public ReadNoticeListResponseDTO(Page<Notice> noticePage) {
+    public ReadNoticeListResponseDTO(Page<Notice> noticePage, boolean content) {
         List<Notice> noticeList = noticePage.getContent();
-        noticeList.forEach(notice -> {
-            this.noticeList.add(new NoticeResponseDTO(notice));
-        });
+        noticeList.forEach(notice -> this.noticeList.add(new NoticeResponseDTO(notice, content)));
         noticePage.getTotalElements();
         noticePage.getTotalPages();
         noticePage.isLast();
