@@ -26,6 +26,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -86,12 +87,25 @@ public class DocumentService {
     }
 
     @Transactional(readOnly = true)
-    public ReadDocumentListResponseDTO readDocumentList(String query, String column, String order, int size, int page) {
+    public ReadDocumentListResponseDTO readDocumentList(String query, String column, String order, int size, int page, int year, int month) {
         Pageable limit = PageRequest.of(page, size, Sort.by(
                 new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), column),
                 new Sort.Order(Sort.Direction.ASC, "createdAt")));
 
-        Page<Document> documentPage = documentRepository.readDocumentList(query, limit);
+        if(year == 0) year = LocalDate.now().getYear();
+        int toMonth = month;
+        if(month == 0) {
+            month = 1;
+            toMonth = 12;
+        }
+
+        LocalDate fromDate = LocalDate.of(year, month, 1);
+        LocalDate toDate = LocalDate.of(year, toMonth, LocalDate.of(year, toMonth, 1).lengthOfMonth());
+        // 테스트 해보기
+
+
+
+        Page<Document> documentPage = documentRepository.readDocumentList(query, fromDate, toDate, limit);
 
         return new ReadDocumentListResponseDTO(documentPage);
     }

@@ -74,11 +74,13 @@ public class DocumentController {
                                                                         @RequestParam(required = false, defaultValue = "date") String column,
                                                                         @RequestParam(required = false, defaultValue = "DESC") String order,
                                                                         @RequestParam(required = false, defaultValue = "10") int size,
-                                                                        @RequestParam(required = false, defaultValue = "0") int page) {
+                                                                        @RequestParam(required = false, defaultValue = "0") int page,
+                                                                        @RequestParam(required = false, defaultValue = "0") int year,
+                                                                        @RequestParam(required = false, defaultValue = "0") int month) {
         try {
             DecodedJWT jwt = authService.decodeToken(token);
             if(authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
-                ReadDocumentListResponseDTO responseDto = documentService.readDocumentList(query, column, order, size, page);
+                ReadDocumentListResponseDTO responseDto = documentService.readDocumentList(query, column, order, size, page, year, month);
 
                 return ResponseEntity.status(HttpStatus.OK).body(responseDto);
             } else {
