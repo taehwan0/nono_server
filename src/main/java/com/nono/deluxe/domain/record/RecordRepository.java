@@ -21,8 +21,11 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
      * @param documentId
      * @return Optional<Record>
      */
-    @Query("SELECT r From Record r WHERE r.product.id = :productId AND r.document.id = :documentId")
+    @Query("SELECT r FROM Record r WHERE r.product.id = :productId AND r.document.id = :documentId")
     Optional<Record> findUpdateTargetRecord(@Param("productId") long productId, @Param("documentId") long documentId);
 
     List<Record> findByDocumentId(long documentId);
+
+    @Query("SELECT r FROM Record r WHERE r.document.company.id = :companyId AND r.document.date BETWEEN :fromMonth AND :toMonth ORDER BY r.document.date DESC")
+    List<Record> findByCompanyId(@Param("companyId") long companyId, @Param("fromMonth") LocalDate fromMonth, @Param("toMonth") LocalDate toMonth);
 }
