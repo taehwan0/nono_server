@@ -1,13 +1,16 @@
 package com.nono.deluxe.domain.product;
 
+import com.nono.deluxe.controller.dto.product.UpdateProductRequestDTO;
 import com.nono.deluxe.domain.imagefile.ImageFile;
 import com.nono.deluxe.domain.record.Record;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Getter
 @NoArgsConstructor
@@ -57,6 +60,39 @@ public class Product {
 
     @Column(nullable = true)
     private long margin;
+
+    @Builder
+    public Product(String productCode, String name, String description, String category, String maker, String unit, StorageType storageType, String barcode, long stock, boolean active, ImageFile file, long price, long margin) {
+        this.productCode = productCode;
+        this.name = name;
+        this.description = description;
+        this.category = category;
+        this.maker = maker;
+        this.unit = unit;
+        this.storageType = storageType;
+        this.barcode = barcode;
+        this.stock = stock;
+        this.active = active;
+        this.file = file;
+        this.price = price;
+        this.margin = margin;
+    }
+
+    public void update(UpdateProductRequestDTO requestDTO) {
+        this.productCode = requestDTO.getProductCode();
+        this.name = requestDTO.getName();
+        this.description = requestDTO.getDescription();
+        this.category = requestDTO.getCategory();
+        this.maker = requestDTO.getMaker();
+        this.unit = requestDTO.getUnit();
+        this.storageType = StorageType.valueOf(requestDTO.getStorageType().toUpperCase());
+        this.barcode = requestDTO.getBarcode();
+        this.stock = requestDTO.getStock();
+        this.active = requestDTO.isActive();
+        this.file = null; // requestDTO.getImage();
+        this.price = requestDTO.getPrice();
+        this.margin = requestDTO.getMargin();
+    }
 
     public void updateStock(long stock) {
         this.stock = stock;

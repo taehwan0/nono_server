@@ -1,6 +1,7 @@
 package com.nono.deluxe.controller;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.nono.deluxe.controller.dto.MessageResponseDTO;
 import com.nono.deluxe.controller.dto.product.*;
 import com.nono.deluxe.service.AuthService;
 import com.nono.deluxe.service.ProductService;
@@ -124,12 +125,12 @@ public class ProductController {
     @GetMapping("/product/{productId}/record")
     public ResponseEntity<GetRecordListResponseDTO> getProductRecord(@RequestHeader(value = "Authorization") String token,
                                                                      @PathVariable(name = "productId") long productId,
-                                                                     @RequestParam(value = "year") int year,
-                                                                     @RequestParam(value = "month") int month) {
+                                                                     @RequestParam(required = false, defaultValue = "0") int year,
+                                                                     @RequestParam(required = false, defaultValue = "0") int month) {
         try {
             DecodedJWT jwt = authService.decodeToken(token);
             if (authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
-                GetRecordListResponseDTO responseDTO = productService.getProductRecordList(productId, year, month);
+                GetRecordListResponseDTO responseDTO = productService.readProductRecord(productId, year, month);
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(responseDTO);
             } else {
@@ -138,6 +139,8 @@ public class ProductController {
             }
 
         } catch (RuntimeException exception) {
+            exception.printStackTrace();
+            log.error(exception.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
@@ -161,12 +164,12 @@ public class ProductController {
     }
 
     @DeleteMapping("/product/{productId}")
-    public ResponseEntity<ResponseDTO> deleteProduct(@RequestHeader(value = "Authorization") String token,
-                                                     @PathVariable(name = "productId") long productId) {
+    public ResponseEntity<MessageResponseDTO> deleteProduct(@RequestHeader(value = "Authorization") String token,
+                                                            @PathVariable(name = "productId") long productId) {
         try {
             DecodedJWT jwt = authService.decodeToken(token);
             if (authService.isManager(jwt) || authService.isAdmin(jwt)) {
-                ResponseDTO responseDTO = productService.deleteProduct(productId);
+                MessageResponseDTO responseDTO = productService.deleteProduct(productId);
                 return ResponseEntity
                         .status(HttpStatus.OK)
                         .body(responseDTO);

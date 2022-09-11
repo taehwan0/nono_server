@@ -1,7 +1,9 @@
 package com.nono.deluxe.service;
 
 
+import com.nono.deluxe.controller.dto.MessageResponseDTO;
 import com.nono.deluxe.controller.dto.product.*;
+import com.nono.deluxe.domain.company.Company;
 import com.nono.deluxe.domain.imagefile.ImageFile;
 import com.nono.deluxe.domain.product.Product;
 import com.nono.deluxe.domain.product.ProductRepository;
@@ -67,19 +69,22 @@ public class ProductService {
      * from.hj.yang
      * 1. 해당 부분에 대하여 Query만으로 해당 부분의 데이터를 추출하여 처리하는 부분에 대한 공부 필요.
      */
-    public GetRecordListResponseDTO getProductRecordList(long productId, int year, int month) {
+    public GetRecordListResponseDTO readProductRecord(long productId, int year, int month) {
+        if(year == 0) year = LocalDate.now().getYear();
+        int toMonth = month;
+        if(month == 0) {
+            month = 1;
+            toMonth = 12;
+        }
+
+        LocalDate fromDate = LocalDate.of(year, month, 1);
+        LocalDate toDate = LocalDate.of(year, toMonth, LocalDate.of(year, toMonth, 1).lengthOfMonth());
+
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Not Exist Product."));
+        List<Record> recordList = recordRepository.findByCompanyId(productId, fromDate, toDate);
 
-        List<Record> recordList = recordRepository.findRecordList(productId);
-        LocalDateTime startDate = LocalDate.of(year, month, 1).atTime(LocalTime.MIDNIGHT);
-        LocalDateTime endDate = LocalDate.of(year, month + 1, 1).atTime(LocalTime.MIDNIGHT);
-        List<Record> filteredRecordList = recordList.stream()
-                .filter(record -> record.getCreatedAt().compareTo(startDate) > 0 &&
-                        record.getCreatedAt().compareTo(endDate) < 0)
-                .collect(Collectors.toList());
-
-        return new GetRecordListResponseDTO(product, filteredRecordList);
+        return new GetRecordListResponseDTO(product, recordList);
     }
 
     @Transactional
@@ -94,21 +99,7 @@ public class ProductService {
             imageFile.update(requestDTO.getImage(), requestDTO.getName());
         }
 
-        updatedProduct.update(
-                requestDTO.getProductCode(),
-                requestDTO.getName(),
-                requestDTO.getDescription(),
-                requestDTO.getCategory(),
-                requestDTO.getMaker(),
-                requestDTO.getUnit(),
-                storageType,
-                requestDTO.getBarcode(),
-                requestDTO.getStock(),
-                requestDTO.isActive(),
-                imageFile,
-                requestDTO.getPrice(),
-                requestDTO.getMargin()
-        );
+        updatedProduct.update(requestDTO);
 
         productRepository.save(updatedProduct);
         return new ProductResponseDTO(updatedProduct);
@@ -116,10 +107,10 @@ public class ProductService {
     }
 
     @Transactional
-    public ResponseDTO deleteProduct(long productId) {
+    public MessageResponseDTO deleteProduct(long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product: not found id"));
         productRepository.delete(product);
-        return new ResponseDTO(true, "deleted");
+        return new MessageResponseDTO(true, "deleted");
     }
 }

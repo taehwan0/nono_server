@@ -1,10 +1,14 @@
 package com.nono.deluxe.controller.dto.product;
 
+import com.nono.deluxe.controller.dto.record.RecordResponseDTO;
 import com.nono.deluxe.domain.product.Product;
 import com.nono.deluxe.domain.record.Record;
+import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
+@Data
 public class GetRecordListResponseDTO {
     /// 상품 고유 아이디
     private long productId;
@@ -35,7 +39,7 @@ public class GetRecordListResponseDTO {
     // 이미지 데이터
     private String image;
     // 입출고 기록
-    private List<Record> recordList;
+    private List<RecordResponseDTO> recordList = new ArrayList<>();
 
     public GetRecordListResponseDTO(Product product, List<Record> recordList) {
         this.productId = product.getId();
@@ -52,7 +56,11 @@ public class GetRecordListResponseDTO {
         this.margin = product.getMargin();
         this.active = product.isActive();
         //TODO: 이미지 파일 변환
-        this.image = product.getFile().getUrl();
-        this.recordList = recordList;
+        // this.image = product.getFile().getUrl();
+        this.image = "TEMP";
+
+        for (Record record : recordList) {
+            this.recordList.add(new RecordResponseDTO(record));
+        }
     }
 }
