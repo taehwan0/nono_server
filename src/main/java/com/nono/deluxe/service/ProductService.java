@@ -82,7 +82,7 @@ public class ProductService {
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Not Exist Product."));
-        List<Record> recordList = recordRepository.findByCompanyId(productId, fromDate, toDate);
+        List<Record> recordList = recordRepository.findByProductId(productId, fromDate, toDate);
 
         return new GetRecordListResponseDTO(product, recordList);
     }
