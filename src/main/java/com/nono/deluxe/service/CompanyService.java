@@ -2,8 +2,11 @@ package com.nono.deluxe.service;
 
 import com.nono.deluxe.controller.dto.MessageResponseDTO;
 import com.nono.deluxe.controller.dto.company.*;
+import com.nono.deluxe.controller.dto.document.ReadDocumentListResponseDTO;
 import com.nono.deluxe.domain.company.Company;
 import com.nono.deluxe.domain.company.CompanyRepository;
+import com.nono.deluxe.domain.document.Document;
+import com.nono.deluxe.domain.document.DocumentRepository;
 import com.nono.deluxe.domain.record.Record;
 import com.nono.deluxe.domain.record.RecordRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +30,7 @@ public class CompanyService {
 
     private final CompanyRepository companyRepository;
     private final RecordRepository recordRepository;
+    private final DocumentRepository documentRepository;
 
     @Transactional
     public CompanyResponseDTO createCompany(CreateCompanyRequestDTO requestDto) {
@@ -53,6 +57,28 @@ public class CompanyService {
         else companyPage = companyRepository.readActiveCompanyList(query, limit);
 
         return new ReadCompanyListResponseDTO(companyPage);
+    }
+
+    @Transactional(readOnly = true)
+    public ReadDocumentListResponseDTO readCompanyDocument(long companyId, String order, int size, int page, int year, int month) {
+        Pageable limit = PageRequest.of(page, size, Sort.by(
+                new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), "date"),
+                new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), "createdAt")));
+
+        if(year == 0) year = LocalDate.now().getYear();
+        int toMonth = month;
+        if(month == 0) {
+            month = 1;
+            toMonth = 12;
+        }
+
+        LocalDate fromDate = LocalDate.of(year, month, 1);
+        LocalDate toDate = LocalDate.of(year, toMonth, LocalDate.of(year, toMonth, 1).lengthOfMonth());
+        // 테스트 해보기
+
+        Page<Document> documentPage = documentRepository.findByCompanyId(companyId, fromDate, toDate, limit);
+
+        return new ReadDocumentListResponseDTO(documentPage);
     }
 
     @Transactional(readOnly = true)

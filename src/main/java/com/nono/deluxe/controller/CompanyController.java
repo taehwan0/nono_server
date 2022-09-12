@@ -3,6 +3,7 @@ package com.nono.deluxe.controller;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.nono.deluxe.controller.dto.MessageResponseDTO;
 import com.nono.deluxe.controller.dto.company.*;
+import com.nono.deluxe.controller.dto.document.ReadDocumentListResponseDTO;
 import com.nono.deluxe.service.AuthService;
 import com.nono.deluxe.service.CompanyService;
 import lombok.RequiredArgsConstructor;
@@ -102,6 +103,38 @@ public class CompanyController {
                 return ResponseEntity.status(HttpStatus.OK).body(responseDto);
             } else {
                 log.error("Company: forbidden read company {}", jwt.getClaim("userId"));
+
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
+    /**
+     * 필요권한: participant, manager, admin
+     * @param token
+     * @param companyId
+     * @return
+     */
+    @GetMapping("/company/{companyId}/document")
+    public ResponseEntity<ReadDocumentListResponseDTO> readDocumentList(@RequestHeader(name = "Authorization") String token,
+                                                                        @PathVariable(name = "companyId") long companyId,
+                                                                        @RequestParam(required = false, defaultValue = "DESC") String order,
+                                                                        @RequestParam(required = false, defaultValue = "10") int size,
+                                                                        @RequestParam(required = false, defaultValue = "0") int page,
+                                                                        @RequestParam(required = false, defaultValue = "0") int year,
+                                                                        @RequestParam(required = false, defaultValue = "0") int month) {
+        try {
+            DecodedJWT jwt = authService.decodeToken(token);
+            if(authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
+                ReadDocumentListResponseDTO responseDto = companyService.readCompanyDocument(companyId, order, size, page, year, month);
+
+                return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+            } else {
+                log.error("Document: forbidden");
 
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
