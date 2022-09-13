@@ -21,7 +21,7 @@ public class ReadNoticeListResponseDTO {
         noticePage.isLast();
         noticePage.getPageable().getPageNumber();
         this.meta = new Meta(
-                noticePage.getPageable().getPageNumber(),
+                noticePage.getPageable().getPageNumber() + 1,
                 noticePage.getNumberOfElements(),
                 noticePage.getTotalPages(),
                 noticePage.getTotalElements(),

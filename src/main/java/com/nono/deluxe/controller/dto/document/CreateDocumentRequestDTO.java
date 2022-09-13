@@ -16,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 public class CreateDocumentRequestDTO {
     LocalDate date;
-    DocumentType type;
+    String type;
     long companyId;
 
     List<RecordRequestDTO> recordList = new ArrayList<>();
@@ -24,7 +24,7 @@ public class CreateDocumentRequestDTO {
     public Document toEntity(User writer, Company company) {
         return Document.builder()
                 .date(this.date)
-                .type(this.type)
+                .type(DocumentType.valueOf(this.type.toUpperCase()))
                 .writer(writer)
                 .company(company)
                 .build();

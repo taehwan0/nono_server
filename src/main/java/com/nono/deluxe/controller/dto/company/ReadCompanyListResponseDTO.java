@@ -18,12 +18,8 @@ public class ReadCompanyListResponseDTO {
         companyList.forEach(company -> {
             this.companyList.add(new CompanyResponseDTO(company));
         });
-        companyPage.getTotalElements();
-        companyPage.getTotalPages();
-        companyPage.isLast();
-        companyPage.getPageable().getPageNumber();
         this.meta = new Meta(
-                companyPage.getPageable().getPageNumber(),
+                companyPage.getPageable().getPageNumber() + 1,
                 companyPage.getNumberOfElements(),
                 companyPage.getTotalPages(),
                 companyPage.getTotalElements(),

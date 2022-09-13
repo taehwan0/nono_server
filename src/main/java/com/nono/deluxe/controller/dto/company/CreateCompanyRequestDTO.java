@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.Locale;
 
 @Getter
 @NoArgsConstructor
@@ -21,26 +22,14 @@ public class CreateCompanyRequestDTO {
      * enum 값은 blank 쓸 때 에러가 났다. 왜?
      */
     @NotNull(message = "Company: companyType can not Null")
-    private CompanyType type;
+    private String type;
 
     private String category;
-
-    /**
-     * for test
-     * @param name
-     * @param type
-     * @param category
-     */
-    public CreateCompanyRequestDTO(String name, CompanyType type, String category) {
-        this.name = name;
-        this.type = type;
-        this.category = category;
-    }
 
     public Company toEntity() {
         return Company.builder()
                 .name(this.name)
-                .type(this.type)
+                .type(CompanyType.valueOf(this.type.toUpperCase()))
                 .category(this.category)
                 .build();
     }

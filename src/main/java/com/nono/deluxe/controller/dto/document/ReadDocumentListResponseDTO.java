@@ -19,7 +19,7 @@ public class ReadDocumentListResponseDTO {
             this.documentList.add(new SimpleDocumentResponseDTO(document));
         });
         this.meta = new Meta(
-                documentPage.getPageable().getPageNumber(),
+                documentPage.getPageable().getPageNumber() + 1,
                 documentPage.getNumberOfElements(),
                 documentPage.getTotalPages(),
                 documentPage.getTotalElements(),

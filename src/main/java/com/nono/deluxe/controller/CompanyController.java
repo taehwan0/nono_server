@@ -124,13 +124,13 @@ public class CompanyController {
                                                                         @PathVariable(name = "companyId") long companyId,
                                                                         @RequestParam(required = false, defaultValue = "DESC") String order,
                                                                         @RequestParam(required = false, defaultValue = "10") int size,
-                                                                        @RequestParam(required = false, defaultValue = "0") int page,
+                                                                        @RequestParam(required = false, defaultValue = "1") int page,
                                                                         @RequestParam(required = false, defaultValue = "0") int year,
                                                                         @RequestParam(required = false, defaultValue = "0") int month) {
         try {
             DecodedJWT jwt = authService.decodeToken(token);
             if(authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
-                ReadDocumentListResponseDTO responseDto = companyService.readCompanyDocument(companyId, order, size, page, year, month);
+                ReadDocumentListResponseDTO responseDto = companyService.readCompanyDocument(companyId, order, size, (page - 1), year, month);
 
                 return ResponseEntity.status(HttpStatus.OK).body(responseDto);
             } else {
