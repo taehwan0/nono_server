@@ -66,12 +66,12 @@ public class CompanyController {
                                                                       @RequestParam(required = false, defaultValue = "name") String column,
                                                                       @RequestParam(required = false, defaultValue = "ASC") String order,
                                                                       @RequestParam(required = false, defaultValue = "10") int size,
-                                                                      @RequestParam(required = false, defaultValue = "0") int page,
+                                                                      @RequestParam(required = false, defaultValue = "1") int page,
                                                                       @RequestParam(required = false, defaultValue = "false") boolean active) {
         try {
             DecodedJWT jwt = authService.decodeToken(token);
             if(authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
-                ReadCompanyListResponseDTO responseDto = companyService.readCompanyList(query, column, order, size, page, active);
+                ReadCompanyListResponseDTO responseDto = companyService.readCompanyList(query, column, order, size, (page - 1), active);
 
                 return ResponseEntity.status(HttpStatus.OK).body(responseDto);
             } else {
@@ -145,34 +145,34 @@ public class CompanyController {
         }
     }
 
-    /**
-     * 필요권한: participant, manager, admin
-     * @param token
-     * @param companyId
-     * @return
-     */
-    @GetMapping("/company/{companyId}/record")
-    public ResponseEntity<CompanyRecordResponseDTO> readCompanyRecord(@RequestHeader(name = "Authorization") String token,
-                                                                      @PathVariable(name = "companyId") long companyId,
-                                                                      @RequestParam(required = false, defaultValue = "0") int year,
-                                                                      @RequestParam(required = false, defaultValue = "0") int month) {
-        try {
-            DecodedJWT jwt = authService.decodeToken(token);
-            if(authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
-                CompanyRecordResponseDTO responseDto = companyService.readCompanyRecord(companyId, year, month);
-
-                return ResponseEntity.status(HttpStatus.OK).body(responseDto);
-            } else {
-                log.error("Company: forbidden read company {}", jwt.getClaim("userId"));
-
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage());
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-    }
+//    /**
+//     * 필요권한: participant, manager, admin
+//     * @param token
+//     * @param companyId
+//     * @return
+//     */
+//    @GetMapping("/company/{companyId}/record")
+//    public ResponseEntity<CompanyRecordResponseDTO> readCompanyRecord(@RequestHeader(name = "Authorization") String token,
+//                                                                      @PathVariable(name = "companyId") long companyId,
+//                                                                      @RequestParam(required = false, defaultValue = "0") int year,
+//                                                                      @RequestParam(required = false, defaultValue = "0") int month) {
+//        try {
+//            DecodedJWT jwt = authService.decodeToken(token);
+//            if(authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
+//                CompanyRecordResponseDTO responseDto = companyService.readCompanyRecord(companyId, year, month);
+//
+//                return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+//            } else {
+//                log.error("Company: forbidden read company {}", jwt.getClaim("userId"));
+//
+//                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+//            }
+//        } catch (Exception e) {
+//            log.error(e.getMessage());
+//
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+//        }
+//    }
 
     /**
      * 필요권한: admin

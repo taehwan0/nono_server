@@ -18,6 +18,6 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
                                     @Param("toDate") LocalDate toDate,
                                     Pageable limit);
 
-    @Query("SELECT r FROM Record r WHERE r.document.company.id = :companyId AND r.document.date BETWEEN :fromMonth AND :toMonth ORDER BY r.document.date DESC")
+    @Query("SELECT d FROM Document d WHERE d.company.id = :companyId AND d.date BETWEEN :fromMonth AND :toMonth")
     Page<Document> findByCompanyId(@Param("companyId") long companyId, @Param("fromMonth") LocalDate fromMonth, @Param("toMonth") LocalDate toMonth, Pageable limit);
 }

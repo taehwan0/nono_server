@@ -53,8 +53,8 @@ public class CompanyService {
         Pageable limit = PageRequest.of(page, size, Sort.by(new Sort.Order(Sort.Direction.valueOf(order.toUpperCase(Locale.ROOT)), column)));
         Page<Company> companyPage;
 
-        if(active) companyPage = companyRepository.readCompanyList(query, limit);
-        else companyPage = companyRepository.readActiveCompanyList(query, limit);
+        if(active) companyPage = companyRepository.readActiveCompanyList(query, limit); // true -> active 만 읽기
+        else companyPage = companyRepository.readCompanyList(query, limit); // false -> 전체 읽기
 
         return new ReadCompanyListResponseDTO(companyPage);
     }
@@ -81,25 +81,25 @@ public class CompanyService {
         return new ReadDocumentListResponseDTO(documentPage);
     }
 
-    @Transactional(readOnly = true)
-    public CompanyRecordResponseDTO readCompanyRecord(long companyId, int year, int month) {
-
-        if(year == 0) year = LocalDate.now().getYear();
-        int toMonth = month;
-        if(month == 0) {
-            month = 1;
-            toMonth = 12;
-        }
-
-        LocalDate fromDate = LocalDate.of(year, month, 1);
-        LocalDate toDate = LocalDate.of(year, toMonth, LocalDate.of(year, toMonth, 1).lengthOfMonth());
-
-        Company company = companyRepository.findById(companyId)
-                .orElseThrow(() -> new RuntimeException("Not Found Company"));
-        List<Record> recordList = recordRepository.findByCompanyId(companyId, fromDate, toDate);
-
-        return new CompanyRecordResponseDTO(company, recordList);
-    }
+//    @Transactional(readOnly = true)
+//    public CompanyRecordResponseDTO readCompanyRecord(long companyId, int year, int month) {
+//
+//        if(year == 0) year = LocalDate.now().getYear();
+//        int toMonth = month;
+//        if(month == 0) {
+//            month = 1;
+//            toMonth = 12;
+//        }
+//
+//        LocalDate fromDate = LocalDate.of(year, month, 1);
+//        LocalDate toDate = LocalDate.of(year, toMonth, LocalDate.of(year, toMonth, 1).lengthOfMonth());
+//
+//        Company company = companyRepository.findById(companyId)
+//                .orElseThrow(() -> new RuntimeException("Not Found Company"));
+//        List<Record> recordList = recordRepository.findByCompanyId(companyId, fromDate, toDate);
+//
+//        return new CompanyRecordResponseDTO(company, recordList);
+//    }
 
 
 

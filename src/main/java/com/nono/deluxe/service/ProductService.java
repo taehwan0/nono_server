@@ -3,7 +3,6 @@ package com.nono.deluxe.service;
 
 import com.nono.deluxe.controller.dto.MessageResponseDTO;
 import com.nono.deluxe.controller.dto.product.*;
-import com.nono.deluxe.domain.company.Company;
 import com.nono.deluxe.domain.imagefile.ImageFile;
 import com.nono.deluxe.domain.product.Product;
 import com.nono.deluxe.domain.product.ProductRepository;
@@ -19,11 +18,8 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 /**
  * Pageable 적용 필요
@@ -49,11 +45,8 @@ public class ProductService {
         Pageable pageable = PageRequest.of(page, size, Sort.by(new Sort.Order(Sort.Direction.valueOf(order.toUpperCase(Locale.ROOT)), column)));
         Page<Product> productPage;
 
-        if (active) {
-            productPage = productRepository.getActiveProductList(query, pageable);
-        } else {
-            productPage = productRepository.getProductList(query, pageable);
-        }
+        if(active) productPage = productRepository.readActiveProductList(query, pageable); // true -> active 만 읽기
+        else productPage = productRepository.readProductList(query, pageable); // false -> 전체 읽기
 
         return new GetProductListResponseDTO(productPage);
     }

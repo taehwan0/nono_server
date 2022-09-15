@@ -26,8 +26,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Optional<Product> findById(@Param("productId") long productId);
 
     @Query(value = "SELECT p FROM Product p WHERE p.name LIKE CONCAT('%', :query, '%') AND p.active = true AND p.deleted = false")
-    Page<Product> getActiveProductList(@Param("query") String query, Pageable pageable);
+    Page<Product> readActiveProductList(@Param("query") String query, Pageable pageable);
 
     @Query(value = "SELECT p FROM Product p WHERE p.name LIKE CONCAT('%', :query, '%') AND p.deleted = false")
-    Page<Product> getProductList(@Param("query") String query, Pageable pageable);
+    Page<Product> readProductList(@Param("query") String query, Pageable pageable);
 }
