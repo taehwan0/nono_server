@@ -110,7 +110,8 @@ public class ProductService {
     public MessageResponseDTO deleteProduct(long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product: not found id"));
-        productRepository.delete(product);
+        product.delete();
+
         return new MessageResponseDTO(true, "deleted");
     }
 }

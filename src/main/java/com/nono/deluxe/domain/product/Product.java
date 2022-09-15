@@ -8,9 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
+import java.util.UUID;
 
 @Getter
 @NoArgsConstructor
@@ -61,6 +59,9 @@ public class Product {
     @Column(nullable = true)
     private long margin;
 
+    @Column(columnDefinition = "tinyint(1) default 0")
+    private boolean deleted;
+
     @Builder
     public Product(String productCode, String name, String description, String category, String maker, String unit, StorageType storageType, String barcode, long stock, boolean active, ImageFile file, long price, long margin) {
         this.productCode = productCode;
@@ -96,5 +97,10 @@ public class Product {
 
     public void updateStock(long stock) {
         this.stock = stock;
+    }
+
+    public void delete() {
+        this.deleted = false;
+        this.productCode = UUID.randomUUID().toString().substring(0, 18);
     }
 }

@@ -9,11 +9,11 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface CompanyRepository extends JpaRepository<Company, Long> {
-    @Query(value = "SELECT c FROM Company c WHERE c.name LIKE concat('%', :query, '%')")
+    @Query(value = "SELECT c FROM Company c WHERE c.name LIKE concat('%', :query, '%') AND c.deleted = false ")
     Page<Company> readCompanyList(@Param("query") String query,
                            Pageable limit);
 
-    @Query(value = "SELECT c FROM Company c WHERE c.name LIKE concat('%', :query, '%') and c.active = true")
+    @Query(value = "SELECT c FROM Company c WHERE c.name LIKE concat('%', :query, '%') and c.active = true AND c.deleted = false")
     Page<Company> readActiveCompanyList(@Param("query") String query,
                                   Pageable limit);
 }

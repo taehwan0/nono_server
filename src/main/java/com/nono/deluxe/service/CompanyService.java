@@ -137,7 +137,7 @@ public class CompanyService {
     public MessageResponseDTO deleteCompany(long companyId) {
         Company company = companyRepository.findById(companyId)
                 .orElseThrow(() -> new RuntimeException("Company: not found id"));
-        companyRepository.delete(company);
+        company.delete();
 
         return new MessageResponseDTO(true, "deleted");
     }

@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.UUID;
 
 @Getter
 @NoArgsConstructor
@@ -35,11 +36,19 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
+    @Column(columnDefinition = "tinyint(1) default 0")
+    private boolean deleted;
+
     @Builder
     public User(String name, String email, String password, Role role) {
         this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
+    }
+
+    public void delete() {
+        this.deleted = false;
+        this.name = UUID.randomUUID().toString().substring(0, 18);
     }
 }

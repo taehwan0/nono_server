@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.UUID;
 
 @Getter
 @NoArgsConstructor
@@ -26,6 +27,9 @@ public class Company {
     @Column(columnDefinition = "tinyint(1) default 1")
     private boolean active;
 
+    @Column(columnDefinition = "tinyint(1) default 0")
+    private boolean deleted;
+
     public void update(String name, String category, boolean active) {
         this.name = name;
         this.category = category;
@@ -42,5 +46,10 @@ public class Company {
         this.type = type;
         this.category = category;
         this.active = true; // 적용이 안되서 일단 넣음.
+    }
+
+    public void delete() {
+        this.deleted = false;
+        this.name = UUID.randomUUID().toString().substring(0, 18);
     }
 }
