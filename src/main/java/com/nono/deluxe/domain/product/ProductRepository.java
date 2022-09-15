@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 /**
  * Pageable 적용이 필요 할겁니다. 또는 아래의 방식으로 사용하려면 native query 값을 true 로 하고 로직의 수정이 필요 할 수 있습니다.
  * 아래의 방법으로는 현재 page, total page, count 등을 알 수 없습니다.
@@ -19,6 +21,10 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
+
+    @Query("SELECT p FROM Product p WHERE p.id = :productId AND p.deleted = false")
+    Optional<Product> findById(@Param("productId") long productId);
+
     @Query(value = "SELECT p FROM Product p WHERE p.name LIKE CONCAT('%', :query, '%') AND p.active = true AND p.deleted = false")
     Page<Product> getActiveProductList(@Param("query") String query, Pageable pageable);
 

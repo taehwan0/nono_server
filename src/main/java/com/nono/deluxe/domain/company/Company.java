@@ -49,7 +49,8 @@ public class Company {
     }
 
     public void delete() {
-        this.deleted = false;
+        this.deleted = true;
+        this.active = false;
         this.name = UUID.randomUUID().toString().substring(0, 18);
     }
 }

@@ -100,7 +100,8 @@ public class Product {
     }
 
     public void delete() {
-        this.deleted = false;
+        this.deleted = true;
+        this.active = false;
         this.productCode = UUID.randomUUID().toString().substring(0, 18);
     }
 }
