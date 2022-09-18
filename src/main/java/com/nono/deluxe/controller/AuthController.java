@@ -1,9 +1,13 @@
 package com.nono.deluxe.controller;
 
+import com.nono.deluxe.controller.dto.MessageResponseDTO;
+import com.nono.deluxe.controller.dto.auth.EmailRequestDTO;
 import com.nono.deluxe.controller.dto.auth.LoginRequestDTO;
 import com.nono.deluxe.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,7 +33,9 @@ public class AuthController {
     }
 
     @PostMapping("/email/duplicate")
-    public void checkDuplicateEmail() {
+    public ResponseEntity<MessageResponseDTO> checkDuplicateEmail(@Validated @RequestBody EmailRequestDTO requestDTO) {
+        MessageResponseDTO responseDTO = authService.checkDuplicateEmail(requestDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
     @PostMapping("/email/check")

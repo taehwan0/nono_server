@@ -4,6 +4,8 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.nono.deluxe.controller.dto.MessageResponseDTO;
+import com.nono.deluxe.controller.dto.auth.EmailRequestDTO;
 import com.nono.deluxe.domain.user.Role;
 import com.nono.deluxe.domain.user.User;
 import com.nono.deluxe.domain.user.UserRepository;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -39,6 +42,13 @@ public class AuthService {
         User user = userRepository.findByEmailAndPassword(email, password)
                 .orElseThrow(() -> new RuntimeException("Not Found User"));
         return createToken(user.getName(), user.getId(), user.getRole(), tokenActiveSeconds);
+    }
+
+    public MessageResponseDTO checkDuplicateEmail(EmailRequestDTO requestDTO) {
+        String email = requestDTO.getEmail();
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if(optionalUser.isEmpty()) return new MessageResponseDTO(true, "enable email");
+        return new MessageResponseDTO(false, "already used email");
     }
 
     /**
