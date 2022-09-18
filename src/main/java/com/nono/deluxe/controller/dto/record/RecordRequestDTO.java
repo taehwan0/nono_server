@@ -35,11 +35,15 @@ public class RecordRequestDTO {
     }
 
     public TempRecord toTempEntity(TempDocument document, Product product) {
+        long tempPrice = this.price;
+        if (this.price <= 0 ) {
+            tempPrice = product.getPrice();
+        }
         return TempRecord.builder()
                 .document(document)
                 .product(product)
                 .quantity(quantity)
-                .price(price)
+                .price(tempPrice)
                 .build();
     }
 }
