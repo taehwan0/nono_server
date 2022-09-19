@@ -6,17 +6,23 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.nono.deluxe.controller.dto.MessageResponseDTO;
 import com.nono.deluxe.controller.dto.auth.EmailRequestDTO;
+import com.nono.deluxe.domain.checkemail.CheckType;
+import com.nono.deluxe.domain.checkemail.CheckEmail;
+import com.nono.deluxe.domain.checkemail.CheckEmailRepository;
 import com.nono.deluxe.domain.user.Role;
 import com.nono.deluxe.domain.user.User;
 import com.nono.deluxe.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -29,6 +35,9 @@ public class AuthService {
     private String issuer;
 
     private final UserRepository userRepository;
+    private final CheckEmailRepository checkEmailRepository;
+
+    private final JavaMailSender javaMailSender;
 
     /**
      * 입력 값을 받아 회원 여부를 판별하고, tokenActiveSeconds 만큼의 (초단위) 유효기간으로 토큰을 생성하고 반환
@@ -44,11 +53,55 @@ public class AuthService {
         return createToken(user.getName(), user.getId(), user.getRole(), tokenActiveSeconds);
     }
 
+    @Transactional(readOnly = true)
     public MessageResponseDTO checkDuplicateEmail(EmailRequestDTO requestDTO) {
         String email = requestDTO.getEmail();
         Optional<User> optionalUser = userRepository.findByEmail(email);
         if(optionalUser.isEmpty()) return new MessageResponseDTO(true, "enable email");
         return new MessageResponseDTO(false, "already used email");
+    }
+
+    @Transactional
+    public MessageResponseDTO checkEmail(EmailRequestDTO requestDTO) {
+        String email = requestDTO.getEmail();
+        deleteLegacyEmailCode(email); // 이전 인증 메일이 있다면 최신화를 위해 삭제시킴
+        SimpleMailMessage message = createCheckEmailMessage(email); // checkEmail 객체 생성 및 메세지 반환
+        javaMailSender.send(message);
+
+        return new MessageResponseDTO(true, "mail posted");
+    }
+
+    private SimpleMailMessage createCheckEmailMessage(String email) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        CheckType type;
+        if(optionalUser.isEmpty()) {
+            // join check email
+            message.setSubject("노노 Deluxe 회원가입 인증번호 메일입니다.");
+            type = CheckType.JOIN;
+        } else {
+            // password reissue email
+            message.setSubject("노노 Deluxe 비밀번호 초기화 메일입니다.");
+            type = CheckType.REISSUE;
+        }
+
+        String verifyCode = UUID.randomUUID().toString().substring(0, 8);
+        CheckEmail checkEmail = CheckEmail.builder()
+                .email(email)
+                .type(type)
+                .verifyCode(verifyCode)
+                .build();
+        checkEmailRepository.save(checkEmail);
+        message.setText(verifyCode);
+        return message;
+    }
+
+    private void deleteLegacyEmailCode(String email) {
+        // 이미 이메일에 발송된 코드라면 삭제하고 최신화
+        Optional<CheckEmail> byEmail = checkEmailRepository.findByEmail(email);
+        byEmail.ifPresent(checkEmailRepository::delete);
     }
 
     /**

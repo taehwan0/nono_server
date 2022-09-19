@@ -5,6 +5,7 @@ import com.nono.deluxe.controller.dto.auth.EmailRequestDTO;
 import com.nono.deluxe.controller.dto.auth.LoginRequestDTO;
 import com.nono.deluxe.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 @RestController
@@ -39,7 +41,14 @@ public class AuthController {
     }
 
     @PostMapping("/email/check")
-    public void postCheckEmail() {
+    public ResponseEntity<MessageResponseDTO> postCheckEmail(@Validated @RequestBody EmailRequestDTO requestDTO) {
+        try {
+            MessageResponseDTO responseDTO = authService.checkEmail(requestDTO);
+            return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
     @PostMapping("/email/verify")
