@@ -25,10 +25,18 @@ public class CheckEmail extends BaseTimeEntity {
     @Column(nullable = false)
     private CheckType type;
 
+    @Column(nullable = false)
+    private boolean verified;
+
     @Builder
     public CheckEmail(String email, String verifyCode, CheckType type) {
         this.email = email;
         this.verifyCode = verifyCode;
         this.type = type;
+        this.verified = false;
+    }
+
+    public void verify() {
+        this.verified = true;
     }
 }

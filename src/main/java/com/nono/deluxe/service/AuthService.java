@@ -6,6 +6,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.nono.deluxe.controller.dto.MessageResponseDTO;
 import com.nono.deluxe.controller.dto.auth.EmailRequestDTO;
+import com.nono.deluxe.controller.dto.auth.VerifyEmailRequestDTO;
 import com.nono.deluxe.domain.checkemail.CheckType;
 import com.nono.deluxe.domain.checkemail.CheckEmail;
 import com.nono.deluxe.domain.checkemail.CheckEmailRepository;
@@ -20,6 +21,9 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
@@ -69,6 +73,28 @@ public class AuthService {
         javaMailSender.send(message);
 
         return new MessageResponseDTO(true, "mail posted");
+    }
+
+    @Transactional
+    public MessageResponseDTO verifyEmail(VerifyEmailRequestDTO requestDTO) {
+        String email = requestDTO.getEmail();
+        String code = requestDTO.getCode();
+
+        CheckEmail checkEmail = checkEmailRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Not Found Check Email"));
+
+        if(checkEmail.getEmail().equals(email) && verifyValidTime(checkEmail)) {
+            // code 가 맞았을 경우, 시간 또한 제한시간 안쪽일때
+            checkEmail.verify();
+            return new MessageResponseDTO(true, "success");
+        }
+        return new MessageResponseDTO(false, "fail");
+    }
+
+    private boolean verifyValidTime(CheckEmail checkEmail) {
+        LocalDateTime createdAt = checkEmail.getCreatedAt();
+        long milliOfCreatedAt = ZonedDateTime.of(createdAt, ZoneId.systemDefault()).toInstant().toEpochMilli();
+        return milliOfCreatedAt + (1000 * 60 * 10) >= System.currentTimeMillis();
     }
 
     private SimpleMailMessage createCheckEmailMessage(String email) {

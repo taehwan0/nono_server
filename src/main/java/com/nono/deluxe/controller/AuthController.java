@@ -3,6 +3,7 @@ package com.nono.deluxe.controller;
 import com.nono.deluxe.controller.dto.MessageResponseDTO;
 import com.nono.deluxe.controller.dto.auth.EmailRequestDTO;
 import com.nono.deluxe.controller.dto.auth.LoginRequestDTO;
+import com.nono.deluxe.controller.dto.auth.VerifyEmailRequestDTO;
 import com.nono.deluxe.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +53,14 @@ public class AuthController {
     }
 
     @PostMapping("/email/verify")
-    public void verifyEmail() {
+    public ResponseEntity<MessageResponseDTO> verifyEmail(@Validated @RequestBody VerifyEmailRequestDTO requestDTO) {
+        try {
+            MessageResponseDTO responseDTO = authService.verifyEmail(requestDTO);
+            return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
     @PostMapping("/reissue")
