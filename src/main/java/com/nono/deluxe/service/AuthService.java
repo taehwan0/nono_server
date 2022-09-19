@@ -6,6 +6,8 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.nono.deluxe.controller.dto.MessageResponseDTO;
 import com.nono.deluxe.controller.dto.auth.EmailRequestDTO;
+import com.nono.deluxe.controller.dto.auth.JoinRequestDTO;
+import com.nono.deluxe.controller.dto.auth.JoinResponseDTO;
 import com.nono.deluxe.controller.dto.auth.VerifyEmailRequestDTO;
 import com.nono.deluxe.domain.checkemail.CheckType;
 import com.nono.deluxe.domain.checkemail.CheckEmail;
@@ -42,6 +44,20 @@ public class AuthService {
     private final CheckEmailRepository checkEmailRepository;
 
     private final JavaMailSender javaMailSender;
+
+    @Transactional
+    public JoinResponseDTO joinUser(JoinRequestDTO requestDTO) {
+        String email = requestDTO.getEmail();
+        CheckEmail checkEmail = checkEmailRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Email Not Checked"));
+
+        if (checkEmail.isVerified() && checkEmail.getType().equals(CheckType.JOIN)) {
+            User user = requestDTO.toEntity();
+            User savedUser = userRepository.save(user);
+            return new JoinResponseDTO(savedUser);
+        }
+        throw new RuntimeException("Email Not Verified");
+    }
 
     /**
      * 입력 값을 받아 회원 여부를 판별하고, tokenActiveSeconds 만큼의 (초단위) 유효기간으로 토큰을 생성하고 반환
@@ -171,10 +187,6 @@ public class AuthService {
 
     public long getUserIdByDecodedToken(DecodedJWT jwt) {
         return Long.parseLong(jwt.getClaim("userId").toString());
-    }
-
-    public boolean isStranger(DecodedJWT jwt) {
-        return jwt.getClaim("ROLE").toString().replaceAll("\"", "").equals(Role.ROLE_STRANGER.toString());
     }
 
     public boolean isParticipant(DecodedJWT jwt) {
