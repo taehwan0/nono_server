@@ -52,6 +52,10 @@ public class User {
         this.deleted = false;
     }
 
+    public void updatePassword(String newPassword) {
+        this.password = newPassword;
+    }
+
     public void delete() {
         this.deleted = true;
         this.active = false;

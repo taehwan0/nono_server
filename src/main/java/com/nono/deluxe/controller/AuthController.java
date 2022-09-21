@@ -69,7 +69,14 @@ public class AuthController {
     }
 
     @PostMapping("/reissue")
-    public void reissueUser() {
+    public ResponseEntity<MessageResponseDTO> reissueUser(@Validated @RequestBody ReissueRequestDTO requestDTO) {
+        try {
+            MessageResponseDTO responseDTO = authService.reissue(requestDTO);
+            return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
     @PostMapping("/logincode")

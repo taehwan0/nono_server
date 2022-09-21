@@ -5,10 +5,7 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.nono.deluxe.controller.dto.MessageResponseDTO;
-import com.nono.deluxe.controller.dto.auth.EmailRequestDTO;
-import com.nono.deluxe.controller.dto.auth.JoinRequestDTO;
-import com.nono.deluxe.controller.dto.auth.JoinResponseDTO;
-import com.nono.deluxe.controller.dto.auth.VerifyEmailRequestDTO;
+import com.nono.deluxe.controller.dto.auth.*;
 import com.nono.deluxe.domain.checkemail.CheckType;
 import com.nono.deluxe.domain.checkemail.CheckEmail;
 import com.nono.deluxe.domain.checkemail.CheckEmailRepository;
@@ -48,15 +45,18 @@ public class AuthService {
     @Transactional
     public JoinResponseDTO joinUser(JoinRequestDTO requestDTO) {
         String email = requestDTO.getEmail();
+        String code = requestDTO.getCode();
         CheckEmail checkEmail = checkEmailRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Email Not Checked"));
 
-        if (checkEmail.isVerified() && checkEmail.getType().equals(CheckType.JOIN)) {
+        if (checkEmail.isVerified() &&
+                checkEmail.getVerifyCode().equals(code) &&
+                checkEmail.getType().equals(CheckType.JOIN)) {
             User user = requestDTO.toEntity();
             User savedUser = userRepository.save(user);
             return new JoinResponseDTO(savedUser);
         }
-        throw new RuntimeException("Email Not Verified");
+        throw new RuntimeException("Email Not Verified OR Verify Code Not Collect");
     }
 
     /**
@@ -99,12 +99,39 @@ public class AuthService {
         CheckEmail checkEmail = checkEmailRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Not Found Check Email"));
 
-        if(checkEmail.getEmail().equals(email) && verifyValidTime(checkEmail)) {
+        if(checkEmail.getVerifyCode().equals(code) && verifyValidTime(checkEmail)) {
             // code 가 맞았을 경우, 시간 또한 제한시간 안쪽일때
             checkEmail.verify();
             return new MessageResponseDTO(true, "success");
         }
         return new MessageResponseDTO(false, "fail");
+    }
+
+    @Transactional
+    public MessageResponseDTO reissue(ReissueRequestDTO requestDTO) {
+        String email = requestDTO.getEmail();
+        String code = requestDTO.getCode();
+
+        CheckEmail checkEmail = checkEmailRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Not Found Check Email"));
+
+        if(checkEmail.isVerified() &&
+                checkEmail.getVerifyCode().equals(code) &&
+                checkEmail.getType().equals(CheckType.REISSUE)) {
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("Not Found User"));
+            String newPassword = UUID.randomUUID().toString().substring(0, 8);
+            user.updatePassword(newPassword);
+
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(email);
+            message.setSubject("노노 Deluxe 초기화된 비밀번호 메일입니다.");
+            message.setText(newPassword);
+            javaMailSender.send(message);
+
+            return new MessageResponseDTO(true, "password reset");
+        }
+        throw new RuntimeException("Email Not Verified OR Verify Code Not Collect");
     }
 
     private boolean verifyValidTime(CheckEmail checkEmail) {
@@ -125,7 +152,7 @@ public class AuthService {
             type = CheckType.JOIN;
         } else {
             // password reissue email
-            message.setSubject("노노 Deluxe 비밀번호 초기화 메일입니다.");
+            message.setSubject("노노 Deluxe 비밀번호 초기화 인증 메일입니다.");
             type = CheckType.REISSUE;
         }
 
