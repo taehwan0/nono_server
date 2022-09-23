@@ -63,17 +63,18 @@ public class AuthService {
     }
 
     /**
-     * 입력 값을 받아 회원 여부를 판별하고, tokenActiveSeconds 만큼의 (초단위) 유효기간으로 토큰을 생성하고 반환
-     * @param email
-     * @param password
-     * @param tokenActiveSeconds
+     * 유효기간 1일의 AccessToken 생성
+     * @param requestDTO
      * @return
      */
     @Transactional(readOnly = true)
-    public String loginUser(String email, String password, long tokenActiveSeconds) {
+    public String loginUser(LoginRequestDTO requestDTO) {
+        String email = requestDTO.getEmail();
+        String password = requestDTO.getPassword();
         User user = userRepository.findByEmailAndPassword(email, password)
                 .orElseThrow(() -> new RuntimeException("Not Found User"));
-        return createToken(user.getName(), user.getId(), user.getRole(), tokenActiveSeconds);
+
+        return createToken(user.getName(), user.getId(), user.getRole(), (60 * 60 * 24));
     }
 
     @Transactional(readOnly = true)
@@ -194,6 +195,7 @@ public class AuthService {
      * @return
      */
     private String createToken(String username, long userId, Role userRole, long tokenActiveSeconds) {
+        log.info("Token Created By: {}", userId);
         Algorithm algorithm = getAlgorithm(key);
         return JWT.create()
                 .withExpiresAt(new Date(System.currentTimeMillis() + (1000 * tokenActiveSeconds)))

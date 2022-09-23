@@ -21,12 +21,13 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public String login(@RequestBody LoginRequestDTO loginRequestDto) {
-        return authService.loginUser(
-                loginRequestDto.getEmail(),
-                loginRequestDto.getPassword(),
-                loginRequestDto.getTokenActiveSeconds()
-        );
+    public ResponseEntity<String> login(@RequestBody LoginRequestDTO requestDTO) {
+        try {
+            String token = authService.loginUser(requestDTO);
+            return ResponseEntity.status(HttpStatus.OK).body(token);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
     @PostMapping("/join")
