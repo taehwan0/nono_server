@@ -17,9 +17,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -27,6 +30,7 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
+@EnableAsync
 @Slf4j
 @RequiredArgsConstructor
 @Service
@@ -39,8 +43,7 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final CheckEmailRepository checkEmailRepository;
-
-    private final JavaMailSender javaMailSender;
+    private final MailService mailService;
 
     @Transactional
     public JoinResponseDTO joinUser(JoinRequestDTO requestDTO) {
@@ -85,10 +88,33 @@ public class AuthService {
     public MessageResponseDTO checkEmail(EmailRequestDTO requestDTO) {
         String email = requestDTO.getEmail();
         deleteLegacyEmailCode(email); // 이전 인증 메일이 있다면 최신화를 위해 삭제시킴
-        SimpleMailMessage message = createCheckEmailMessage(email); // checkEmail 객체 생성 및 메세지 반환
-        javaMailSender.send(message);
+
+        String verifyCode = getVerifyCode();
+
+        CheckType type;
+        if(isNewUser(email)) {
+            // 신규 유저의 경우 회원가입 체크 메일 발송
+            type = CheckType.JOIN;
+            mailService.postJoinCheckMail(email, verifyCode);
+        } else {
+            // 기존 유저의 경우 재발급 체크 메일 발송
+            type = CheckType.REISSUE;
+            mailService.postReissueCheckMail(email, verifyCode);
+        }
+
+        CheckEmail checkEmail = CheckEmail.builder()
+                .email(email)
+                .verifyCode(verifyCode)
+                .type(type)
+                .build();
+        checkEmailRepository.save(checkEmail);
 
         return new MessageResponseDTO(true, "mail posted");
+    }
+
+    private boolean isNewUser(String email) {
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        return optionalUser.isEmpty();
     }
 
     @Transactional
@@ -120,51 +146,39 @@ public class AuthService {
                 checkEmail.getType().equals(CheckType.REISSUE)) {
             User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new RuntimeException("Not Found User"));
-            String newPassword = UUID.randomUUID().toString().substring(0, 8);
+
+            String newPassword = createRandomPassword(12);
             user.updatePassword(newPassword);
 
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setTo(email);
-            message.setSubject("노노 Deluxe 초기화된 비밀번호 메일입니다.");
-            message.setText(newPassword);
-            javaMailSender.send(message);
+            mailService.postReissuePasswordMail(email, newPassword);
 
             return new MessageResponseDTO(true, "password reset");
         }
         throw new RuntimeException("Email Not Verified OR Verify Code Not Collect");
     }
 
+    private String getVerifyCode() {
+        return UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    private String createRandomPassword(int length) {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
+
+        SecureRandom random = new SecureRandom();
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < length; i++) {
+            int randomInt = random.nextInt(chars.length());
+            sb.append(chars.charAt(randomInt));
+        }
+
+        return sb.toString();
+    }
+
     private boolean verifyValidTime(CheckEmail checkEmail) {
         LocalDateTime createdAt = checkEmail.getCreatedAt();
         long milliOfCreatedAt = ZonedDateTime.of(createdAt, ZoneId.systemDefault()).toInstant().toEpochMilli();
         return milliOfCreatedAt + (1000 * 60 * 10) >= System.currentTimeMillis();
-    }
-
-    private SimpleMailMessage createCheckEmailMessage(String email) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(email);
-
-        Optional<User> optionalUser = userRepository.findByEmail(email);
-        CheckType type;
-        if(optionalUser.isEmpty()) {
-            // join check email
-            message.setSubject("노노 Deluxe 회원가입 인증번호 메일입니다.");
-            type = CheckType.JOIN;
-        } else {
-            // password reissue email
-            message.setSubject("노노 Deluxe 비밀번호 초기화 인증 메일입니다.");
-            type = CheckType.REISSUE;
-        }
-
-        String verifyCode = UUID.randomUUID().toString().substring(0, 8);
-        CheckEmail checkEmail = CheckEmail.builder()
-                .email(email)
-                .type(type)
-                .verifyCode(verifyCode)
-                .build();
-        checkEmailRepository.save(checkEmail);
-        message.setText(verifyCode);
-        return message;
     }
 
     private void deleteLegacyEmailCode(String email) {
@@ -179,7 +193,7 @@ public class AuthService {
      * @param tokenActiveSeconds
      * @return
      */
-    public String createToken(String username, long userId, Role userRole, long tokenActiveSeconds) {
+    private String createToken(String username, long userId, Role userRole, long tokenActiveSeconds) {
         Algorithm algorithm = getAlgorithm(key);
         return JWT.create()
                 .withExpiresAt(new Date(System.currentTimeMillis() + (1000 * tokenActiveSeconds)))
@@ -234,7 +248,7 @@ public class AuthService {
      * @param token
      * @return
      */
-    public String extractToken(String token) {
+    private String extractToken(String token) {
         if(token.matches("(^Bearer [A-Za-z0-9-_]*\\.[A-Za-z0-9-_]*\\.[A-Za-z0-9-_]*$)")) {
             return token.split(" ")[1];
         } else {
