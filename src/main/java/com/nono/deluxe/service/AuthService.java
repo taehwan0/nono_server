@@ -35,8 +35,10 @@ import java.util.UUID;
 @Service
 public class AuthService {
 
-    @Value("${auth.key}")
-    private String key;
+    @Value("${auth.accessKey}")
+    private String accessKey;
+    @Value("${auth.refreshKey}")
+    private String refreshKey;
     @Value("${auth.issuer}")
     private String issuer;
 
@@ -68,24 +70,30 @@ public class AuthService {
      * @return
      */
     @Transactional(readOnly = true)
-    public String loginUser(LoginRequestDTO requestDTO) {
+    public LoginResponseDTO loginUser(LoginRequestDTO requestDTO) {
         String email = requestDTO.getEmail();
         String password = requestDTO.getPassword();
         User user = userRepository.findByEmailAndPassword(email, password)
                 .orElseThrow(() -> new RuntimeException("Not Found User"));
 
-        return createAccessToken(user.getName(), user.getId(), user.getRole(), (60 * 60 * 24));
+        String accessToken = createAccessToken(user.getName(), user.getId(), user.getRole());
+        String refreshToken = createRefreshToken(user.getName(), user.getId(), user.getRole());
+
+        return new LoginResponseDTO(accessToken, refreshToken);
     }
 
     @Transactional
-    public String verifyLoginCode(VerifyLoginCodeRequestDTO requestDTO) {
+    public LoginResponseDTO verifyLoginCode(VerifyLoginCodeRequestDTO requestDTO) {
         String code = requestDTO.getCode();
         LoginCode loginCode = loginCodeRepository.findByVerifyCode(code)
                 .orElseThrow(() -> new RuntimeException("Not Found LoginCode"));
 
         loginCodeRepository.delete(loginCode);
         User user = loginCode.getUser();
-        return createAccessToken(user.getName(), user.getId(), user.getRole(), (60 * 60 * 24));
+        String accessToken = createAccessToken(user.getName(), user.getId(), user.getRole());
+        String refreshToken = createRefreshToken(user.getName(), user.getId(), user.getRole());
+
+        return new LoginResponseDTO(accessToken, refreshToken);
     }
 
     @Transactional(readOnly = true)
@@ -146,7 +154,7 @@ public class AuthService {
     }
 
     @Transactional
-    public MessageResponseDTO reissue(ReissueRequestDTO requestDTO) {
+    public MessageResponseDTO reissueUser(ReissueUserRequestDTO requestDTO) {
         String email = requestDTO.getEmail();
         String code = requestDTO.getCode();
 
@@ -159,7 +167,7 @@ public class AuthService {
             User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new RuntimeException("Not Found User"));
 
-            String newPassword = createRandomPassword(12);
+            String newPassword = createRandomPassword();
             user.updatePassword(newPassword);
 
             mailService.postReissuePasswordMail(email, newPassword);
@@ -169,6 +177,7 @@ public class AuthService {
         throw new RuntimeException("Email Not Verified OR Verify Code Not Collect");
     }
 
+    @Transactional
     public LoginCodeResponseDTO createLoginCode(long userCode) {
         deleteLegacyLoginCode(userCode);
         User user = userRepository.findById(userCode)
@@ -184,6 +193,17 @@ public class AuthService {
         return new LoginCodeResponseDTO(loginCode);
     }
 
+    @Transactional
+    public LoginResponseDTO reissueToken(ReissueTokenRequestDTO requestDTO) {
+        DecodedJWT decodedJWT = verifyRefreshToken(requestDTO.getRefreshToken());
+        long userId = Long.parseLong(decodedJWT.getClaim("userId").toString());
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Not Found User"));
+
+        String accessToken = createAccessToken(user.getName(), user.getId(), user.getRole());
+        return new LoginResponseDTO(accessToken, null);
+    }
+
     private void deleteLegacyLoginCode(long userCode) {
         Optional<LoginCode> optionalLoginCode = loginCodeRepository.findByUserCode(userCode);
         optionalLoginCode.ifPresent(loginCodeRepository::delete);
@@ -193,13 +213,13 @@ public class AuthService {
         return UUID.randomUUID().toString().substring(0, 8);
     }
 
-    private String createRandomPassword(int length) {
+    private String createRandomPassword() {
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
 
         SecureRandom random = new SecureRandom();
         StringBuilder sb = new StringBuilder();
 
-        for (int i = 0; i < length; i++) {
+        for (int i = 0; i < 12; i++) {
             int randomInt = random.nextInt(chars.length());
             sb.append(chars.charAt(randomInt));
         }
@@ -220,16 +240,30 @@ public class AuthService {
     }
 
     /**
-     * 토큰을 생성하고 반환함
+     * 토큰 생성 후 반환 유효시간 2시간
      * @param username
-     * @param tokenActiveSeconds
+     * @param userId
+     * @param userRole
      * @return
      */
-    private String createAccessToken(String username, long userId, Role userRole, long tokenActiveSeconds) {
-        log.info("Token Created By: {}", userId);
-        Algorithm algorithm = getAlgorithm(key);
+    private String createAccessToken(String username, long userId, Role userRole) {
+        log.info("AccessToken Created By: {}", userId);
+        Algorithm algorithm = getAlgorithm(accessKey);
         return JWT.create()
-                .withExpiresAt(new Date(System.currentTimeMillis() + (1000 * tokenActiveSeconds)))
+                .withExpiresAt(new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 2)))
+                .withIssuer(issuer)
+                .withClaim("username", username)
+                .withClaim("userId", userId)
+                .withClaim("ROLE", userRole.toString())
+                .sign(algorithm);
+    }
+
+    // 1년짜리 리프레쉬 토큰
+    private String createRefreshToken(String username, long userId, Role userRole) {
+        log.info("RefreshToken Created By: {}", userId);
+        Algorithm algorithm = getAlgorithm(refreshKey);
+        return JWT.create()
+                .withExpiresAt(new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 365)))
                 .withIssuer(issuer)
                 .withClaim("username", username)
                 .withClaim("userId", userId)
@@ -242,8 +276,8 @@ public class AuthService {
      * @param token
      * @return
      */
-    public DecodedJWT decodeToken(String token) {
-        Algorithm algorithm = getAlgorithm(key);
+    public DecodedJWT decodeAccessToken(String token) {
+        Algorithm algorithm = getAlgorithm(accessKey);
         JWTVerifier verifier = getVerifier(algorithm);
         try {
             String extractedToken = extractToken(token);
@@ -251,8 +285,19 @@ public class AuthService {
             long userId = Long.parseLong(decodedJWT.getClaim("userId").toString());
             userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("Not Found User"));
-            log.info("user Login : {}", decodedJWT.getClaim("username").toString());
+            log.info("user Login : {}", decodedJWT.getClaim("userId").toString());
             return decodedJWT;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new RuntimeException("invalid token");
+        }
+    }
+
+    private DecodedJWT verifyRefreshToken(String token) {
+        Algorithm algorithm = getAlgorithm(refreshKey);
+        JWTVerifier verifier = getVerifier(algorithm);
+        try {
+            return verifier.verify(token);
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new RuntimeException("invalid token");
@@ -275,7 +320,6 @@ public class AuthService {
         return jwt.getClaim("ROLE").toString().replaceAll("\"", "").equals(Role.ROLE_ADMIN.toString());
     }
 
-
     /**
      * bearer token 형식 검증 및 토큰 추출
      * @param token
@@ -297,7 +341,6 @@ public class AuthService {
     private Algorithm getAlgorithm(String key) {
         return Algorithm.HMAC256(key);
     }
-
 
     /**
      * verifier 생성기

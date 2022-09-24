@@ -19,10 +19,10 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequestDTO requestDTO) {
+    public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO requestDTO) {
         try {
-            String token = authService.loginUser(requestDTO);
-            return ResponseEntity.status(HttpStatus.OK).body(token);
+            LoginResponseDTO responseDTO = authService.loginUser(requestDTO);
+            return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
@@ -73,9 +73,9 @@ public class AuthController {
      * @return
      */
     @PostMapping("/reissue")
-    public ResponseEntity<MessageResponseDTO> reissueUser(@Validated @RequestBody ReissueRequestDTO requestDTO) {
+    public ResponseEntity<MessageResponseDTO> reissueUser(@Validated @RequestBody ReissueUserRequestDTO requestDTO) {
         try {
-            MessageResponseDTO responseDTO = authService.reissue(requestDTO);
+            MessageResponseDTO responseDTO = authService.reissueUser(requestDTO);
             return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -87,7 +87,7 @@ public class AuthController {
     public ResponseEntity<LoginCodeResponseDTO> getLoginCode(@RequestHeader(name = "Authorization") String token,
                                                              @PathVariable(name = "userCode") long userCode) {
         try {
-            DecodedJWT jwt = authService.decodeToken(token);
+            DecodedJWT jwt = authService.decodeAccessToken(token);
             if(authService.isAdmin(jwt)) {
                 LoginCodeResponseDTO responseDTO = authService.createLoginCode(userCode);
                 return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
@@ -102,9 +102,9 @@ public class AuthController {
 
     // path, method 명 수정 필요할 듯
     @PostMapping("/code/verify")
-    public ResponseEntity<String> verifyLoginCode(@RequestBody VerifyLoginCodeRequestDTO requestDTO) {
+    public ResponseEntity<LoginResponseDTO> verifyLoginCode(@RequestBody VerifyLoginCodeRequestDTO requestDTO) {
         try {
-            String responseDTO = authService.verifyLoginCode(requestDTO);
+            LoginResponseDTO responseDTO = authService.verifyLoginCode(requestDTO);
             return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -113,6 +113,13 @@ public class AuthController {
     }
 
     @PostMapping("/token/reissue")
-    public void reissueToken() {
+    public ResponseEntity<LoginResponseDTO> reissueToken(@RequestBody ReissueTokenRequestDTO requestDTO) {
+        try {
+            LoginResponseDTO responseDTO = authService.reissueToken(requestDTO);
+            return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 }

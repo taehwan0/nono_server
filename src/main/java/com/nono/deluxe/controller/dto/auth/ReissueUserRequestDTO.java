@@ -7,7 +7,7 @@ import javax.validation.constraints.Email;
 
 @Getter
 @NoArgsConstructor
-public class ReissueRequestDTO {
+public class ReissueUserRequestDTO {
     @Email
     private String email;
     private String code;
