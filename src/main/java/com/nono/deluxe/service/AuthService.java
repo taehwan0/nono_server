@@ -17,9 +17,6 @@ import com.nono.deluxe.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -77,7 +74,18 @@ public class AuthService {
         User user = userRepository.findByEmailAndPassword(email, password)
                 .orElseThrow(() -> new RuntimeException("Not Found User"));
 
-        return createToken(user.getName(), user.getId(), user.getRole(), (60 * 60 * 24));
+        return createAccessToken(user.getName(), user.getId(), user.getRole(), (60 * 60 * 24));
+    }
+
+    @Transactional
+    public String verifyLoginCode(VerifyLoginCodeRequestDTO requestDTO) {
+        String code = requestDTO.getCode();
+        LoginCode loginCode = loginCodeRepository.findByVerifyCode(code)
+                .orElseThrow(() -> new RuntimeException("Not Found LoginCode"));
+
+        loginCodeRepository.delete(loginCode);
+        User user = loginCode.getUser();
+        return createAccessToken(user.getName(), user.getId(), user.getRole(), (60 * 60 * 24));
     }
 
     @Transactional(readOnly = true)
@@ -217,7 +225,7 @@ public class AuthService {
      * @param tokenActiveSeconds
      * @return
      */
-    private String createToken(String username, long userId, Role userRole, long tokenActiveSeconds) {
+    private String createAccessToken(String username, long userId, Role userRole, long tokenActiveSeconds) {
         log.info("Token Created By: {}", userId);
         Algorithm algorithm = getAlgorithm(key);
         return JWT.create()

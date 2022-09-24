@@ -100,8 +100,16 @@ public class AuthController {
         }
     }
 
+    // path, method 명 수정 필요할 듯
     @PostMapping("/code/verify")
-    public void verifyLoginCode() {
+    public ResponseEntity<String> verifyLoginCode(@RequestBody VerifyLoginCodeRequestDTO requestDTO) {
+        try {
+            String responseDTO = authService.verifyLoginCode(requestDTO);
+            return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
     @PostMapping("/token/reissue")

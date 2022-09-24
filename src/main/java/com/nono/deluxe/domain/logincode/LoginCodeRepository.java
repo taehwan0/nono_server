@@ -11,4 +11,7 @@ import java.util.Optional;
 public interface LoginCodeRepository extends JpaRepository<LoginCode, Long> {
     @Query("SELECT lc FROM LoginCode lc WHERE lc.user.id = :userCode")
     Optional<LoginCode> findByUserCode(@Param("userCode") long userCode);
+
+    @Query("SELECT lc FROM LoginCode lc WHERE lc.code = :verifyCode")
+    Optional<LoginCode> findByVerifyCode(@Param("verifyCode") String verifyCode);
 }
