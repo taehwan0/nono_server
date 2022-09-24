@@ -9,6 +9,8 @@ import com.nono.deluxe.controller.dto.auth.*;
 import com.nono.deluxe.domain.checkemail.CheckType;
 import com.nono.deluxe.domain.checkemail.CheckEmail;
 import com.nono.deluxe.domain.checkemail.CheckEmailRepository;
+import com.nono.deluxe.domain.logincode.LoginCode;
+import com.nono.deluxe.domain.logincode.LoginCodeRepository;
 import com.nono.deluxe.domain.user.Role;
 import com.nono.deluxe.domain.user.User;
 import com.nono.deluxe.domain.user.UserRepository;
@@ -43,6 +45,7 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final CheckEmailRepository checkEmailRepository;
+    private final LoginCodeRepository loginCodeRepository;
     private final MailService mailService;
 
     @Transactional
@@ -156,6 +159,26 @@ public class AuthService {
             return new MessageResponseDTO(true, "password reset");
         }
         throw new RuntimeException("Email Not Verified OR Verify Code Not Collect");
+    }
+
+    public LoginCodeResponseDTO createLoginCode(long userCode) {
+        deleteLegacyLoginCode(userCode);
+        User user = userRepository.findById(userCode)
+                .orElseThrow(() -> new RuntimeException("Not Found User"));
+        String verifyCode = getVerifyCode();
+
+        LoginCode loginCode = LoginCode.builder()
+                .user(user)
+                .verifyCode(verifyCode)
+                .build();
+        loginCodeRepository.save(loginCode);
+
+        return new LoginCodeResponseDTO(loginCode);
+    }
+
+    private void deleteLegacyLoginCode(long userCode) {
+        Optional<LoginCode> optionalLoginCode = loginCodeRepository.findByUserCode(userCode);
+        optionalLoginCode.ifPresent(loginCodeRepository::delete);
     }
 
     private String getVerifyCode() {

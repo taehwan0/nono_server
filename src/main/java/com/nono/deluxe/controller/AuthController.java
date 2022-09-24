@@ -1,5 +1,6 @@
 package com.nono.deluxe.controller;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.nono.deluxe.controller.dto.MessageResponseDTO;
 import com.nono.deluxe.controller.dto.auth.*;
 import com.nono.deluxe.service.AuthService;
@@ -8,10 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RequestMapping("/api/v1/auth")
@@ -69,6 +67,11 @@ public class AuthController {
         }
     }
 
+    /**
+     * token reissue 와 path 조정 필요
+     * @param requestDTO
+     * @return
+     */
     @PostMapping("/reissue")
     public ResponseEntity<MessageResponseDTO> reissueUser(@Validated @RequestBody ReissueRequestDTO requestDTO) {
         try {
@@ -80,11 +83,28 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/logincode")
-    public void getLoginCode() {
+    @PostMapping("/code/{userCode}")
+    public ResponseEntity<LoginCodeResponseDTO> getLoginCode(@RequestHeader(name = "Authorization") String token,
+                                                             @PathVariable(name = "userCode") long userCode) {
+        try {
+            DecodedJWT jwt = authService.decodeToken(token);
+            if(authService.isAdmin(jwt)) {
+                LoginCodeResponseDTO responseDTO = authService.createLoginCode(userCode);
+                return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+        } catch(Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
-    @PostMapping("/logincode/verify")
+    @PostMapping("/code/verify")
     public void verifyLoginCode() {
+    }
+
+    @PostMapping("/token/reissue")
+    public void reissueToken() {
     }
 }
