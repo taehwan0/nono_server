@@ -1,5 +1,6 @@
 package com.nono.deluxe.domain.user;
 
+import com.nono.deluxe.controller.dto.user.UpdateUserRequestDTO;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,28 +38,40 @@ public class User {
     private Role role;
 
     @Column(columnDefinition = "tinyint(1) default 0")
+    private boolean active;
+
+    @Column(columnDefinition = "tinyint(1) default 0")
     private boolean deleted;
 
-    @Column(nullable = false)
-     private boolean active;
-
-
     @Builder
-    public User(String name, String email, String password, Role role) {
+    public User(String name, String email, String password, Role role, boolean active) {
         this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
-        this.active = true;
+        this.active = active;
+        this.deleted = false;
+    }
+
+    public void updatePassword(String newPassword) {
+        this.password = newPassword;
     }
 
     public void delete() {
         this.deleted = true;
-//        this.active = false;
+        this.active = false;
         this.name = UUID.randomUUID().toString().substring(0, 18);
     }
 
     public void changeActivation(boolean isActive) {
         this.active = isActive;
+    }
+
+    public void update(UpdateUserRequestDTO userRequestDTO) {
+        this.name = userRequestDTO.getUserName();
+        this.email = userRequestDTO.getEmail();
+        this.role = userRequestDTO.getRole();
+        this.active = userRequestDTO.isActive();
+        this.deleted = userRequestDTO.isDeleted();
     }
 }

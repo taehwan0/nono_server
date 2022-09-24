@@ -1,7 +1,9 @@
 package com.nono.deluxe.service;
 
+import com.nono.deluxe.controller.dto.MessageResponseDTO;
 import com.nono.deluxe.controller.dto.user.AddUserRequestDTO;
 import com.nono.deluxe.controller.dto.user.GetUserListResponseDTO;
+import com.nono.deluxe.controller.dto.user.UpdateUserRequestDTO;
 import com.nono.deluxe.controller.dto.user.UserResponseDTO;
 import com.nono.deluxe.domain.user.Role;
 import com.nono.deluxe.domain.user.User;
@@ -30,7 +32,6 @@ public class UserService {
                 .name(temp)
                 .email(temp)
                 .password(temp)
-                .role(Role.ROLE_ADMIN)
                 .build();
         return userRepository.save(user);
     }
@@ -40,7 +41,6 @@ public class UserService {
                 .name(temp)
                 .email(temp)
                 .password(temp)
-                .role(Role.ROLE_PARTICIPANT)
                 .build();
         return userRepository.save(user);
     }
@@ -85,5 +85,23 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("Not exist data."));
 
         return new UserResponseDTO(user);
+    }
+
+    public UserResponseDTO updateUser(long userCode, UpdateUserRequestDTO userRequestDTO) {
+        User updateUser = userRepository.findById(userCode)
+                .orElseThrow(() -> new RuntimeException("User: Not found user"));
+
+        updateUser.update(userRequestDTO);
+        userRepository.save(updateUser);
+        return new UserResponseDTO(updateUser);
+    }
+
+    public MessageResponseDTO deleteUser(long userCode) {
+        User user = userRepository.findById(userCode)
+                .orElseThrow(() -> new RuntimeException("User: Not found user"));
+
+        user.delete();
+
+        return new MessageResponseDTO(true, "Deleted");
     }
 }

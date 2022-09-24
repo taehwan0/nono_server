@@ -26,7 +26,7 @@ public class Notice extends BaseTimeEntity {
     private String content;
 
     @Column(nullable = false)
-    boolean focus;
+    private boolean focus;
 
     @Builder
     public Notice(User writer, String title, String content, boolean focus) {

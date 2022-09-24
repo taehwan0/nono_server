@@ -1,8 +1,10 @@
 package com.nono.deluxe.controller;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.nono.deluxe.controller.dto.MessageResponseDTO;
 import com.nono.deluxe.controller.dto.user.AddUserRequestDTO;
 import com.nono.deluxe.controller.dto.user.GetUserListResponseDTO;
+import com.nono.deluxe.controller.dto.user.UpdateUserRequestDTO;
 import com.nono.deluxe.controller.dto.user.UserResponseDTO;
 import com.nono.deluxe.domain.user.User;
 import com.nono.deluxe.service.AuthService;
@@ -47,7 +49,7 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(responseDTO);
             } else {
-                log.error("This user is not authorized this api.: createProduct");
+                log.error("User: Forbidden");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             }
         } catch (RuntimeException exception) {
@@ -101,7 +103,43 @@ public class UserController {
 
     @PutMapping("/{userCode}")
     public ResponseEntity<UserResponseDTO> updateUser(@RequestHeader(value = "Authorization") String token,
-                                                      @RequestBody AddUserRequestDTO userRequestDTO) {
+                                                      @PathVariable(name = "userCode") long userCode,
+                                                      @RequestBody UpdateUserRequestDTO userRequestDTO) {
+        try {
+            DecodedJWT jwt = authService.decodeToken(token);
+            if(authService.isManager(jwt) || authService.isAdmin(jwt)) {
+                UserResponseDTO responseDTO = userService.updateUser(userCode, userRequestDTO);
+                return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+            } else {
+                log.error("User: forbidden");
 
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
+    @DeleteMapping("/{userCode}")
+    public ResponseEntity<MessageResponseDTO> deleteUser(@RequestHeader(name = "Authorization") String token,
+                                                         @PathVariable(name = "userCode") long userCode) {
+        try {
+            DecodedJWT jwt = authService.decodeToken(token);
+            if(authService.isAdmin(jwt)) {
+                long userId = authService.getUserIdByDecodedToken(jwt);
+                log.info("User: {} user is deleted By {}", userCode, userId);
+                MessageResponseDTO responseDto = userService.deleteUser(userCode);
+
+                return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+            } else {
+                log.error("User: forbidden");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 }
