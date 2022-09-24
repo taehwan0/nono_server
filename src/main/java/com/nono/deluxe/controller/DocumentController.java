@@ -85,7 +85,6 @@ public class DocumentController {
                 return ResponseEntity.status(HttpStatus.OK).body(responseDto);
             } else {
                 log.error("Document: forbidden");
-
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
         } catch (Exception e) {

@@ -39,7 +39,9 @@ public class User {
     @Column(columnDefinition = "tinyint(1) default 0")
     private boolean deleted;
 
-    // private boolean active;
+    @Column(nullable = false)
+     private boolean active;
+
 
     @Builder
     public User(String name, String email, String password, Role role) {
@@ -47,11 +49,16 @@ public class User {
         this.email = email;
         this.password = password;
         this.role = role;
+        this.active = true;
     }
 
     public void delete() {
         this.deleted = true;
 //        this.active = false;
         this.name = UUID.randomUUID().toString().substring(0, 18);
+    }
+
+    public void changeActivation(boolean isActive) {
+        this.active = isActive;
     }
 }
