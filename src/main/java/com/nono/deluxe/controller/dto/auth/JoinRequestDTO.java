@@ -1,5 +1,6 @@
 package com.nono.deluxe.controller.dto.auth;
 
+import com.nono.deluxe.domain.user.Role;
 import com.nono.deluxe.domain.user.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,6 +27,8 @@ public class JoinRequestDTO {
                 .name(this.name)
                 .email(this.email)
                 .password(this.password)
+                .role(Role.ROLE_ADMIN)
+                .active(true)
                 .build();
     }
 }

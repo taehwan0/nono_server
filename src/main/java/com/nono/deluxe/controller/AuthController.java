@@ -18,10 +18,10 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     private final AuthService authService;
 
-    @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO requestDTO) {
+    @PostMapping("/code")
+    public ResponseEntity<AuthCodeResponseDTO> login(@RequestBody CreateAuthCodeRequestDTO requestDTO) {
         try {
-            LoginResponseDTO responseDTO = authService.loginUser(requestDTO);
+            AuthCodeResponseDTO responseDTO = authService.createAuthCode(requestDTO);
             return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
@@ -84,12 +84,12 @@ public class AuthController {
     }
 
     @PostMapping("/code/{userCode}")
-    public ResponseEntity<LoginCodeResponseDTO> getLoginCode(@RequestHeader(name = "Authorization") String token,
-                                                             @PathVariable(name = "userCode") long userCode) {
+    public ResponseEntity<AuthCodeResponseDTO> createAuthCode(@RequestHeader(name = "Authorization") String token,
+                                                              @PathVariable(name = "userCode") long userCode) {
         try {
-            DecodedJWT jwt = authService.decodeAccessToken(token);
+            DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
             if(authService.isAdmin(jwt)) {
-                LoginCodeResponseDTO responseDTO = authService.createLoginCode(userCode);
+                AuthCodeResponseDTO responseDTO = authService.createAuthCode(userCode);
                 return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
             } else {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -100,22 +100,10 @@ public class AuthController {
         }
     }
 
-    // path, method 명 수정 필요할 듯
-    @PostMapping("/code/verify")
-    public ResponseEntity<LoginResponseDTO> verifyLoginCode(@RequestBody VerifyLoginCodeRequestDTO requestDTO) {
+    @PostMapping("/token")
+    public ResponseEntity<TokenResponseDTO> createToken(@RequestBody TokenRequestDTO requestDTO) {
         try {
-            LoginResponseDTO responseDTO = authService.verifyLoginCode(requestDTO);
-            return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-    }
-
-    @PostMapping("/token/reissue")
-    public ResponseEntity<LoginResponseDTO> reissueToken(@RequestBody ReissueTokenRequestDTO requestDTO) {
-        try {
-            LoginResponseDTO responseDTO = authService.reissueToken(requestDTO);
+            TokenResponseDTO responseDTO = authService.createToken(requestDTO);
             return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
         } catch (Exception e) {
             log.error(e.getMessage());
