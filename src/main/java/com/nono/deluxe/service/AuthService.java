@@ -183,11 +183,6 @@ public class AuthService {
         }
     }
 
-    private boolean isNewUser(String email) {
-        Optional<User> optionalUser = userRepository.findByEmail(email);
-        return optionalUser.isEmpty();
-    }
-
     @Transactional
     public MessageResponseDTO verifyEmail(VerifyEmailRequestDTO requestDTO) {
         String email = requestDTO.getEmail();
@@ -228,17 +223,6 @@ public class AuthService {
             return new MessageResponseDTO(true, "password reset");
         }
         throw new RuntimeException("Email Not Verified OR Verify Code Not Collect");
-    }
-
-    @Transactional
-    public LoginResponseDTO reissueToken(ReissueTokenRequestDTO requestDTO) {
-        DecodedJWT decodedJWT = verifyRefreshToken(requestDTO.getRefreshToken());
-        long userId = Long.parseLong(decodedJWT.getClaim("userId").toString());
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Not Found User"));
-
-        String accessToken = createAccessToken(user.getName(), user.getId(), user.getRole());
-        return new LoginResponseDTO(accessToken, null);
     }
 
     private void deleteLegacyLoginCode(long userCode) {

@@ -25,26 +25,6 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-
-    @Transactional
-    public User createAdmin(String temp) {
-        User user = User.builder()
-                .name(temp)
-                .email(temp)
-                .password(temp)
-                .build();
-        return userRepository.save(user);
-    }
-
-    public User createParticipant(String temp) {
-        User user = User.builder()
-                .name(temp)
-                .email(temp)
-                .password(temp)
-                .build();
-        return userRepository.save(user);
-    }
-
     @Transactional
     public UserResponseDTO addUser(AddUserRequestDTO userRequestDTO) {
         User user = User.builder()
@@ -52,6 +32,7 @@ public class UserService {
                 .email(UUID.randomUUID().toString())
                 .password(UUID.randomUUID().toString())
                 .role(Role.ROLE_PARTICIPANT)
+                .active(true)
                 .build();
         userRepository.save(user);
         return new UserResponseDTO(user);

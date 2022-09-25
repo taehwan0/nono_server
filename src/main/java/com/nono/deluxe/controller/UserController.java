@@ -24,26 +24,12 @@ public class UserController {
     private final UserService userService;
     private final AuthService authService;
 
-    @PostMapping("/admin")
-    public ResponseEntity<User> createAdmin(@RequestBody String temp) {
-        User user = userService.createAdmin(temp);
-
-        return ResponseEntity.status(HttpStatus.OK).body(user);
-    }
-
-    @PostMapping("/participant")
-    public ResponseEntity<User> createParticipant(@RequestBody String temp) {
-        User user = userService.createParticipant(temp);
-
-        return ResponseEntity.status(HttpStatus.OK).body(user);
-    }
-
     // 사용자 생성 - Participant 추가.
     @PostMapping()
     public ResponseEntity<UserResponseDTO> addUser(@RequestHeader(value = "Authorization") String token,
                                                    @RequestBody AddUserRequestDTO userRequestDTO) {
         try {
-            DecodedJWT jwt = authService.decodeAccessToken(token);
+            DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
             if (authService.isAdmin(jwt) || authService.isManager(jwt)) {
                 UserResponseDTO responseDTO = userService.addUser(userRequestDTO);
                 return ResponseEntity.status(HttpStatus.OK)
@@ -67,7 +53,7 @@ public class UserController {
                                                                @RequestParam(required = false, defaultValue = "10") int size,
                                                                @RequestParam(required = false, defaultValue = "1") int page) {
         try {
-            DecodedJWT jwt = authService.decodeAccessToken(token);
+            DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
             if (authService.isManager(jwt) || authService.isAdmin(jwt)) {
                 GetUserListResponseDTO userList = userService.readUserList(query, column, order, size, (page - 1));
                 return ResponseEntity.status(HttpStatus.OK).body(userList);
@@ -86,7 +72,7 @@ public class UserController {
     public ResponseEntity<UserResponseDTO> getUserInfo(@RequestHeader(value = "Authorization") String token,
                                                        @PathVariable(name = "userCode") long userCode) {
         try {
-            DecodedJWT jwt = authService.decodeAccessToken(token);
+            DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
             if (authService.isManager(jwt) || authService.isAdmin(jwt)) {
                 UserResponseDTO responseDTO = userService.getUserInfo(userCode);
                 return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
@@ -106,7 +92,7 @@ public class UserController {
                                                       @PathVariable(name = "userCode") long userCode,
                                                       @RequestBody UpdateUserRequestDTO userRequestDTO) {
         try {
-            DecodedJWT jwt = authService.decodeAccessToken(token);
+            DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
             if(authService.isManager(jwt) || authService.isAdmin(jwt)) {
                 UserResponseDTO responseDTO = userService.updateUser(userCode, userRequestDTO);
                 return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
@@ -126,7 +112,7 @@ public class UserController {
     public ResponseEntity<MessageResponseDTO> deleteUser(@RequestHeader(name = "Authorization") String token,
                                                          @PathVariable(name = "userCode") long userCode) {
         try {
-            DecodedJWT jwt = authService.decodeAccessToken(token);
+            DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
             if(authService.isAdmin(jwt)) {
                 long userId = authService.getUserIdByDecodedToken(jwt);
                 log.info("User: {} user is deleted By {}", userCode, userId);
