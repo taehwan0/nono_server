@@ -1,5 +1,6 @@
 package com.nono.deluxe.domain.user;
 
+import com.nono.deluxe.controller.dto.user.UpdateUserRequestDTO;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -60,5 +61,17 @@ public class User {
         this.deleted = true;
         this.active = false;
         this.name = UUID.randomUUID().toString().substring(0, 18);
+    }
+
+    public void changeActivation(boolean isActive) {
+        this.active = isActive;
+    }
+
+    public void update(UpdateUserRequestDTO userRequestDTO) {
+        this.name = userRequestDTO.getUserName();
+        this.email = userRequestDTO.getEmail();
+        this.role = userRequestDTO.getRole();
+        this.active = userRequestDTO.isActive();
+        this.deleted = userRequestDTO.isDeleted();
     }
 }

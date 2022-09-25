@@ -28,7 +28,7 @@ public class NoticeController {
      */
     @PostMapping("/notice")
     public ResponseEntity<NoticeResponseDTO> createNotice(@RequestHeader(value = "Authorization") String token,
-                                                                @RequestBody CreateNoticeRequestDTO requestDto) {
+                                                          @RequestBody CreateNoticeRequestDTO requestDto) {
         try {
             DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
             if(authService.isAdmin(jwt)) {
@@ -141,8 +141,8 @@ public class NoticeController {
      */
     @PutMapping("/notice/{noticeId}")
     public ResponseEntity<NoticeResponseDTO> updateNotice(@RequestHeader(value = "Authorization") String token,
-                                                                @PathVariable(name = "noticeId") long noticeId,
-                                                                @RequestBody UpdateNoticeRequestDTO requestDto) {
+                                                          @PathVariable(name = "noticeId") long noticeId,
+                                                          @RequestBody UpdateNoticeRequestDTO requestDto) {
         try {
             DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
             if(authService.isAdmin(jwt)) {

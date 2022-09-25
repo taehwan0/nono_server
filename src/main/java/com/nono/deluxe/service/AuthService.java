@@ -230,9 +230,16 @@ public class AuthService {
         throw new RuntimeException("Email Not Verified OR Verify Code Not Collect");
     }
 
+    @Transactional
+    public LoginResponseDTO reissueToken(ReissueTokenRequestDTO requestDTO) {
+        DecodedJWT decodedJWT = verifyRefreshToken(requestDTO.getRefreshToken());
+        long userId = Long.parseLong(decodedJWT.getClaim("userId").toString());
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Not Found User"));
 
-
-
+        String accessToken = createAccessToken(user.getName(), user.getId(), user.getRole());
+        return new LoginResponseDTO(accessToken, null);
+    }
 
     private void deleteLegacyLoginCode(long userCode) {
         List<AuthCode> authCodeList = authCodeRepository.findByUserCode(userCode);

@@ -30,7 +30,7 @@ public class CompanyController {
      */
     @PostMapping("/company")
     public ResponseEntity<CompanyResponseDTO> createCompany(@RequestHeader(name = "Authorization") String token,
-                                                                  @Validated @RequestBody CreateCompanyRequestDTO requestDto) {
+                                                            @Validated @RequestBody CreateCompanyRequestDTO requestDto) {
         try {
             DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
             if(authService.isManager(jwt) || authService.isAdmin(jwt)) {
@@ -183,8 +183,8 @@ public class CompanyController {
      */
     @PutMapping("/company/{companyId}")
     public ResponseEntity<CompanyResponseDTO> updateCompany(@RequestHeader(name = "Authorization") String token,
-                                                                  @Validated @RequestBody UpdateCompanyRequestDTO requestDto,
-                                                                  @PathVariable(name = "companyId") long companyId) {
+                                                            @Validated @RequestBody UpdateCompanyRequestDTO requestDto,
+                                                            @PathVariable(name = "companyId") long companyId) {
         try {
             DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
             if(authService.isAdmin(jwt)) {
