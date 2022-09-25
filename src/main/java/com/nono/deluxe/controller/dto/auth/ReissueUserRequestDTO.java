@@ -3,10 +3,12 @@ package com.nono.deluxe.controller.dto.auth;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.Email;
+
 @Getter
 @NoArgsConstructor
-public class LoginRequestDTO {
+public class ReissueUserRequestDTO {
+    @Email
     private String email;
-    private String password;
-    private long tokenActiveSeconds;
+    private String code;
 }

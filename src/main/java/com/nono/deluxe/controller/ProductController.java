@@ -39,7 +39,7 @@ public class ProductController {
     public ResponseEntity<ProductResponseDTO> createProduct(@RequestHeader(value = "Authorization") String token,
                                                             @RequestBody CreateProductRequestDto requestDto) {
         try {
-            DecodedJWT jwt = authService.decodeToken(token);
+            DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
             if (authService.isManager(jwt) || authService.isAdmin(jwt)) {
                 ProductResponseDTO responseDTO = productService.createProduct(requestDto);
                 return ResponseEntity
@@ -87,7 +87,7 @@ public class ProductController {
                                                                     @RequestParam(value = "page", defaultValue = "1") int page,
                                                                     @RequestParam(value = "active", defaultValue = "false") boolean active) {
         try {
-            DecodedJWT jwt = authService.decodeToken(token);
+            DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
             if (authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
                 GetProductListResponseDTO responseDTO = productService.getProductList(query, column, order, size, (page -1), active);
                 return ResponseEntity
@@ -109,7 +109,7 @@ public class ProductController {
     public ResponseEntity<ProductResponseDTO> getProductInfo(@RequestHeader(value = "Authorization") String token,
                                                              @PathVariable(name = "productId") long productId) {
         try {
-            DecodedJWT jwt = authService.decodeToken(token);
+            DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
             if (authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
                 ProductResponseDTO responseDTO = productService.getProductInfo(productId);
                 return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
@@ -128,7 +128,7 @@ public class ProductController {
                                                                      @RequestParam(required = false, defaultValue = "0") int year,
                                                                      @RequestParam(required = false, defaultValue = "0") int month) {
         try {
-            DecodedJWT jwt = authService.decodeToken(token);
+            DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
             if (authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
                 GetRecordListResponseDTO responseDTO = productService.readProductRecord(productId, year, month);
                 return ResponseEntity.status(HttpStatus.OK)
@@ -150,7 +150,7 @@ public class ProductController {
                                                             @PathVariable(name = "productId") long productId,
                                                             @RequestBody UpdateProductRequestDTO requestDto) {
         try {
-            DecodedJWT jwt = authService.decodeToken(token);
+            DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
             if (authService.isManager(jwt) || authService.isAdmin(jwt)) {
                 ProductResponseDTO responseDTO = productService.updateProduct(productId, requestDto);
                 return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
@@ -167,7 +167,7 @@ public class ProductController {
     public ResponseEntity<MessageResponseDTO> deleteProduct(@RequestHeader(value = "Authorization") String token,
                                                             @PathVariable(name = "productId") long productId) {
         try {
-            DecodedJWT jwt = authService.decodeToken(token);
+            DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
             if (authService.isManager(jwt) || authService.isAdmin(jwt)) {
                 MessageResponseDTO responseDTO = productService.deleteProduct(productId);
                 return ResponseEntity

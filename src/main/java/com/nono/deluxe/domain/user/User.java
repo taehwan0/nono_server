@@ -37,21 +37,28 @@ public class User {
     private Role role;
 
     @Column(columnDefinition = "tinyint(1) default 0")
+    private boolean active;
+
+    @Column(columnDefinition = "tinyint(1) default 0")
     private boolean deleted;
 
-    // private boolean active;
-
     @Builder
-    public User(String name, String email, String password, Role role) {
+    public User(String name, String email, String password, Role role, boolean active) {
         this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
+        this.active = active;
+        this.deleted = false;
+    }
+
+    public void updatePassword(String newPassword) {
+        this.password = newPassword;
     }
 
     public void delete() {
         this.deleted = true;
-//        this.active = false;
+        this.active = false;
         this.name = UUID.randomUUID().toString().substring(0, 18);
     }
 }

@@ -26,7 +26,6 @@ public class UserService {
                 .name(temp)
                 .email(temp)
                 .password(temp)
-                .role(Role.ROLE_ADMIN)
                 .build();
         return userRepository.save(user);
     }
@@ -36,7 +35,6 @@ public class UserService {
                 .name(temp)
                 .email(temp)
                 .password(temp)
-                .role(Role.ROLE_PARTICIPANT)
                 .build();
         return userRepository.save(user);
     }
