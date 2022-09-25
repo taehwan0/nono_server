@@ -151,18 +151,8 @@ public class AuthService {
         String email = requestDTO.getEmail();
         deleteLegacyEmailCode(email); // 이전 인증 메일이 있다면 최신화를 위해 삭제시킴
 
+        CheckType type = CheckType.valueOf(requestDTO.getType().toUpperCase());
         String verifyCode = getVerifyCode();
-
-        CheckType type;
-        if(isNewUser(email)) {
-            // 신규 유저의 경우 회원가입 체크 메일 발송
-            type = CheckType.JOIN;
-            mailService.postJoinCheckMail(email, verifyCode);
-        } else {
-            // 기존 유저의 경우 재발급 체크 메일 발송
-            type = CheckType.REISSUE;
-            mailService.postReissueCheckMail(email, verifyCode);
-        }
 
         CheckEmail checkEmail = CheckEmail.builder()
                 .email(email)
@@ -171,7 +161,26 @@ public class AuthService {
                 .build();
         checkEmailRepository.save(checkEmail);
 
+        postEmail(checkEmail);
+
         return new MessageResponseDTO(true, "mail posted");
+    }
+
+    private void postEmail(CheckEmail checkEmail) {
+        String email = checkEmail.getEmail();
+        CheckType type = checkEmail.getType();
+        String verifyCode = checkEmail.getVerifyCode();
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+
+        if(type.equals(CheckType.JOIN)) {
+            if(optionalUser.isPresent()) throw new RuntimeException("already exist email");
+            mailService.postJoinCheckMail(email, verifyCode);
+        } else if(type.equals(CheckType.REISSUE)) {
+            if(optionalUser.isEmpty()) throw new RuntimeException("not exist email");
+            mailService.postReissueCheckMail(email, verifyCode);
+        } else {
+            throw new RuntimeException("invalid CheckType");
+        }
     }
 
     private boolean isNewUser(String email) {
@@ -254,8 +263,8 @@ public class AuthService {
 
     private void deleteLegacyEmailCode(String email) {
         // 이미 이메일에 발송된 코드라면 삭제하고 최신화
-        Optional<CheckEmail> byEmail = checkEmailRepository.findByEmail(email);
-        byEmail.ifPresent(checkEmailRepository::delete);
+        List<CheckEmail> checkEmailList = checkEmailRepository.findAllByEmail(email);
+        checkEmailRepository.deleteAll(checkEmailList);
     }
 
     /**

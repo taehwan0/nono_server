@@ -100,7 +100,6 @@ public class AuthController {
         }
     }
 
-    // path, method 명 수정 필요할 듯
     @PostMapping("/token")
     public ResponseEntity<TokenResponseDTO> createToken(@RequestBody TokenRequestDTO requestDTO) {
         try {
