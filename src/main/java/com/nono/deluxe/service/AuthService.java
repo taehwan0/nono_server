@@ -9,8 +9,8 @@ import com.nono.deluxe.controller.dto.auth.*;
 import com.nono.deluxe.domain.checkemail.CheckType;
 import com.nono.deluxe.domain.checkemail.CheckEmail;
 import com.nono.deluxe.domain.checkemail.CheckEmailRepository;
-import com.nono.deluxe.domain.logincode.LoginCode;
-import com.nono.deluxe.domain.logincode.LoginCodeRepository;
+import com.nono.deluxe.domain.authcode.AuthCode;
+import com.nono.deluxe.domain.authcode.AuthCodeRepository;
 import com.nono.deluxe.domain.user.Role;
 import com.nono.deluxe.domain.user.User;
 import com.nono.deluxe.domain.user.UserRepository;
@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -44,7 +45,7 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final CheckEmailRepository checkEmailRepository;
-    private final LoginCodeRepository loginCodeRepository;
+    private final AuthCodeRepository authCodeRepository;
     private final MailService mailService;
 
     @Transactional
@@ -65,35 +66,76 @@ public class AuthService {
     }
 
     /**
-     * 유효기간 1일의 AccessToken 생성
-     * @param requestDTO
+     * authorization_code 생성
+     * @param userCode
      * @return
      */
+    @Transactional
+    public AuthCodeResponseDTO createAuthCode(long userCode) {
+        deleteLegacyLoginCode(userCode);
+        User user = userRepository.findById(userCode)
+                .orElseThrow(() -> new RuntimeException("Not Found User"));
+        String authCode = createRandomString("1234567890", 6);
+
+        AuthCode loginCode = AuthCode.builder()
+                .user(user)
+                .verifyCode(authCode)
+                .build();
+        authCodeRepository.save(loginCode);
+
+        return new AuthCodeResponseDTO(loginCode);
+    }
+
     @Transactional(readOnly = true)
-    public LoginResponseDTO loginUser(LoginRequestDTO requestDTO) {
+    public AuthCodeResponseDTO createAuthCode(CreateAuthCodeRequestDTO requestDTO) {
         String email = requestDTO.getEmail();
         String password = requestDTO.getPassword();
         User user = userRepository.findByEmailAndPassword(email, password)
                 .orElseThrow(() -> new RuntimeException("Not Found User"));
 
+        return createAuthCode(user.getId());
+    }
+
+    private TokenResponseDTO createTokenResponseDTO(User user) {
         String accessToken = createAccessToken(user.getName(), user.getId(), user.getRole());
         String refreshToken = createRefreshToken(user.getName(), user.getId(), user.getRole());
 
-        return new LoginResponseDTO(accessToken, refreshToken);
+        TokenResponseDTO responseDTO = new TokenResponseDTO();
+        responseDTO.setToken_type("bearer");
+        responseDTO.setAccess_token(accessToken);
+        responseDTO.setRefresh_token(refreshToken);
+        responseDTO.setExpires_in(decodeAccessToken(accessToken).getExpiresAt().getTime());
+        responseDTO.setRefresh_token_expires_in(decodeRefreshToken(refreshToken).getExpiresAt().getTime());
+        return responseDTO;
     }
 
     @Transactional
-    public LoginResponseDTO verifyLoginCode(VerifyLoginCodeRequestDTO requestDTO) {
-        String code = requestDTO.getCode();
-        LoginCode loginCode = loginCodeRepository.findByVerifyCode(code)
+    public TokenResponseDTO createToken(TokenRequestDTO requestDTO) {
+        String grant_type = requestDTO.getGrant_type().toLowerCase();
+        if(grant_type.equals("authorization_code")) return createTokenByAuthCode(requestDTO.getCode());
+        else if(grant_type.equals("refresh_token")) return createTokenByRefreshToken(requestDTO.getRefresh_token());
+        else throw new RuntimeException("invalid grant_type");
+    }
+
+    @Transactional
+    public TokenResponseDTO createTokenByAuthCode(String authCode) {
+        AuthCode loginCode = authCodeRepository.findByAuthCode(authCode)
                 .orElseThrow(() -> new RuntimeException("Not Found LoginCode"));
 
-        loginCodeRepository.delete(loginCode);
+        authCodeRepository.delete(loginCode);
         User user = loginCode.getUser();
-        String accessToken = createAccessToken(user.getName(), user.getId(), user.getRole());
-        String refreshToken = createRefreshToken(user.getName(), user.getId(), user.getRole());
 
-        return new LoginResponseDTO(accessToken, refreshToken);
+        return createTokenResponseDTO(user);
+    }
+
+    @Transactional
+    public TokenResponseDTO createTokenByRefreshToken(String refreshToken) {
+        DecodedJWT decodedJWT = decodeRefreshToken(refreshToken);
+        long userId = Long.parseLong(decodedJWT.getClaim("userId").toString());
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Not Found User"));
+
+        return createTokenResponseDTO(user);
     }
 
     @Transactional(readOnly = true)
@@ -167,7 +209,9 @@ public class AuthService {
             User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new RuntimeException("Not Found User"));
 
-            String newPassword = createRandomPassword();
+            String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
+            String newPassword = createRandomString(chars, 12);
+
             user.updatePassword(newPassword);
 
             mailService.postReissuePasswordMail(email, newPassword);
@@ -177,51 +221,26 @@ public class AuthService {
         throw new RuntimeException("Email Not Verified OR Verify Code Not Collect");
     }
 
-    @Transactional
-    public LoginCodeResponseDTO createLoginCode(long userCode) {
-        deleteLegacyLoginCode(userCode);
-        User user = userRepository.findById(userCode)
-                .orElseThrow(() -> new RuntimeException("Not Found User"));
-        String verifyCode = getVerifyCode();
 
-        LoginCode loginCode = LoginCode.builder()
-                .user(user)
-                .verifyCode(verifyCode)
-                .build();
-        loginCodeRepository.save(loginCode);
 
-        return new LoginCodeResponseDTO(loginCode);
-    }
 
-    @Transactional
-    public LoginResponseDTO reissueToken(ReissueTokenRequestDTO requestDTO) {
-        DecodedJWT decodedJWT = verifyRefreshToken(requestDTO.getRefreshToken());
-        long userId = Long.parseLong(decodedJWT.getClaim("userId").toString());
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Not Found User"));
-
-        String accessToken = createAccessToken(user.getName(), user.getId(), user.getRole());
-        return new LoginResponseDTO(accessToken, null);
-    }
 
     private void deleteLegacyLoginCode(long userCode) {
-        Optional<LoginCode> optionalLoginCode = loginCodeRepository.findByUserCode(userCode);
-        optionalLoginCode.ifPresent(loginCodeRepository::delete);
+        List<AuthCode> authCodeList = authCodeRepository.findByUserCode(userCode);
+        authCodeRepository.deleteAll(authCodeList);
     }
 
     private String getVerifyCode() {
         return UUID.randomUUID().toString().substring(0, 8);
     }
 
-    private String createRandomPassword() {
-        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
-
+    private String createRandomString(String charsTable, int randomStringLength) {
         SecureRandom random = new SecureRandom();
         StringBuilder sb = new StringBuilder();
 
-        for (int i = 0; i < 12; i++) {
-            int randomInt = random.nextInt(chars.length());
-            sb.append(chars.charAt(randomInt));
+        for(int i = 0; i < randomStringLength; i ++) {
+            int randomInt = random.nextInt(charsTable.length());
+            sb.append(charsTable.charAt(randomInt));
         }
 
         return sb.toString();
@@ -250,6 +269,7 @@ public class AuthService {
         log.info("AccessToken Created By: {}", userId);
         Algorithm algorithm = getAlgorithm(accessKey);
         return JWT.create()
+                .withIssuedAt(new Date())
                 .withExpiresAt(new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 2)))
                 .withIssuer(issuer)
                 .withClaim("username", username)
@@ -258,11 +278,12 @@ public class AuthService {
                 .sign(algorithm);
     }
 
-    // 1년짜리 리프레쉬 토큰
+    // 1년짜리 리프레쉬 토큰 -> 시간 변경 필요
     private String createRefreshToken(String username, long userId, Role userRole) {
         log.info("RefreshToken Created By: {}", userId);
         Algorithm algorithm = getAlgorithm(refreshKey);
         return JWT.create()
+                .withIssuedAt(new Date())
                 .withExpiresAt(new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 365)))
                 .withIssuer(issuer)
                 .withClaim("username", username)
@@ -276,7 +297,7 @@ public class AuthService {
      * @param token
      * @return
      */
-    public DecodedJWT decodeAccessToken(String token) {
+    public DecodedJWT decodeAccessTokenByRequestHeader(String token) {
         Algorithm algorithm = getAlgorithm(accessKey);
         JWTVerifier verifier = getVerifier(algorithm);
         try {
@@ -293,7 +314,18 @@ public class AuthService {
         }
     }
 
-    private DecodedJWT verifyRefreshToken(String token) {
+    private DecodedJWT decodeAccessToken(String token) {
+        Algorithm algorithm = getAlgorithm(accessKey);
+        JWTVerifier verifier = getVerifier(algorithm);
+        try {
+            return verifier.verify(token);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new RuntimeException("invalid token");
+        }
+    }
+
+    private DecodedJWT decodeRefreshToken(String token) {
         Algorithm algorithm = getAlgorithm(refreshKey);
         JWTVerifier verifier = getVerifier(algorithm);
         try {

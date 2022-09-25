@@ -43,12 +43,12 @@ public class User {
     private boolean deleted;
 
     @Builder
-    public User(String name, String email, String password) {
+    public User(String name, String email, String password, Role role, boolean active) {
         this.name = name;
         this.email = email;
         this.password = password;
-        this.role = Role.ROLE_ADMIN;
-        this.active = false;
+        this.role = role;
+        this.active = active;
         this.deleted = false;
     }
 
