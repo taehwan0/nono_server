@@ -122,6 +122,24 @@ public class ProductController {
         }
     }
 
+    /// Product 상세 정보 조회.
+    @GetMapping("/product/barcode/{barcode}")
+    public ResponseEntity<ProductResponseDTO> getProductInfoByBarcode(@RequestHeader(value = "Authorization") String token,
+                                                             @PathVariable(name = "barcode") String barcode) {
+        try {
+            DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
+            if (authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
+                ProductResponseDTO responseDTO = productService.getProductInfoByBarcode(barcode);
+                return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+            } else {
+                log.error("Product: forbidden getProductInfo {}", jwt.getId());
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+        } catch (RuntimeException exception) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
     @GetMapping("/product/{productId}/record")
     public ResponseEntity<GetRecordListResponseDTO> getProductRecord(@RequestHeader(value = "Authorization") String token,
                                                                      @PathVariable(name = "productId") long productId,

@@ -58,6 +58,13 @@ public class ProductService {
         return new ProductResponseDTO(product);
     }
 
+    public ProductResponseDTO getProductInfoByBarcode(String barcode) {
+        Product product = productRepository.findByBarcode(barcode)
+                .orElseThrow(() -> new RuntimeException("not exist data"));
+
+        return new ProductResponseDTO(product);
+    }
+
     /**
      * from.hj.yang
      * 1. 해당 부분에 대하여 Query만으로 해당 부분의 데이터를 추출하여 처리하는 부분에 대한 공부 필요.
