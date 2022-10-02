@@ -58,14 +58,9 @@ public class NoticeService {
      */
     @Transactional(readOnly = true)
     public NoticeResponseDTO readNoticeRecent() {
-        Pageable limit = PageRequest.of(0, 1, Sort.by(new Sort.Order(Sort.Direction.valueOf("DESC"), "createdAt")));
-        Page<Notice> noticePage;
-
-        Page<Notice> notices = noticeRepository.readNoticeList("", limit);
-        List<Notice> content = notices.getContent();
-        Notice notice = content.get(0);
-
-        return new NoticeResponseDTO(notice);
+        Optional<Notice> optionalNotice = noticeRepository.readNoticeRecentOne();
+        if(optionalNotice.isEmpty()) return null;
+        return new NoticeResponseDTO(optionalNotice.get());
     }
 
     /*

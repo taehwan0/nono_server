@@ -19,4 +19,7 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
     @Query(value = "SELECT n FROM Notice n WHERE n.title LIKE concat('%', :query, '%') and n.focus = true")
     Page<Notice> readNoticeListFocus(@Param("query") String query,
                                  Pageable limit);
+
+    @Query(value = "SELECT * FROM notice as n ORDER BY n.created_at DESC LIMIT 1", nativeQuery = true)
+    Optional<Notice> readNoticeRecentOne();
 }
