@@ -14,14 +14,14 @@ import java.util.Locale;
 @NoArgsConstructor
 public class CreateCompanyRequestDTO {
 
-    @NotBlank(message = "Company: companyName can not Blank")
-    @Size(max = 30, message = "companyName max size = 30")
+    @NotBlank
+    @Size(max = 30)
     private String name;
 
     /**
      * enum 값은 blank 쓸 때 에러가 났다. 왜?
      */
-    @NotNull(message = "Company: companyType can not Null")
+    @NotBlank
     private String type;
 
     private String category;

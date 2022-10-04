@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
+
 /**
  * RequestDto 에 전부 Validation 적용이 필요한데 이 부분은 회의를 거치고 할 필요가 있는 것 같습니다.
  * storageType 은 enum 으로 만든 데이터를 사용하려고 합니다.
@@ -28,22 +30,29 @@ import lombok.NoArgsConstructor;
 public class CreateProductRequestDto {
 
     /// 상품 코드
+    @NotBlank
     private String productCode;
     /// 상품 이름
+    @NotBlank
     private String name;
     /// 상품에 대한 설명
     private String description;
     /// 상품 분류
+    @NotBlank
     private String category;
     /// 제조사
+    @NotBlank
     private String maker;
     /// 규격
+    @NotBlank
     private String unit;
     /// 보관 방법 - Ice / Cold / Room
+    @NotBlank
     private String storageType;
     /// 바코드
     private String barcode;
     /// 생성시 가지고 있는 재고.
+    @NotBlank
     private int stock;
     /// 기준 가격
     private int price;

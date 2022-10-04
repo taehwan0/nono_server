@@ -12,8 +12,8 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 public class UpdateCompanyRequestDTO {
 
-    @NotBlank(message = "Company: name can not Blank")
-    @Size(max = 30, message = "companyName max size = 30")
+    @NotBlank
+    @Size(max = 30)
     private String name;
 
     /**
@@ -23,9 +23,9 @@ public class UpdateCompanyRequestDTO {
 //    @NotNull(message = "Company: type can not Null")
 //    private CompanyType type;
 
-    @NotNull(message = "Company: category can not Null")
+    @NotBlank
     private String category;
 
-    @NotNull(message = "Company: active can not Null")
+    @NotBlank
     private boolean active;
 }

@@ -12,12 +12,12 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 public class UpdateNoticeRequestDTO {
 
-    @NotBlank(message = "noticeTitle can not Blank")
-    @Size(max = 100, message = "noticeTitle max size = 100")
+    @NotBlank
+    @Size(max = 100)
     private String title;
 
     private String content;
 
-    @NotBlank(message = "noticeFocus can not Blank")
+    @NotBlank
     private boolean focus;
 }
