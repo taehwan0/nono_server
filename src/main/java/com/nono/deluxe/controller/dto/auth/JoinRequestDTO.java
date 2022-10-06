@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 @Getter
 @NoArgsConstructor
@@ -19,6 +20,7 @@ public class JoinRequestDTO {
     private String password;
 
     @NotBlank
+    @Size(max = 20)
     private String name;
 
     @NotBlank

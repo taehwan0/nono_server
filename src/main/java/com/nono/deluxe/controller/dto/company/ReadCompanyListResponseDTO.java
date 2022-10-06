@@ -15,9 +15,7 @@ public class ReadCompanyListResponseDTO {
 
     public ReadCompanyListResponseDTO(Page<Company> companyPage) {
         List<Company> companyList = companyPage.getContent();
-        companyList.forEach(company -> {
-            this.companyList.add(new CompanyResponseDTO(company));
-        });
+        companyList.forEach(company -> this.companyList.add(new CompanyResponseDTO(company)));
         this.meta = new Meta(
                 companyPage.getPageable().getPageNumber() + 1,
                 companyPage.getNumberOfElements(),

@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 
 @Getter
 @NoArgsConstructor
@@ -17,20 +19,25 @@ public class Record {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @NotBlank
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "document_id", nullable = false, foreignKey = @ForeignKey(name = "record_document"))
     private Document document;
 
+    @NotBlank
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false, foreignKey = @ForeignKey(name = "record_product"))
     private Product product;
 
+    @NotBlank
+    @Min(0)
     @Column(nullable = false)
     private long quantity;
 
     @Column(nullable = false)
     private long stock;
 
+    @Min(0)
     @Column(nullable = false)
     private long price;
 

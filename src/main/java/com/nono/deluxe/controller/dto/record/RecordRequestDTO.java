@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Digits;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 
 @Getter
@@ -18,10 +19,10 @@ public class RecordRequestDTO {
     @NotBlank
     long productId;
     @NotBlank
-    @Digits(integer = 10, fraction = 0)
+    @Min(1)
     long quantity;
     @NotBlank
-    @Digits(integer = 10, fraction = 0)
+    @Min(0)
     long price = 0;
 
     public Record toEntity(Document document, Product product, long stock) {

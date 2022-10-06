@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 @Getter
 @NoArgsConstructor
@@ -15,16 +17,20 @@ public class Notice extends BaseTimeEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @NotBlank
     @ManyToOne
     @JoinColumn(name = "writer_id", nullable = false, foreignKey = @ForeignKey(name = "notice_user"))
     private User writer;
 
+    @NotBlank
+    @Size(max = 100)
     @Column(nullable = false, length = 100)
     private String title;
 
     @Column(nullable = true, columnDefinition = "text")
     private String content;
 
+    @NotBlank
     @Column(nullable = false)
     private boolean focus;
 

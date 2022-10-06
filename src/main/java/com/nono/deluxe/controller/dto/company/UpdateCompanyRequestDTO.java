@@ -16,14 +16,7 @@ public class UpdateCompanyRequestDTO {
     @Size(max = 30)
     private String name;
 
-    /**
-     * enum 값은 blank 쓸 때 에러가 났다. 왜?
-     * 불변으로 수정
-     */
-//    @NotNull(message = "Company: type can not Null")
-//    private CompanyType type;
-
-    @NotBlank
+    @Size(max = 30)
     private String category;
 
     @NotBlank

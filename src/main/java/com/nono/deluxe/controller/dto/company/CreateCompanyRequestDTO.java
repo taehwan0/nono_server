@@ -5,9 +5,7 @@ import com.nono.deluxe.domain.company.CompanyType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.util.Locale;
 
 @Getter
@@ -16,6 +14,7 @@ public class CreateCompanyRequestDTO {
 
     @NotBlank
     @Size(max = 30)
+    @Pattern(regexp = "^[\\w가-힣0-9]+$/ig")
     private String name;
 
     /**
@@ -24,6 +23,7 @@ public class CreateCompanyRequestDTO {
     @NotBlank
     private String type;
 
+    @Size(max = 30)
     private String category;
 
     public Company toEntity() {

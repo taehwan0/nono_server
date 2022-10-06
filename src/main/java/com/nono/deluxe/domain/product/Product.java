@@ -8,6 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.util.UUID;
 
 @Getter
@@ -17,22 +20,30 @@ public class Product {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @NotBlank
+    @Size(max = 20)
     @Column(nullable = false, unique = true, length = 20)
     private String productCode;
 
+    @NotBlank
+    @Size(max = 30)
     @Column(nullable = false, length = 30)
     private String name;
 
     @Column(nullable = true, length = 255)
     private String description;
 
+    @NotBlank
     @Column(nullable = false, length = 30)
     private String category;
 
+    @NotBlank
+    @Size(max = 30)
     @Column(nullable = false, length = 30)
     private String maker;
 
-    // standard -> unit
+    @NotBlank
+    @Size(max = 30)
     @Column(nullable = false, length = 30)
     private String unit;
 
@@ -40,6 +51,7 @@ public class Product {
     @Column(nullable = false)
     private StorageType storageType;
 
+    @Size(max = 50)
     @Column(nullable = true, length = 50)
     private String barcode;
 
@@ -53,6 +65,7 @@ public class Product {
     @JoinColumn(name = "file_id", nullable = true, foreignKey = @ForeignKey(name = "product_image"))
     private ImageFile file;
 
+    @Min(0)
     @Column(nullable = true)
     private long price;
 
