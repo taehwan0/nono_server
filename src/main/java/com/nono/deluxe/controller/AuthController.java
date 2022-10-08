@@ -20,23 +20,14 @@ public class AuthController {
 
     @PostMapping("/code")
     public ResponseEntity<AuthCodeResponseDTO> login(@RequestBody CreateAuthCodeRequestDTO requestDTO) {
-        try {
-            AuthCodeResponseDTO responseDTO = authService.createAuthCode(requestDTO);
-            return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+        AuthCodeResponseDTO responseDTO = authService.createAuthCode(requestDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
     @PostMapping("/join")
     public ResponseEntity<JoinResponseDTO> joinUser(@Validated @RequestBody JoinRequestDTO requestDTO) {
-        try {
-            JoinResponseDTO responseDTO = authService.joinUser(requestDTO);
-            return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+        JoinResponseDTO responseDTO = authService.joinUser(requestDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
     @PostMapping("/email/duplicate")
@@ -47,67 +38,41 @@ public class AuthController {
 
     @PostMapping("/email/check")
     public ResponseEntity<MessageResponseDTO> postCheckEmail(@Validated @RequestBody EmailRequestDTO requestDTO) {
-        try {
-            MessageResponseDTO responseDTO = authService.checkEmail(requestDTO);
-            return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+        MessageResponseDTO responseDTO = authService.checkEmail(requestDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
     @PostMapping("/email/verify")
     public ResponseEntity<MessageResponseDTO> verifyEmail(@Validated @RequestBody VerifyEmailRequestDTO requestDTO) {
-        try {
-            MessageResponseDTO responseDTO = authService.verifyEmail(requestDTO);
-            return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+        MessageResponseDTO responseDTO = authService.verifyEmail(requestDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
     /**
      * token reissue 와 path 조정 필요
+     *
      * @param requestDTO
      * @return
      */
     @PostMapping("/reissue")
     public ResponseEntity<MessageResponseDTO> reissueUser(@Validated @RequestBody ReissueUserRequestDTO requestDTO) {
-        try {
-            MessageResponseDTO responseDTO = authService.reissueUser(requestDTO);
-            return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+        MessageResponseDTO responseDTO = authService.reissueUser(requestDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
     @PostMapping("/code/{userCode}")
     public ResponseEntity<AuthCodeResponseDTO> createAuthCode(@RequestHeader(name = "Authorization") String token,
                                                               @PathVariable(name = "userCode") long userCode) {
-        try {
-            DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-            if(authService.isAdmin(jwt)) {
-                AuthCodeResponseDTO responseDTO = authService.createAuthCode(userCode);
-                return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
-            } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-        } catch(Exception e) {
-            log.error(e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
+        if (authService.isAdmin(jwt)) {
         }
+        AuthCodeResponseDTO responseDTO = authService.createAuthCode(userCode);
+        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
     @PostMapping("/token")
     public ResponseEntity<TokenResponseDTO> createToken(@RequestBody TokenRequestDTO requestDTO) {
-        try {
-            TokenResponseDTO responseDTO = authService.createToken(requestDTO);
-            return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+        TokenResponseDTO responseDTO = authService.createToken(requestDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 }

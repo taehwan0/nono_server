@@ -22,6 +22,7 @@ public class NoticeController {
 
     /**
      * 필요 권한: admin
+     *
      * @param token
      * @param requestDto
      * @return
@@ -29,27 +30,19 @@ public class NoticeController {
     @PostMapping("/notice")
     public ResponseEntity<NoticeResponseDTO> createNotice(@RequestHeader(value = "Authorization") String token,
                                                           @RequestBody CreateNoticeRequestDTO requestDto) {
-        try {
-            DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-            if(authService.isAdmin(jwt)) {
-                long userId = authService.getUserIdByDecodedToken(jwt);
-                NoticeResponseDTO responseDto = noticeService.createNotice(userId, requestDto);
 
-                return ResponseEntity.status(HttpStatus.OK).body(responseDto);
-            } else {
-                log.error("Notice: forbidden create notice {}", jwt.getClaim("userId"));
-
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-        } catch (RuntimeException e) {
-            log.error(e.getMessage());
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
+        if (authService.isAdmin(jwt)) {
         }
+        long userId = authService.getUserIdByDecodedToken(jwt);
+        NoticeResponseDTO responseDto = noticeService.createNotice(userId, requestDto);
+
+        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 
     /**
      * 필요권한: participant, manager, admin
+     *
      * @param token
      * @return
      */
@@ -62,26 +55,17 @@ public class NoticeController {
                                                                     @RequestParam(required = false, defaultValue = "1") int page,
                                                                     @RequestParam(required = false, defaultValue = "false") boolean focus,
                                                                     @RequestParam(required = false, defaultValue = "false") boolean content) {
-        try {
-            DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-            if(authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
-                ReadNoticeListResponseDTO responseDto  = noticeService.readNoticeList(query, column, order, size, (page - 1), focus, content);
-
-                return ResponseEntity.status(HttpStatus.OK).body(responseDto);
-            } else {
-                log.error("Notice: forbidden read notice {}", jwt.getClaim("userId"));
-
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage());
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
+        if (authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
         }
+        ReadNoticeListResponseDTO responseDto = noticeService.readNoticeList(query, column, order, size, (page - 1), focus, content);
+
+        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 
     /**
      * 필요권한: participant, manager, admin
+     *
      * @param token
      * @param noticeId
      * @return
@@ -89,51 +73,33 @@ public class NoticeController {
     @GetMapping("/notice/{noticeId}")
     public ResponseEntity<NoticeResponseDTO> readNotice(@RequestHeader(value = "Authorization") String token,
                                                         @PathVariable(name = "noticeId") long noticeId) {
-        try{
-            DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-            if(authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
-                NoticeResponseDTO responseDto = noticeService.readNotice(noticeId);
-
-                return ResponseEntity.status(HttpStatus.OK).body(responseDto);
-            } else {
-                log.error("Notice: forbidden read notice {}", jwt.getClaim("userId"));
-
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-        } catch (RuntimeException e) {
-            log.error(e.getMessage());
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
+        if (authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
         }
+        NoticeResponseDTO responseDto = noticeService.readNotice(noticeId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 
     /**
      * 필요권한: participant, manager, admin
+     *
      * @param token
      * @return
      */
     @GetMapping("/notice/recent")
     public ResponseEntity<NoticeResponseDTO> readNoticeRecent(@RequestHeader(value = "Authorization") String token) {
-        try{
-            DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-            if(authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
-                NoticeResponseDTO responseDto = noticeService.readNoticeRecent();
-
-                return ResponseEntity.status(HttpStatus.OK).body(responseDto);
-            } else {
-                log.error("Notice: forbidden read notice {}", jwt.getClaim("userId"));
-
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-        } catch (RuntimeException e) {
-            log.error(e.getMessage());
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
+        if (authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
         }
+        NoticeResponseDTO responseDto = noticeService.readNoticeRecent();
+
+        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 
     /**
      * 필요권한: admin
+     *
      * @param token
      * @param noticeId
      * @param requestDto
@@ -143,26 +109,17 @@ public class NoticeController {
     public ResponseEntity<NoticeResponseDTO> updateNotice(@RequestHeader(value = "Authorization") String token,
                                                           @PathVariable(name = "noticeId") long noticeId,
                                                           @RequestBody UpdateNoticeRequestDTO requestDto) {
-        try {
-            DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-            if(authService.isAdmin(jwt)) {
-                NoticeResponseDTO responseDto = noticeService.updateNotice(noticeId, requestDto);
-
-                return ResponseEntity.status(HttpStatus.OK).body(responseDto);
-            } else {
-                log.error("Notice: forbidden update notice {}", jwt.getClaim("userId"));
-
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-        } catch (RuntimeException e) {
-            log.error(e.getMessage());
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
+        if (authService.isAdmin(jwt)) {
         }
+        NoticeResponseDTO responseDto = noticeService.updateNotice(noticeId, requestDto);
+
+        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 
     /**
      * 필요권한: admin
+     *
      * @param token
      * @param noticeId
      * @return
@@ -170,21 +127,11 @@ public class NoticeController {
     @DeleteMapping("/notice/{noticeId}")
     public ResponseEntity<MessageResponseDTO> deleteNotice(@RequestHeader(value = "Authorization") String token,
                                                            @PathVariable(name = "noticeId") long noticeId) {
-        try {
-            DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-            if(authService.isAdmin(jwt)) {
-                MessageResponseDTO responseDto = noticeService.deleteNotice(noticeId);
-
-                return ResponseEntity.status(HttpStatus.OK).body(responseDto);
-            } else {
-                log.error("Notice: forbidden delete notice {}", jwt.getClaim("userId"));
-
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-        } catch (RuntimeException e) {
-            log.error(e.getMessage());
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
+        if (authService.isAdmin(jwt)) {
         }
+        MessageResponseDTO responseDto = noticeService.deleteNotice(noticeId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 }
