@@ -9,9 +9,9 @@ import javax.validation.constraints.NotNull;
 @Getter
 @NoArgsConstructor
 public class UpdateCompanyActiveDTO {
-    @NotBlank
+    @NotNull
     private long companyId;
 
-    @NotBlank
+    @NotNull
     private boolean active;
 }

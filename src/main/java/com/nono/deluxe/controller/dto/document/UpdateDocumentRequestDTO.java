@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 public class UpdateDocumentRequestDTO {
 
-    @NotBlank
+    @NotNull
     long companyId; // 입출고처는 수정 가능하나 타 데이터 변화 가능성이 있음
 
     List<RecordRequestDTO> recordList = new ArrayList<>();

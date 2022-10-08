@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,11 +17,11 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class CreateDocumentRequestDTO {
-    @NotBlank
+    @NotNull
     LocalDate date;
     @NotBlank
     String type;
-    @NotBlank
+    @NotNull
     long companyId;
 
     List<RecordRequestDTO> recordList = new ArrayList<>();

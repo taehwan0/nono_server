@@ -5,12 +5,13 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Getter
 @NoArgsConstructor
 public class ReissueUserRequestDTO {
     @Email
     private String email;
-    @NotBlank
+    @NotNull
     private String code;
 }

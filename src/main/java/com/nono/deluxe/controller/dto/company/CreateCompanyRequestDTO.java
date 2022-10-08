@@ -6,21 +6,20 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.*;
-import java.util.Locale;
 
 @Getter
 @NoArgsConstructor
 public class CreateCompanyRequestDTO {
 
-    @NotBlank
-    @Size(max = 30)
-    @Pattern(regexp = "^[\\w가-힣0-9]+$/ig")
+    @NotNull
+    @Size(min = 1, max = 30)
+    @Pattern(regexp = "^[\\w가-힣0-9]+$")
     private String name;
 
     /**
      * enum 값은 blank 쓸 때 에러가 났다. 왜?
      */
-    @NotBlank
+    @NotNull
     private String type;
 
     @Size(max = 30)

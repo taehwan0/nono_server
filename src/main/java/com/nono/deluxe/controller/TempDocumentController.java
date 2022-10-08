@@ -29,8 +29,7 @@ public class TempDocumentController {
     public ResponseEntity<Object> createTempDocument(@RequestHeader(name = "Authorization") String token,
                                                      @Validated @RequestBody CreateTempDocumentRequestDTO requestDto) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        if (authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
-        }
+        authService.verifyParticipantRole(jwt);
         long userId = authService.getUserIdByDecodedToken(jwt);
         TempDocumentResponseDTO responseDto = tempDocumentService.createDocument(userId, requestDto);
 
@@ -41,8 +40,7 @@ public class TempDocumentController {
     public ResponseEntity<TempDocumentResponseDTO> readTempDocument(@RequestHeader(name = "Authorization") String token,
                                                                     @PathVariable(name = "documentId") long documentId) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        if (authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
-        }
+        authService.verifyParticipantRole(jwt);
         TempDocumentResponseDTO responseDto = tempDocumentService.readDocument(documentId);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
@@ -56,8 +54,7 @@ public class TempDocumentController {
                                                                                 @RequestParam(required = false, defaultValue = "10") int size,
                                                                                 @RequestParam(required = false, defaultValue = "0") int page) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        if (authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
-        }
+        authService.verifyParticipantRole(jwt);
         ReadTempDocumentListResponseDTO responseDto = tempDocumentService.readDocumentList(query, column, order, size, page);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
@@ -68,8 +65,7 @@ public class TempDocumentController {
                                                                       @PathVariable(name = "documentId") long documentId,
                                                                       @Validated @RequestBody UpdateTempDocumentRequestDTO requestDto) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        if (authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
-        }
+        authService.verifyParticipantRole(jwt);
         long userId = authService.getUserIdByDecodedToken(jwt);
         log.info("Document: {} document updated By {}", documentId, userId);
         TempDocumentResponseDTO responseDto = tempDocumentService.updateDocument(documentId, userId, requestDto);
@@ -81,8 +77,7 @@ public class TempDocumentController {
     public ResponseEntity<MessageResponseDTO> deleteTempDocument(@RequestHeader(name = "Authorization") String token,
                                                                  @PathVariable(name = "documentId") long documentId) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        if (authService.isAdmin(jwt)) {
-        }
+        authService.verifyManagerRole(jwt);
         long userId = authService.getUserIdByDecodedToken(jwt);
         log.info("TempDocument: {} document deleted By {}", documentId, userId);
         MessageResponseDTO responseDto = tempDocumentService.deleteDocument(documentId);

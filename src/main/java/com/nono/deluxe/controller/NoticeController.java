@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -29,11 +30,10 @@ public class NoticeController {
      */
     @PostMapping("/notice")
     public ResponseEntity<NoticeResponseDTO> createNotice(@RequestHeader(value = "Authorization") String token,
-                                                          @RequestBody CreateNoticeRequestDTO requestDto) {
+                                                          @Validated @RequestBody CreateNoticeRequestDTO requestDto) {
 
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        if (authService.isAdmin(jwt)) {
-        }
+        authService.verifyAdminRole(jwt);
         long userId = authService.getUserIdByDecodedToken(jwt);
         NoticeResponseDTO responseDto = noticeService.createNotice(userId, requestDto);
 
@@ -56,8 +56,7 @@ public class NoticeController {
                                                                     @RequestParam(required = false, defaultValue = "false") boolean focus,
                                                                     @RequestParam(required = false, defaultValue = "false") boolean content) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        if (authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
-        }
+        authService.verifyParticipantRole(jwt);
         ReadNoticeListResponseDTO responseDto = noticeService.readNoticeList(query, column, order, size, (page - 1), focus, content);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
@@ -74,8 +73,7 @@ public class NoticeController {
     public ResponseEntity<NoticeResponseDTO> readNotice(@RequestHeader(value = "Authorization") String token,
                                                         @PathVariable(name = "noticeId") long noticeId) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        if (authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
-        }
+        authService.verifyParticipantRole(jwt);
         NoticeResponseDTO responseDto = noticeService.readNotice(noticeId);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
@@ -90,8 +88,7 @@ public class NoticeController {
     @GetMapping("/notice/recent")
     public ResponseEntity<NoticeResponseDTO> readNoticeRecent(@RequestHeader(value = "Authorization") String token) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        if (authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
-        }
+        authService.verifyParticipantRole(jwt);
         NoticeResponseDTO responseDto = noticeService.readNoticeRecent();
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
@@ -108,10 +105,9 @@ public class NoticeController {
     @PutMapping("/notice/{noticeId}")
     public ResponseEntity<NoticeResponseDTO> updateNotice(@RequestHeader(value = "Authorization") String token,
                                                           @PathVariable(name = "noticeId") long noticeId,
-                                                          @RequestBody UpdateNoticeRequestDTO requestDto) {
+                                                          @Validated @RequestBody UpdateNoticeRequestDTO requestDto) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        if (authService.isAdmin(jwt)) {
-        }
+        authService.verifyAdminRole(jwt);
         NoticeResponseDTO responseDto = noticeService.updateNotice(noticeId, requestDto);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
@@ -128,8 +124,7 @@ public class NoticeController {
     public ResponseEntity<MessageResponseDTO> deleteNotice(@RequestHeader(value = "Authorization") String token,
                                                            @PathVariable(name = "noticeId") long noticeId) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        if (authService.isAdmin(jwt)) {
-        }
+        authService.verifyAdminRole(jwt);
         MessageResponseDTO responseDto = noticeService.deleteNotice(noticeId);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);

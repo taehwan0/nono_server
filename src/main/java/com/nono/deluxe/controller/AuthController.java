@@ -3,6 +3,7 @@ package com.nono.deluxe.controller;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.nono.deluxe.controller.dto.MessageResponseDTO;
 import com.nono.deluxe.controller.dto.auth.*;
+import com.nono.deluxe.exception.NoAuthorityException;
 import com.nono.deluxe.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +20,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/code")
-    public ResponseEntity<AuthCodeResponseDTO> login(@RequestBody CreateAuthCodeRequestDTO requestDTO) {
+    public ResponseEntity<AuthCodeResponseDTO> login(@Validated @RequestBody CreateAuthCodeRequestDTO requestDTO) {
         AuthCodeResponseDTO responseDTO = authService.createAuthCode(requestDTO);
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
@@ -64,14 +65,13 @@ public class AuthController {
     public ResponseEntity<AuthCodeResponseDTO> createAuthCode(@RequestHeader(name = "Authorization") String token,
                                                               @PathVariable(name = "userCode") long userCode) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        if (authService.isAdmin(jwt)) {
-        }
+        authService.verifyAdminRole(jwt);
         AuthCodeResponseDTO responseDTO = authService.createAuthCode(userCode);
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
     @PostMapping("/token")
-    public ResponseEntity<TokenResponseDTO> createToken(@RequestBody TokenRequestDTO requestDTO) {
+    public ResponseEntity<TokenResponseDTO> createToken(@Validated @RequestBody TokenRequestDTO requestDTO) {
         TokenResponseDTO responseDTO = authService.createToken(requestDTO);
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }

@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 @Getter
@@ -16,6 +17,6 @@ public class CreateAuthCodeRequestDTO {
     /**
      * password 는 회원가입 시에만 검증함
      */
-    @NotBlank
+    @NotNull
     private String password;
 }

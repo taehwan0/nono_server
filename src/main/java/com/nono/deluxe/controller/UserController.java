@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -27,10 +28,9 @@ public class UserController {
     // 사용자 생성 - Participant 추가.
     @PostMapping()
     public ResponseEntity<UserResponseDTO> addUser(@RequestHeader(value = "Authorization") String token,
-                                                   @RequestBody AddUserRequestDTO userRequestDTO) {
+                                                   @Validated @RequestBody AddUserRequestDTO userRequestDTO) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        if (authService.isAdmin(jwt) || authService.isManager(jwt)) {
-        }
+        authService.verifyManagerRole(jwt);
         UserResponseDTO responseDTO = userService.addUser(userRequestDTO);
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
 
@@ -39,14 +39,13 @@ public class UserController {
     // 유저 리스트 조회.
     @GetMapping()
     public ResponseEntity<GetUserListResponseDTO> readUserList(@RequestHeader(value = "Authorization") String token,
-                                                               @RequestParam(value = "query", defaultValue = "") String query,
+                                                               @RequestParam(required = false, defaultValue = "") String query,
                                                                @RequestParam(required = false, defaultValue = "userName") String column,
                                                                @RequestParam(required = false, defaultValue = "ASC") String order,
                                                                @RequestParam(required = false, defaultValue = "10") int size,
                                                                @RequestParam(required = false, defaultValue = "1") int page) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        if (authService.isManager(jwt) || authService.isAdmin(jwt)) {
-        }
+        authService.verifyManagerRole(jwt);
         GetUserListResponseDTO userList = userService.readUserList(query, column, order, size, (page - 1));
         return ResponseEntity.status(HttpStatus.OK).body(userList);
     }
@@ -55,8 +54,7 @@ public class UserController {
     public ResponseEntity<UserResponseDTO> getUserInfo(@RequestHeader(value = "Authorization") String token,
                                                        @PathVariable(name = "userCode") long userCode) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        if (authService.isManager(jwt) || authService.isAdmin(jwt)) {
-        }
+        authService.verifyManagerRole(jwt);
         UserResponseDTO responseDTO = userService.getUserInfo(userCode);
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
@@ -64,10 +62,9 @@ public class UserController {
     @PutMapping("/{userCode}")
     public ResponseEntity<UserResponseDTO> updateUser(@RequestHeader(value = "Authorization") String token,
                                                       @PathVariable(name = "userCode") long userCode,
-                                                      @RequestBody UpdateUserRequestDTO userRequestDTO) {
+                                                      @Validated @RequestBody UpdateUserRequestDTO userRequestDTO) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        if (authService.isManager(jwt) || authService.isAdmin(jwt)) {
-        }
+        authService.verifyManagerRole(jwt);
         UserResponseDTO responseDTO = userService.updateUser(userCode, userRequestDTO);
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
@@ -76,8 +73,7 @@ public class UserController {
     public ResponseEntity<MessageResponseDTO> deleteUser(@RequestHeader(name = "Authorization") String token,
                                                          @PathVariable(name = "userCode") long userCode) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        if (authService.isAdmin(jwt)) {
-        }
+        authService.verifyAdminRole(jwt);
         long userId = authService.getUserIdByDecodedToken(jwt);
         log.info("User: {} user is deleted By {}", userCode, userId);
         MessageResponseDTO responseDto = userService.deleteUser(userCode);

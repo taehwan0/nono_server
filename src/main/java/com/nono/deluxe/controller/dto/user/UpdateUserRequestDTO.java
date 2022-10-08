@@ -5,18 +5,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @NoArgsConstructor
 @Getter
 public class UpdateUserRequestDTO {
-    @NotBlank
+    @NotNull
     @Size(max = 20)
     private String userName;
     private String email;
-    @NotBlank
+    @NotNull
     private Role role;
-    @NotBlank
+    @NotNull
     private boolean active;
     private boolean deleted;
 }

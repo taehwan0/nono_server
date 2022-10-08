@@ -16,8 +16,6 @@ public class Company {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @NotBlank
-    @Size(max = 30)
     @Column(nullable = false, unique = true, length = 30)
     private String name;
 
@@ -25,7 +23,6 @@ public class Company {
     @Column(nullable = false)
     private CompanyType type;
 
-    @Size(max = 30)
     @Column(nullable = true, length = 30)
     private String category;
 

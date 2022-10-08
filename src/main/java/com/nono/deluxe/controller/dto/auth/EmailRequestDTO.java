@@ -14,6 +14,6 @@ public class EmailRequestDTO {
     @Email
     private String email;
 
-    @NotBlank
+    @NotNull
     private String type; // JOIN, REISSUE
 }

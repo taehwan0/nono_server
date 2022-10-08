@@ -4,6 +4,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.nono.deluxe.controller.dto.MessageResponseDTO;
 import com.nono.deluxe.controller.dto.company.*;
 import com.nono.deluxe.controller.dto.document.ReadDocumentListResponseDTO;
+import com.nono.deluxe.exception.NoAuthorityException;
 import com.nono.deluxe.service.AuthService;
 import com.nono.deluxe.service.CompanyService;
 import lombok.RequiredArgsConstructor;
@@ -33,8 +34,7 @@ public class CompanyController {
     public ResponseEntity<CompanyResponseDTO> createCompany(@RequestHeader(name = "Authorization") String token,
                                                             @Validated @RequestBody CreateCompanyRequestDTO requestDto) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        if (authService.isManager(jwt) || authService.isAdmin(jwt)) {
-        }
+        authService.verifyManagerRole(jwt);
         CompanyResponseDTO responseDto = companyService.createCompany(requestDto);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
@@ -61,8 +61,7 @@ public class CompanyController {
                                                                       @RequestParam(required = false, defaultValue = "1") int page,
                                                                       @RequestParam(required = false, defaultValue = "false") boolean active) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        if (authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
-        }
+        authService.verifyParticipantRole(jwt);
         ReadCompanyListResponseDTO responseDto = companyService.readCompanyList(query, column, order, size, (page - 1), active);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
@@ -79,8 +78,7 @@ public class CompanyController {
     public ResponseEntity<CompanyResponseDTO> readCompany(@RequestHeader(name = "Authorization") String token,
                                                           @PathVariable(name = "companyId") long companyId) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        if (authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
-        }
+        authService.verifyParticipantRole(jwt);
         CompanyResponseDTO responseDto = companyService.readCompany(companyId);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
@@ -103,8 +101,7 @@ public class CompanyController {
                                                                         @RequestParam(required = false, defaultValue = "0") int year,
                                                                         @RequestParam(required = false, defaultValue = "0") int month) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        if (authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
-        }
+        authService.verifyParticipantRole(jwt);
         ReadDocumentListResponseDTO responseDto = companyService.readCompanyDocument(companyId, order, size, (page - 1), year, month);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
@@ -123,8 +120,7 @@ public class CompanyController {
                                                             @Validated @RequestBody UpdateCompanyRequestDTO requestDto,
                                                             @PathVariable(name = "companyId") long companyId) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        if (authService.isAdmin(jwt)) {
-        }
+        authService.verifyAdminRole(jwt);
         CompanyResponseDTO responseDto = companyService.updateCompany(companyId, requestDto);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
@@ -134,8 +130,7 @@ public class CompanyController {
     public ResponseEntity<UpdateCompanyActiveResponseDTO> updateCompanyActive(@RequestHeader(name = "Authorization") String token,
                                                                               @Validated @RequestBody UpdateCompanyActiveRequestDTO requestDto) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        if (authService.isAdmin(jwt)) {
-        }
+        authService.verifyAdminRole(jwt);
         UpdateCompanyActiveResponseDTO responseDto = companyService.updateCompanyActive(requestDto);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
@@ -153,8 +148,7 @@ public class CompanyController {
     public ResponseEntity<MessageResponseDTO> updateCompany(@RequestHeader(name = "Authorization") String token,
                                                             @PathVariable(name = "companyId") long companyId) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        if (authService.isAdmin(jwt)) {
-        }
+        authService.verifyAdminRole(jwt);
         MessageResponseDTO responseDto = companyService.deleteCompany(companyId);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);

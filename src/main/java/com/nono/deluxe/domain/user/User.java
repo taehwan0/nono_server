@@ -17,8 +17,6 @@ public class User {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @NotBlank
-    @Size(max = 20)
     @Column(nullable = false, length = 20)
     private String name;
 
@@ -37,7 +35,6 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @NotBlank
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;

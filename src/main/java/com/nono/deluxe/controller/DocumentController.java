@@ -29,8 +29,7 @@ public class DocumentController {
     public ResponseEntity<Object> createDocument(@RequestHeader(name = "Authorization") String token,
                                                  @Validated @RequestBody CreateDocumentRequestDTO requestDto) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        if (authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
-        }
+        authService.verifyParticipantRole(jwt);
         long userId = authService.getUserIdByDecodedToken(jwt);
         DocumentResponseDTO responseDto = documentService.createDocument(userId, requestDto);
 
@@ -41,8 +40,7 @@ public class DocumentController {
     public ResponseEntity<DocumentResponseDTO> readDocument(@RequestHeader(name = "Authorization") String token,
                                                             @PathVariable(name = "documentId") long documentId) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        if (authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
-        }
+        authService.verifyParticipantRole(jwt);
         DocumentResponseDTO responseDto = documentService.readDocument(documentId);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
@@ -58,8 +56,7 @@ public class DocumentController {
                                                                         @RequestParam(required = false, defaultValue = "0") int year,
                                                                         @RequestParam(required = false, defaultValue = "0") int month) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        if (authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
-        }
+        authService.verifyParticipantRole(jwt);
         ReadDocumentListResponseDTO responseDto = documentService.readDocumentList(query, column, order, size, (page - 1), year, month);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
@@ -70,8 +67,7 @@ public class DocumentController {
                                                               @PathVariable(name = "documentId") long documentId,
                                                               @Validated @RequestBody UpdateDocumentRequestDTO requestDto) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        if (authService.isParticipant(jwt) || authService.isManager(jwt) || authService.isAdmin(jwt)) {
-        }
+        authService.verifyParticipantRole(jwt);
         long userId = authService.getUserIdByDecodedToken(jwt);
         log.info("Document: {} document updated By {}", documentId, userId);
         DocumentResponseDTO responseDto = documentService.updateDocument(documentId, requestDto);
@@ -83,8 +79,7 @@ public class DocumentController {
     public ResponseEntity<MessageResponseDTO> deleteDocument(@RequestHeader(name = "Authorization") String token,
                                                              @PathVariable(name = "documentId") long documentId) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        if (authService.isAdmin(jwt)) {
-        }
+        authService.verifyAdminRole(jwt);
         long userId = authService.getUserIdByDecodedToken(jwt);
         log.info("Document: {} document deleted By {}", documentId, userId);
         MessageResponseDTO responseDto = documentService.deleteDocument(documentId);

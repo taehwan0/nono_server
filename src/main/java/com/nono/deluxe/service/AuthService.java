@@ -14,6 +14,8 @@ import com.nono.deluxe.domain.authcode.AuthCodeRepository;
 import com.nono.deluxe.domain.user.Role;
 import com.nono.deluxe.domain.user.User;
 import com.nono.deluxe.domain.user.UserRepository;
+import com.nono.deluxe.exception.InvalidTokenException;
+import com.nono.deluxe.exception.NoAuthorityException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -67,6 +69,7 @@ public class AuthService {
 
     /**
      * authorization_code 생성
+     *
      * @param userCode
      * @return
      */
@@ -112,9 +115,9 @@ public class AuthService {
     @Transactional
     public TokenResponseDTO createToken(TokenRequestDTO requestDTO) {
         String grant_type = requestDTO.getGrant_type().toLowerCase();
-        if(grant_type.equals("authorization_code")) return createTokenByAuthCode(requestDTO.getCode());
-        else if(grant_type.equals("refresh_token")) return createTokenByRefreshToken(requestDTO.getRefresh_token());
-        else throw new RuntimeException("invalid grant_type");
+        if (grant_type.equals("authorization_code")) return createTokenByAuthCode(requestDTO.getCode());
+        else if (grant_type.equals("refresh_token")) return createTokenByRefreshToken(requestDTO.getRefresh_token());
+        else throw new IllegalArgumentException("invalid grant_type");
     }
 
     @Transactional
@@ -142,7 +145,7 @@ public class AuthService {
     public MessageResponseDTO checkDuplicateEmail(EmailRequestDTO requestDTO) {
         String email = requestDTO.getEmail();
         Optional<User> optionalUser = userRepository.findByEmail(email);
-        if(optionalUser.isEmpty()) return new MessageResponseDTO(true, "enable email");
+        if (optionalUser.isEmpty()) return new MessageResponseDTO(true, "enable email");
         return new MessageResponseDTO(false, "already used email");
     }
 
@@ -172,11 +175,11 @@ public class AuthService {
         String verifyCode = checkEmail.getVerifyCode();
         Optional<User> optionalUser = userRepository.findByEmail(email);
 
-        if(type.equals(CheckType.JOIN)) {
-            if(optionalUser.isPresent()) throw new RuntimeException("already exist email");
+        if (type.equals(CheckType.JOIN)) {
+            if (optionalUser.isPresent()) throw new RuntimeException("already exist email");
             mailService.postJoinCheckMail(email, verifyCode);
-        } else if(type.equals(CheckType.REISSUE)) {
-            if(optionalUser.isEmpty()) throw new RuntimeException("not exist email");
+        } else if (type.equals(CheckType.REISSUE)) {
+            if (optionalUser.isEmpty()) throw new RuntimeException("not exist email");
             mailService.postReissueCheckMail(email, verifyCode);
         } else {
             throw new RuntimeException("invalid CheckType");
@@ -191,7 +194,7 @@ public class AuthService {
         CheckEmail checkEmail = checkEmailRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Not Found Check Email"));
 
-        if(checkEmail.getVerifyCode().equals(code) && verifyValidTime(checkEmail)) {
+        if (checkEmail.getVerifyCode().equals(code) && verifyValidTime(checkEmail)) {
             // code 가 맞았을 경우, 시간 또한 제한시간 안쪽일때
             checkEmail.verify();
             return new MessageResponseDTO(true, "success");
@@ -207,7 +210,7 @@ public class AuthService {
         CheckEmail checkEmail = checkEmailRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Not Found Check Email"));
 
-        if(checkEmail.isVerified() &&
+        if (checkEmail.isVerified() &&
                 checkEmail.getVerifyCode().equals(code) &&
                 checkEmail.getType().equals(CheckType.REISSUE)) {
             User user = userRepository.findByEmail(email)
@@ -238,7 +241,7 @@ public class AuthService {
         SecureRandom random = new SecureRandom();
         StringBuilder sb = new StringBuilder();
 
-        for(int i = 0; i < randomStringLength; i ++) {
+        for (int i = 0; i < randomStringLength; i++) {
             int randomInt = random.nextInt(charsTable.length());
             sb.append(charsTable.charAt(randomInt));
         }
@@ -260,6 +263,7 @@ public class AuthService {
 
     /**
      * 토큰 생성 후 반환 유효시간 2시간
+     *
      * @param username
      * @param userId
      * @param userRole
@@ -294,24 +298,20 @@ public class AuthService {
 
     /**
      * 유효한 유저인지 확인하고, User 객체를 반환
+     *
      * @param token
      * @return
      */
     public DecodedJWT decodeAccessTokenByRequestHeader(String token) {
         Algorithm algorithm = getAlgorithm(accessKey);
         JWTVerifier verifier = getVerifier(algorithm);
-        try {
-            String extractedToken = extractToken(token);
-            DecodedJWT decodedJWT = verifier.verify(extractedToken);
-            long userId = Long.parseLong(decodedJWT.getClaim("userId").toString());
-            userRepository.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("Not Found User"));
-            log.info("user Login : {}", decodedJWT.getClaim("userId").toString());
-            return decodedJWT;
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            throw new RuntimeException("invalid token");
-        }
+        String extractedToken = extractToken(token);
+        DecodedJWT decodedJWT = verifier.verify(extractedToken);
+        long userId = Long.parseLong(decodedJWT.getClaim("userId").toString());
+        userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Not Found User"));
+        log.info("user Login : {}", decodedJWT.getClaim("userId").toString());
+        return decodedJWT;
     }
 
     private DecodedJWT decodeAccessToken(String token) {
@@ -328,16 +328,23 @@ public class AuthService {
     private DecodedJWT decodeRefreshToken(String token) {
         Algorithm algorithm = getAlgorithm(refreshKey);
         JWTVerifier verifier = getVerifier(algorithm);
-        try {
-            return verifier.verify(token);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            throw new RuntimeException("invalid token");
-        }
+        return verifier.verify(token);
     }
 
     public long getUserIdByDecodedToken(DecodedJWT jwt) {
         return Long.parseLong(jwt.getClaim("userId").toString());
+    }
+
+    public void verifyAdminRole(DecodedJWT jwt) {
+        if (!isAdmin(jwt)) throw new NoAuthorityException("Forbidden API");
+    }
+
+    public void verifyManagerRole(DecodedJWT jwt) {
+        if (!isManager(jwt) && !isAdmin(jwt)) throw new NoAuthorityException("Forbidden API");
+    }
+
+    public void verifyParticipantRole(DecodedJWT jwt) {
+        if (!isParticipant(jwt) && !isManager(jwt) && !isAdmin(jwt)) throw new NoAuthorityException("Forbidden API");
     }
 
     public boolean isParticipant(DecodedJWT jwt) {
@@ -354,19 +361,21 @@ public class AuthService {
 
     /**
      * bearer token 형식 검증 및 토큰 추출
+     *
      * @param token
      * @return
      */
     private String extractToken(String token) {
-        if(token.matches("(^Bearer [A-Za-z0-9-_]*\\.[A-Za-z0-9-_]*\\.[A-Za-z0-9-_]*$)")) {
+        if (token.matches("(^Bearer [A-Za-z0-9-_]*\\.[A-Za-z0-9-_]*\\.[A-Za-z0-9-_]*$)")) {
             return token.split(" ")[1];
         } else {
-            throw new RuntimeException("is not bearer token: " + token);
+            throw new InvalidTokenException("InvalidTokenForm");
         }
     }
 
     /**
      * algorithm 생성기
+     *
      * @param key
      * @return
      */
@@ -376,6 +385,7 @@ public class AuthService {
 
     /**
      * verifier 생성기
+     *
      * @param algorithm
      * @return
      */
