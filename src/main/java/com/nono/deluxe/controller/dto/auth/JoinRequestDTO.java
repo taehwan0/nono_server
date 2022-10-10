@@ -5,21 +5,22 @@ import com.nono.deluxe.domain.user.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.Email;
+import javax.validation.constraints.*;
 
 @Getter
 @NoArgsConstructor
 public class JoinRequestDTO {
-    /**
-     * Validation 추가 필요함
-     */
     @Email
     private String email;
 
+    @Pattern(regexp="^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$")
     private String password;
 
+    @NotNull
+    @Size(max = 20)
     private String name;
 
+    @NotNull
     private String code;
 
     public User toEntity() {

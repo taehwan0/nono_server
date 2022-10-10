@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @Getter
@@ -12,12 +13,12 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 public class UpdateNoticeRequestDTO {
 
-    @NotBlank(message = "noticeTitle can not Blank")
-    @Size(max = 100, message = "noticeTitle max size = 100")
+    @NotNull
+    @Size(max = 100)
     private String title;
 
     private String content;
 
-    @NotBlank(message = "noticeFocus can not Blank")
+    @NotNull
     private boolean focus;
 }

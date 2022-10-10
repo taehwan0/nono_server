@@ -8,6 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.util.UUID;
 
 @Getter
@@ -32,7 +35,6 @@ public class Product {
     @Column(nullable = false, length = 30)
     private String maker;
 
-    // standard -> unit
     @Column(nullable = false, length = 30)
     private String unit;
 

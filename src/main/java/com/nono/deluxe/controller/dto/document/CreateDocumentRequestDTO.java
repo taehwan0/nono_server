@@ -8,6 +8,8 @@ import com.nono.deluxe.domain.user.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,8 +17,11 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class CreateDocumentRequestDTO {
+    @NotNull
     LocalDate date;
+    @NotBlank
     String type;
+    @NotNull
     long companyId;
 
     List<RecordRequestDTO> recordList = new ArrayList<>();

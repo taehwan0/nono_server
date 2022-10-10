@@ -5,25 +5,24 @@ import com.nono.deluxe.domain.company.CompanyType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import java.util.Locale;
+import javax.validation.constraints.*;
 
 @Getter
 @NoArgsConstructor
 public class CreateCompanyRequestDTO {
 
-    @NotBlank(message = "Company: companyName can not Blank")
-    @Size(max = 30, message = "companyName max size = 30")
+    @NotNull
+    @Size(min = 1, max = 30)
+    @Pattern(regexp = "^[\\w가-힣0-9]+$")
     private String name;
 
     /**
      * enum 값은 blank 쓸 때 에러가 났다. 왜?
      */
-    @NotNull(message = "Company: companyType can not Null")
+    @NotNull
     private String type;
 
+    @Size(max = 30)
     private String category;
 
     public Company toEntity() {

@@ -8,6 +8,8 @@ import com.nono.deluxe.domain.user.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,10 +18,13 @@ import java.util.List;
 @NoArgsConstructor
 public class CreateTempDocumentRequestDTO {
     // 거래 일자
+    @NotNull
     LocalDate date;
     // 문서 유형 - TEMP_IMPUT / TEMP_OUTPUT
+    @NotNull
     DocumentType type;
 
+    @NotNull
     long companyId;
 
     List<RecordRequestDTO> recordList = new ArrayList<>();

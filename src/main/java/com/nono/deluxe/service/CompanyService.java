@@ -29,7 +29,6 @@ import java.util.Locale;
 public class CompanyService {
 
     private final CompanyRepository companyRepository;
-    private final RecordRepository recordRepository;
     private final DocumentRepository documentRepository;
 
     @Transactional

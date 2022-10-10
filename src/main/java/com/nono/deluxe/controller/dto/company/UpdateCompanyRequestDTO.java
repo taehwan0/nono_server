@@ -12,20 +12,13 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 public class UpdateCompanyRequestDTO {
 
-    @NotBlank(message = "Company: name can not Blank")
-    @Size(max = 30, message = "companyName max size = 30")
+    @NotNull
+    @Size(min = 1, max = 30)
     private String name;
 
-    /**
-     * enum 값은 blank 쓸 때 에러가 났다. 왜?
-     * 불변으로 수정
-     */
-//    @NotNull(message = "Company: type can not Null")
-//    private CompanyType type;
-
-    @NotNull(message = "Company: category can not Null")
+    @Size(max = 30)
     private String category;
 
-    @NotNull(message = "Company: active can not Null")
+    @NotBlank
     private boolean active;
 }
