@@ -1,6 +1,7 @@
-package com.nono.deluxe.controller.exception;
+package com.nono.deluxe.exception.handler;
 
 import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.nono.deluxe.controller.dto.ErrorResponseDTO;
@@ -29,38 +30,11 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler
     public ResponseEntity<ErrorResponseDTO> runtimeException(RuntimeException exception) {
-        String code = "RuntimeError";
+        String code = "R-Runtime";
         String message = exception.getMessage();
-        ErrorResponseDTO response = new ErrorResponseDTO(code, message);
+        ErrorResponseDTO response = new ErrorResponseDTO(HttpStatus.BAD_REQUEST, code, message);
 
-        log.error("[RuntimeException]: {}", message);
-        log.error("[RuntimeException]: " + exception);
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-    }
-
-    /*
-    토큰의 기한이 만료됐거나, 토큰의 형식이 틀렸거나, 토큰이 변질되어 디코딩 할 수 없는 경우
-     */
-    @ExceptionHandler({InvalidTokenException.class, TokenExpiredException.class, JWTDecodeException.class})
-    public ResponseEntity<ErrorResponseDTO> authTokenException(Exception exception) {
-
-        String code = "";
-
-//        if(exception instanceof InvalidTokenException || exception instanceof JWTDecodeException) {
-//            code = "InvalidToken";
-//        }
-
-        if (exception instanceof TokenExpiredException) {
-            code = "ExpiredToken";
-        } else {
-            code = "InvalidToken";
-        }
-
-        String message = exception.getMessage();
-        ErrorResponseDTO response = new ErrorResponseDTO(code, message);
-
-        log.error("[AuthTokenException]: {}", message);
+        log.error("[RuntimeException = {}]: {}" + exception, code, message);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
@@ -70,11 +44,11 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler({DataIntegrityViolationException.class, ConstraintViolationException.class})
     public ResponseEntity<ErrorResponseDTO> sqlException(Exception exception) {
-        String code = "ImpossibleInputData";
+        String code = "D-InvalidData";
         String message = exception.getMessage();
-        ErrorResponseDTO response = new ErrorResponseDTO(code, message);
+        ErrorResponseDTO response = new ErrorResponseDTO(HttpStatus.BAD_REQUEST, code, message);
 
-        log.error("[SqlException]: {}", message);
+        log.error("[SQLException = {}]: {}" + exception, code, message);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
@@ -84,11 +58,11 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler({MethodArgumentNotValidException.class})
     public ResponseEntity<ErrorResponseDTO> validationException(Exception exception) {
-        String code = "Validation";
+        String code = "D-Validation";
         String message = exception.getMessage();
-        ErrorResponseDTO response = new ErrorResponseDTO(code, message);
+        ErrorResponseDTO response = new ErrorResponseDTO(HttpStatus.BAD_REQUEST, code, message);
 
-        log.error("[ValidationException]: {}", message);
+        log.error("[ValidationException = {}]: {}" + exception, code, message);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
@@ -99,44 +73,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({IllegalArgumentException.class, HttpMessageNotReadableException.class, UnexpectedTypeException.class,
             InvalidFormatException.class})
     public ResponseEntity<ErrorResponseDTO> illegalArgumentException(Exception exception) {
-        String code = "IllegalArgument";
+        String code = "D-Illegal";
         String message = exception.getMessage();
-        ErrorResponseDTO response = new ErrorResponseDTO(code, message);
+        ErrorResponseDTO response = new ErrorResponseDTO(HttpStatus.BAD_REQUEST, code, message);
 
-        log.error("[IllegalArgumentException]: {}", message);
+        log.error("[IllegalArgumentException = {}]: {}" + exception, code, message);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-    }
-
-    /*
-    RequestHeader 의 필수 요소가 없음 -> 본 프로젝트에서는 Authorization 필수
-    때문에, 401 에러를 리턴함 (인증할 것을 요구함)
-     */
-    @ExceptionHandler
-    public ResponseEntity<ErrorResponseDTO> missingRequestHeaderException(MissingRequestHeaderException exception) {
-
-        String code = "MissingRequestHeader";
-        String message = exception.getMessage();
-        ErrorResponseDTO response = new ErrorResponseDTO(code, message);
-
-        log.error("[MissingRequestHeaderException]: {}", message);
-
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-    }
-
-    /*
-    해당 API 에 접근할 권한이 없음
-     */
-    @ExceptionHandler
-    public ResponseEntity<ErrorResponseDTO> noAuthorityException(NoAuthorityException exception) {
-
-        String code = "NoAuthority";
-        String message = exception.getMessage();
-        ErrorResponseDTO response = new ErrorResponseDTO(code, message);
-
-        log.error("[NoAuthorityException]: {}", message);
-
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
     /*
@@ -144,12 +87,11 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler
     public ResponseEntity<ErrorResponseDTO> methodArgumentTypeMismatchException(MethodArgumentTypeMismatchException exception) {
-
-        String code = "MismatchArgumentType";
+        String code = "D-Query";
         String message = exception.getMessage();
-        ErrorResponseDTO response = new ErrorResponseDTO(code, message);
+        ErrorResponseDTO response = new ErrorResponseDTO(HttpStatus.BAD_REQUEST, code, message);
 
-        log.error("[MethodArgumentTypeMismatchException]: {}", message);
+        log.error("[MethodArgumentTypeMismatchException = {}]: {}" + exception, code, message);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
