@@ -13,7 +13,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/product")
 @RequiredArgsConstructor
 @RestController
 public class ProductController {
@@ -22,7 +22,7 @@ public class ProductController {
     private final AuthService authService;
 
     /// product 생성
-    @PostMapping("/product")
+    @PostMapping("")
     public ResponseEntity<ProductResponseDTO> createProduct(@RequestHeader(value = "Authorization") String token,
                                                             @Validated @RequestBody CreateProductRequestDto requestDto) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
@@ -46,7 +46,7 @@ public class ProductController {
      */
 
     // product 리스트 가져오기.
-    @GetMapping("/product")
+    @GetMapping("")
     public ResponseEntity<GetProductListResponseDTO> getProductList(@RequestHeader(value = "Authorization") String token,
                                                                     @RequestParam(value = "query", defaultValue = "") String query,
                                                                     @RequestParam(value = "column", defaultValue = "name") String column,
@@ -61,7 +61,7 @@ public class ProductController {
     }
 
     /// Product 상세 정보 조회.
-    @GetMapping("/product/{productId}")
+    @GetMapping("/{productId}")
     public ResponseEntity<ProductResponseDTO> getProductInfo(@RequestHeader(value = "Authorization") String token,
                                                              @PathVariable(name = "productId") long productId) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
@@ -71,7 +71,7 @@ public class ProductController {
     }
 
     /// Product 상세 정보 조회.
-    @GetMapping("/product/barcode/{barcode}")
+    @GetMapping("/barcode/{barcode}")
     public ResponseEntity<ProductResponseDTO> getProductInfoByBarcode(@RequestHeader(value = "Authorization") String token,
                                                                       @PathVariable(name = "barcode") String barcode) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
@@ -80,7 +80,7 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
-    @GetMapping("/product/{productId}/record")
+    @GetMapping("/{productId}/record")
     public ResponseEntity<GetRecordListResponseDTO> getProductRecord(@RequestHeader(value = "Authorization") String token,
                                                                      @PathVariable(name = "productId") long productId,
                                                                      @RequestParam(required = false, defaultValue = "0") int year,
@@ -91,7 +91,7 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
-    @PutMapping("/product/{productId}")
+    @PutMapping("/{productId}")
     public ResponseEntity<ProductResponseDTO> updateProduct(@RequestHeader(value = "Authorization") String token,
                                                             @PathVariable(name = "productId") long productId,
                                                             @Validated @RequestBody UpdateProductRequestDTO requestDto) {
@@ -101,7 +101,7 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
-    @DeleteMapping("/product/{productId}")
+    @DeleteMapping("/{productId}")
     public ResponseEntity<MessageResponseDTO> deleteProduct(@RequestHeader(value = "Authorization") String token,
                                                             @PathVariable(name = "productId") long productId) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);

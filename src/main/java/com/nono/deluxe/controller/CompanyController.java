@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/company")
 @RestController
 public class CompanyController {
 
@@ -30,7 +30,7 @@ public class CompanyController {
      * @param requestDto
      * @return
      */
-    @PostMapping("/company")
+    @PostMapping("")
     public ResponseEntity<CompanyResponseDTO> createCompany(@RequestHeader(name = "Authorization") String token,
                                                             @Validated @RequestBody CreateCompanyRequestDTO requestDto) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
@@ -52,7 +52,7 @@ public class CompanyController {
      * @param active
      * @return
      */
-    @GetMapping("/company")
+    @GetMapping("")
     public ResponseEntity<ReadCompanyListResponseDTO> readCompanyList(@RequestHeader(name = "Authorization") String token,
                                                                       @RequestParam(required = false, defaultValue = "") String query,
                                                                       @RequestParam(required = false, defaultValue = "name") String column,
@@ -74,7 +74,7 @@ public class CompanyController {
      * @param companyId
      * @return
      */
-    @GetMapping("/company/{companyId}")
+    @GetMapping("/{companyId}")
     public ResponseEntity<CompanyResponseDTO> readCompany(@RequestHeader(name = "Authorization") String token,
                                                           @PathVariable(name = "companyId") long companyId) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
@@ -92,7 +92,7 @@ public class CompanyController {
      * @param companyId
      * @return
      */
-    @GetMapping("/company/{companyId}/document")
+    @GetMapping("/{companyId}/document")
     public ResponseEntity<ReadDocumentListResponseDTO> readDocumentList(@RequestHeader(name = "Authorization") String token,
                                                                         @PathVariable(name = "companyId") long companyId,
                                                                         @RequestParam(required = false, defaultValue = "DESC") String order,
@@ -115,7 +115,7 @@ public class CompanyController {
      * @param companyId
      * @return
      */
-    @PutMapping("/company/{companyId}")
+    @PutMapping("/{companyId}")
     public ResponseEntity<CompanyResponseDTO> updateCompany(@RequestHeader(name = "Authorization") String token,
                                                             @Validated @RequestBody UpdateCompanyRequestDTO requestDto,
                                                             @PathVariable(name = "companyId") long companyId) {
@@ -126,7 +126,7 @@ public class CompanyController {
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 
-    @PutMapping("/company/active")
+    @PutMapping("/active")
     public ResponseEntity<UpdateCompanyActiveResponseDTO> updateCompanyActive(@RequestHeader(name = "Authorization") String token,
                                                                               @Validated @RequestBody UpdateCompanyActiveRequestDTO requestDto) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
@@ -144,7 +144,7 @@ public class CompanyController {
      * @param companyId
      * @return
      */
-    @DeleteMapping("/company/{companyId}")
+    @DeleteMapping("/{companyId}")
     public ResponseEntity<MessageResponseDTO> updateCompany(@RequestHeader(name = "Authorization") String token,
                                                             @PathVariable(name = "companyId") long companyId) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);

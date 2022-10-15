@@ -13,7 +13,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/notice")
 @RequiredArgsConstructor
 @RestController
 public class NoticeController {
@@ -28,7 +28,7 @@ public class NoticeController {
      * @param requestDto
      * @return
      */
-    @PostMapping("/notice")
+    @PostMapping("")
     public ResponseEntity<NoticeResponseDTO> createNotice(@RequestHeader(value = "Authorization") String token,
                                                           @Validated @RequestBody CreateNoticeRequestDTO requestDto) {
 
@@ -46,7 +46,7 @@ public class NoticeController {
      * @param token
      * @return
      */
-    @GetMapping("/notice")
+    @GetMapping("")
     public ResponseEntity<ReadNoticeListResponseDTO> readNoticeList(@RequestHeader(value = "Authorization") String token,
                                                                     @RequestParam(required = false, defaultValue = "") String query,
                                                                     @RequestParam(required = false, defaultValue = "createdAt") String column,
@@ -69,7 +69,7 @@ public class NoticeController {
      * @param noticeId
      * @return
      */
-    @GetMapping("/notice/{noticeId}")
+    @GetMapping("/{noticeId}")
     public ResponseEntity<NoticeResponseDTO> readNotice(@RequestHeader(value = "Authorization") String token,
                                                         @PathVariable(name = "noticeId") long noticeId) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
@@ -85,7 +85,7 @@ public class NoticeController {
      * @param token
      * @return
      */
-    @GetMapping("/notice/recent")
+    @GetMapping("/recent")
     public ResponseEntity<NoticeResponseDTO> readNoticeRecent(@RequestHeader(value = "Authorization") String token) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
         authService.verifyParticipantRole(jwt);
@@ -102,7 +102,7 @@ public class NoticeController {
      * @param requestDto
      * @return
      */
-    @PutMapping("/notice/{noticeId}")
+    @PutMapping("/{noticeId}")
     public ResponseEntity<NoticeResponseDTO> updateNotice(@RequestHeader(value = "Authorization") String token,
                                                           @PathVariable(name = "noticeId") long noticeId,
                                                           @Validated @RequestBody UpdateNoticeRequestDTO requestDto) {
@@ -120,7 +120,7 @@ public class NoticeController {
      * @param noticeId
      * @return
      */
-    @DeleteMapping("/notice/{noticeId}")
+    @DeleteMapping("/{noticeId}")
     public ResponseEntity<MessageResponseDTO> deleteNotice(@RequestHeader(value = "Authorization") String token,
                                                            @PathVariable(name = "noticeId") long noticeId) {
         DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
