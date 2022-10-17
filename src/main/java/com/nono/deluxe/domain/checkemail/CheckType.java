@@ -4,6 +4,6 @@ import lombok.Getter;
 
 @Getter
 public enum CheckType {
-    JOIN,
-    REISSUE
+	JOIN,
+	REISSUE
 }

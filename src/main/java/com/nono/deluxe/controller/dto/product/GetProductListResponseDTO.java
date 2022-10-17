@@ -1,13 +1,15 @@
 package com.nono.deluxe.controller.dto.product;
 
-import com.nono.deluxe.controller.dto.Meta;
-import com.nono.deluxe.domain.product.Product;
-import lombok.Data;
-import lombok.Getter;
-import org.springframework.data.domain.Page;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.springframework.data.domain.Page;
+
+import com.nono.deluxe.controller.dto.Meta;
+import com.nono.deluxe.domain.product.Product;
+
+import lombok.Data;
+import lombok.Getter;
 
 /**
  * from. hj.yang
@@ -22,20 +24,20 @@ import java.util.List;
 @Getter
 @Data
 public class GetProductListResponseDTO {
-    private Meta meta;
-    private List<ProductResponseDTO> productList = new ArrayList<>();
+	private Meta meta;
+	private List<ProductResponseDTO> productList = new ArrayList<>();
 
-    public GetProductListResponseDTO(Page<Product> productPage) {
-        this.meta = new Meta(productPage.getNumber() + 1,
-                productPage.getNumberOfElements(),
-                productPage.getTotalPages(),
-                productPage.getTotalElements(),
-                productPage.isLast());
+	public GetProductListResponseDTO(Page<Product> productPage) {
+		this.meta = new Meta(productPage.getNumber() + 1,
+				productPage.getNumberOfElements(),
+				productPage.getTotalPages(),
+				productPage.getTotalElements(),
+				productPage.isLast());
 
-        List<Product> productList = productPage.getContent();
-        productList.forEach(product -> {
-            this.productList.add(new ProductResponseDTO(product));
-        });
-    }
+		List<Product> productList = productPage.getContent();
+		productList.forEach(product -> {
+			this.productList.add(new ProductResponseDTO(product));
+		});
+	}
 }
 

@@ -1,14 +1,13 @@
 package com.nono.deluxe.controller.dto.auth;
 
+import javax.validation.constraints.NotNull;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 @Getter
 @NoArgsConstructor
 public class AuthCodeRequestDTO {
-    @NotNull
-    private String code;
+	@NotNull
+	private String code;
 }

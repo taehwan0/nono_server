@@ -1,16 +1,15 @@
-package com.nono.deluxe.controller.dto.document;
+package com.nono.deluxe.controller.dto.tempdocument;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import com.nono.deluxe.controller.dto.record.RecordRequestDTO;
 import com.nono.deluxe.domain.company.Company;
-import com.nono.deluxe.domain.document.Document;
 import com.nono.deluxe.domain.document.DocumentType;
+import com.nono.deluxe.domain.document.temp.TempDocument;
 import com.nono.deluxe.domain.user.User;
 
 import lombok.Getter;
@@ -18,20 +17,23 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class CreateDocumentRequestDTO {
+public class CreateTempDocumentRequestDTO {
+	// 거래 일자
 	@NotNull
 	LocalDate date;
-	@NotBlank
-	String type;
+	// 문서 유형 - TEMP_IMPUT / TEMP_OUTPUT
+	@NotNull
+	DocumentType type;
+
 	@NotNull
 	long companyId;
 
 	List<RecordRequestDTO> recordList = new ArrayList<>();
 
-	public Document toEntity(User writer, Company company) {
-		return Document.builder()
+	public TempDocument toEntity(User writer, Company company) {
+		return TempDocument.builder()
 				.date(this.date)
-				.type(DocumentType.valueOf(this.type.toUpperCase()))
+				.type(this.type)
 				.writer(writer)
 				.company(company)
 				.build();
