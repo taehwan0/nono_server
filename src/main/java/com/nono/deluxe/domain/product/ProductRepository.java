@@ -1,13 +1,13 @@
 package com.nono.deluxe.domain.product;
 
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
 
 /**
  * Pageable 적용이 필요 할겁니다. 또는 아래의 방식으로 사용하려면 native query 값을 true 로 하고 로직의 수정이 필요 할 수 있습니다.
@@ -22,15 +22,17 @@ import java.util.Optional;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
-    @Query("SELECT p FROM Product p WHERE p.id = :productId AND p.deleted = false")
-    Optional<Product> findById(@Param("productId") long productId);
+	@Query("SELECT p FROM Product p WHERE p.id = :productId AND p.deleted = false")
+	Optional<Product> findById(@Param("productId") long productId);
 
-    @Query("SELECT p FROM Product p WHERE p.barcode like :barcode AND p.deleted = false")
-    Optional<Product> findByBarcode(@Param("barcode") String barcode);
+	@Query("SELECT p FROM Product p WHERE p.barcode like :barcode AND p.deleted = false")
+	Optional<Product> findByBarcode(@Param("barcode") String barcode);
 
-    @Query(value = "SELECT p FROM Product p WHERE p.name LIKE CONCAT('%', :query, '%') AND p.active = true AND p.deleted = false")
-    Page<Product> readActiveProductList(@Param("query") String query, Pageable pageable);
+	@Query(value = "SELECT p "
+			+ "FROM Product p "
+			+ "WHERE p.name LIKE CONCAT('%', :query, '%') AND p.active = true AND p.deleted = false")
+	Page<Product> readActiveProductList(@Param("query") String query, Pageable pageable);
 
-    @Query(value = "SELECT p FROM Product p WHERE p.name LIKE CONCAT('%', :query, '%') AND p.deleted = false")
-    Page<Product> readProductList(@Param("query") String query, Pageable pageable);
+	@Query(value = "SELECT p FROM Product p WHERE p.name LIKE CONCAT('%', :query, '%') AND p.deleted = false")
+	Page<Product> readProductList(@Param("query") String query, Pageable pageable);
 }
