@@ -1,7 +1,7 @@
 package com.nono.deluxe.controller.dto.auth;
 
 import javax.validation.constraints.Email;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class EmailRequestDTO {
-	@Email
-	private String email;
+    @Email
+    @NotBlank
+    private String email;
 
-	@NotNull
-	private String type; // JOIN, REISSUE
+    private String type; // JOIN, REISSUE
 }
