@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 public enum StorageType {
 
-	ICE,
-	COLD,
-	ROOM;
+    ICE,
+    COLD,
+    ROOM
 }

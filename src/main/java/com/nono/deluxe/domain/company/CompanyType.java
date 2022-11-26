@@ -5,6 +5,6 @@ import lombok.Getter;
 @Getter
 public enum CompanyType {
 
-	INPUT,
-	OUTPUT;
+    INPUT,
+    OUTPUT
 }

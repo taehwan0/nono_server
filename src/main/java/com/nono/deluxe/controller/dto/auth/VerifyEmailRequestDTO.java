@@ -2,7 +2,6 @@ package com.nono.deluxe.controller.dto.auth;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -10,8 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class VerifyEmailRequestDTO {
 
-	@Email
-	private String email;
-	@NotNull
-	private String code;
+    @Email
+    private String email;
+    @NotNull
+    private String code;
 }

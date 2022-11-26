@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface TempDocumentRepository extends JpaRepository<TempDocument, Long> {
-	@Query("SELECT d FROM TempDocument d WHERE d.company.name like concat('%', :query,'%')")
-	Page<TempDocument> readTempDocumentList(@Param("query") String query, Pageable limit);
+
+    @Query("SELECT d FROM TempDocument d WHERE d.company.name like concat('%', :query,'%')")
+    Page<TempDocument> readTempDocumentList(@Param("query") String query, Pageable limit);
 }
