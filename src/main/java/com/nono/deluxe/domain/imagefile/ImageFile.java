@@ -19,19 +19,17 @@ public class ImageFile {
     private long id;
 
     @Column(nullable = false)
-    private String url;
+    private String originalUrl;
 
     @Column(nullable = false)
-    private String fileName;
+    private String thumbnailUrl;
 
     @Builder
-    public ImageFile(String url, String fileName) {
-        this.url = url;
-        this.fileName = fileName;
+    public ImageFile(String originalUrl, String thumbnailUrl) {
+        this.originalUrl = originalUrl;
+        this.thumbnailUrl = thumbnailUrl;
     }
 
     public void update(String url, String fileName) {
-        this.url = url;
-        this.fileName = fileName;
     }
 }
