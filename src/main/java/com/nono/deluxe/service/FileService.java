@@ -45,16 +45,6 @@ public class FileService {
         return new UploadImageFileResponseDTO(savedImageFile);
     }
 
-    private File convertToThumbnail(MultipartFile imageFile) throws IOException {
-        File file = File.createTempFile(imageFile.getName() + THUMBNAIL_TAIL, SUFFIX);
-        Thumbnails.of(imageFile.getInputStream())
-            .size(IMAGE_WIDTH, IMAGE_HEIGHT)
-            .outputQuality(OUTPUT_QUALITY)
-            .toFile(file);
-
-        return file;
-    }
-
     private String putS3(MultipartFile imageFile, String fileName) throws IOException {
         fileName += SUFFIX;
 
@@ -74,6 +64,16 @@ public class FileService {
         deleteFile(file);
 
         return amazonS3Client.getUrl(bucket, fileName).toString();
+    }
+
+    private File convertToThumbnail(MultipartFile imageFile) throws IOException {
+        File file = File.createTempFile(imageFile.getName() + THUMBNAIL_TAIL, SUFFIX);
+        Thumbnails.of(imageFile.getInputStream())
+            .size(IMAGE_WIDTH, IMAGE_HEIGHT)
+            .outputQuality(OUTPUT_QUALITY)
+            .toFile(file);
+
+        return file;
     }
 
     private void deleteFile(File file) {

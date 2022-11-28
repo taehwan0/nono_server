@@ -1,5 +1,6 @@
 package com.nono.deluxe.controller;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.nono.deluxe.controller.dto.imagefile.UploadImageFileResponseDTO;
 import com.nono.deluxe.service.AuthService;
 import com.nono.deluxe.service.FileService;
@@ -26,8 +27,8 @@ public class FileController {
     public ResponseEntity<UploadImageFileResponseDTO> uploadImageFile(
         @RequestHeader(name = "Authorization") String token,
         @RequestPart MultipartFile imageFile) throws IOException {
-//        DecodedJWT decodedJWT = authService.decodeAccessTokenByRequestHeader(token);
-//        authService.verifyParticipantRole(decodedJWT);
+        DecodedJWT decodedJWT = authService.decodeAccessTokenByRequestHeader(token);
+        authService.verifyParticipantRole(decodedJWT);
 
         return ResponseEntity
             .status(HttpStatus.OK)
