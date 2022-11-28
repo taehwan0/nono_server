@@ -34,21 +34,26 @@ public class DocumentController {
     private final AuthService authService;
 
     @PostMapping("")
-    public ResponseEntity<Object> createDocument(@RequestHeader(name = "Authorization") String token,
+    public ResponseEntity<Object> createDocument(
+        @RequestHeader(name = "Authorization") String token,
         @Validated @RequestBody CreateDocumentRequestDTO requestDto) {
-        DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        authService.verifyParticipantRole(jwt);
-        long userId = authService.getUserIdByDecodedToken(jwt);
+
+        authService.validateParticipantToken(token);
+
+        DecodedJWT decodedJWT = authService.decodeJwt(token);
+        long userId = authService.getUserIdByDecodedToken(decodedJWT);
+
         DocumentResponseDTO responseDto = documentService.createDocument(userId, requestDto);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 
     @GetMapping("/{documentId}")
-    public ResponseEntity<DocumentResponseDTO> readDocument(@RequestHeader(name = "Authorization") String token,
+    public ResponseEntity<DocumentResponseDTO> readDocument(
+        @RequestHeader(name = "Authorization") String token,
         @PathVariable(name = "documentId") long documentId) {
-        DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        authService.verifyParticipantRole(jwt);
+        authService.validateParticipantToken(token);
+
         DocumentResponseDTO responseDto = documentService.readDocument(documentId);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
@@ -64,34 +69,32 @@ public class DocumentController {
         @RequestParam(required = false, defaultValue = "1") int page,
         @RequestParam(required = false, defaultValue = "0") int year,
         @RequestParam(required = false, defaultValue = "0") int month) {
-        DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        authService.verifyParticipantRole(jwt);
-        ReadDocumentListResponseDTO responseDto = documentService.readDocumentList(query, column, order, size,
-            (page - 1), year, month);
+        authService.validateParticipantToken(token);
+
+        ReadDocumentListResponseDTO responseDto =
+            documentService.readDocumentList(query, column, order, size, (page - 1), year, month);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 
     @PutMapping("/{documentId}")
-    public ResponseEntity<DocumentResponseDTO> updateDocument(@RequestHeader(name = "Authorization") String token,
+    public ResponseEntity<DocumentResponseDTO> updateDocument(
+        @RequestHeader(name = "Authorization") String token,
         @PathVariable(name = "documentId") long documentId,
         @Validated @RequestBody UpdateDocumentRequestDTO requestDto) {
-        DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        authService.verifyParticipantRole(jwt);
-        long userId = authService.getUserIdByDecodedToken(jwt);
-        log.info("Document: {} document updated By {}", documentId, userId);
+        authService.validateParticipantToken(token);
+
         DocumentResponseDTO responseDto = documentService.updateDocument(documentId, requestDto);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 
     @DeleteMapping("/{documentId}")
-    public ResponseEntity<MessageResponseDTO> deleteDocument(@RequestHeader(name = "Authorization") String token,
+    public ResponseEntity<MessageResponseDTO> deleteDocument(
+        @RequestHeader(name = "Authorization") String token,
         @PathVariable(name = "documentId") long documentId) {
-        DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        authService.verifyAdminRole(jwt);
-        long userId = authService.getUserIdByDecodedToken(jwt);
-        log.info("Document: {} document deleted By {}", documentId, userId);
+        authService.validateAdminToken(token);
+
         MessageResponseDTO responseDto = documentService.deleteDocument(documentId);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);

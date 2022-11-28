@@ -74,12 +74,6 @@ public class AuthService {
         throw new RuntimeException("Email Not Verified OR Verify Code Not Collect");
     }
 
-    /**
-     * authorization_code 생성
-     *
-     * @param userCode
-     * @return
-     */
     @Transactional
     public AuthCodeResponseDTO createAuthCode(long userCode) {
         deleteLegacyLoginCode(userCode);
@@ -114,8 +108,8 @@ public class AuthService {
         responseDTO.setToken_type("bearer");
         responseDTO.setAccess_token(accessToken);
         responseDTO.setRefresh_token(refreshToken);
-        responseDTO.setExpires_in(decodeAccessToken(accessToken).getExpiresAt().getTime());
-        responseDTO.setRefresh_token_expires_in(decodeRefreshToken(refreshToken).getExpiresAt().getTime());
+        responseDTO.setExpires_in(decodeJWT(accessToken, accessKey).getExpiresAt().getTime());
+        responseDTO.setRefresh_token_expires_in(decodeJWT(refreshToken, refreshKey).getExpiresAt().getTime());
         return responseDTO;
     }
 
@@ -144,7 +138,7 @@ public class AuthService {
 
     @Transactional
     public TokenResponseDTO createTokenByRefreshToken(String refreshToken) {
-        DecodedJWT decodedJWT = decodeRefreshToken(refreshToken);
+        DecodedJWT decodedJWT = decodeJWT(refreshToken, refreshKey);
         long userId = Long.parseLong(decodedJWT.getClaim("userId").toString());
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("Not Found User"));
@@ -278,14 +272,7 @@ public class AuthService {
         checkEmailRepository.deleteAll(checkEmailList);
     }
 
-    /**
-     * 토큰 생성 후 반환 유효시간 2시간
-     *
-     * @param username
-     * @param userId
-     * @param userRole
-     * @return
-     */
+    // 토큰 생성 후 반환 유효시간 2시간
     private String createAccessToken(String username, long userId, Role userRole) {
         log.info("AccessToken Created By: {}", userId);
         Algorithm algorithm = getAlgorithm(accessKey);
@@ -313,107 +300,94 @@ public class AuthService {
             .sign(algorithm);
     }
 
-    /**
-     * 유효한 유저인지 확인하고, User 객체를 반환
-     *
-     * @param token
-     * @return
-     */
-    public DecodedJWT decodeAccessTokenByRequestHeader(String token) {
-        Algorithm algorithm = getAlgorithm(accessKey);
-        JWTVerifier verifier = getVerifier(algorithm);
+    public DecodedJWT decodeJwt(String token) {
+        JWTVerifier verifier = getVerifier(accessKey);
+
         String extractedToken = extractToken(token);
         DecodedJWT decodedJWT = verifier.verify(extractedToken);
-        long userId = Long.parseLong(decodedJWT.getClaim("userId").toString());
+
+        Long userId = decodedJWT.getClaim("userId").asLong();
         userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("Not Found User"));
+
         log.info("user Login : {}", decodedJWT.getClaim("userId").toString());
         return decodedJWT;
     }
 
-    private DecodedJWT decodeAccessToken(String token) {
-        Algorithm algorithm = getAlgorithm(accessKey);
-        JWTVerifier verifier = getVerifier(algorithm);
+    private DecodedJWT decodeJWT(String token, String key) {
+        JWTVerifier verifier = getVerifier(key);
         try {
             return verifier.verify(token);
         } catch (Exception e) {
-            log.error(e.getMessage());
             throw new RuntimeException("invalid token");
         }
-    }
-
-    private DecodedJWT decodeRefreshToken(String token) {
-        Algorithm algorithm = getAlgorithm(refreshKey);
-        JWTVerifier verifier = getVerifier(algorithm);
-        return verifier.verify(token);
     }
 
     public long getUserIdByDecodedToken(DecodedJWT jwt) {
         return Long.parseLong(jwt.getClaim("userId").toString());
     }
 
-    public void verifyAdminRole(DecodedJWT jwt) {
+    public void validateAdminToken(String token) {
+        validateAdminRole(decodeJwt(token));
+    }
+
+    public void validateManagerToken(String token) {
+        validateManagerRole(decodeJwt(token));
+    }
+
+    public void validateParticipantToken(String token) {
+        validateParticipantRole(decodeJwt(token));
+    }
+
+    public void validateAdminRole(DecodedJWT jwt) {
         if (!isAdmin(jwt)) {
             throw new NoAuthorityException("Forbidden API");
         }
     }
 
-    public void verifyManagerRole(DecodedJWT jwt) {
+    private void validateManagerRole(DecodedJWT jwt) {
         if (!isManager(jwt) && !isAdmin(jwt)) {
             throw new NoAuthorityException("Forbidden API");
         }
     }
 
-    public void verifyParticipantRole(DecodedJWT jwt) {
+    private void validateParticipantRole(DecodedJWT jwt) {
         if (!isParticipant(jwt) && !isManager(jwt) && !isAdmin(jwt)) {
             throw new NoAuthorityException("Forbidden API");
         }
     }
 
-    public boolean isParticipant(DecodedJWT jwt) {
-        return jwt.getClaim("ROLE").toString().replaceAll("\"", "").equals(Role.ROLE_PARTICIPANT.toString());
+    private String getRoleByJwt(DecodedJWT jwt) {
+        return jwt.getClaim("ROLE").toString().replaceAll("\"", "");
     }
 
-    public boolean isManager(DecodedJWT jwt) {
-        return jwt.getClaim("ROLE").toString().replaceAll("\"", "").equals(Role.ROLE_MANAGER.toString());
+    private boolean isAdmin(DecodedJWT jwt) {
+        return getRoleByJwt(jwt).equals(Role.ROLE_ADMIN.toString());
     }
 
-    public boolean isAdmin(DecodedJWT jwt) {
-        return jwt.getClaim("ROLE").toString().replaceAll("\"", "").equals(Role.ROLE_ADMIN.toString());
+    private boolean isManager(DecodedJWT jwt) {
+        return getRoleByJwt(jwt).equals(Role.ROLE_MANAGER.toString());
     }
 
-    /**
-     * bearer token 형식 검증 및 토큰 추출
-     *
-     * @param token
-     * @return
-     */
+    private boolean isParticipant(DecodedJWT jwt) {
+        return getRoleByJwt(jwt).equals(Role.ROLE_PARTICIPANT.toString());
+    }
+
+    // bearer token 형식 검증 및 토큰 추출
     private String extractToken(String token) {
-        if (token.matches("(^Bearer [A-Za-z0-9-_]*\\.[A-Za-z0-9-_]*\\.[A-Za-z0-9-_]*$)")) {
+        if (token.matches("(^([Bb]earer) [A-Za-z0-9-_]*\\.[A-Za-z0-9-_]*\\.[A-Za-z0-9-_]*$)")) {
             return token.split(" ")[1];
         } else {
             throw new InvalidTokenException("InvalidTokenForm");
         }
     }
 
-    /**
-     * algorithm 생성기
-     *
-     * @param key
-     * @return
-     */
     private Algorithm getAlgorithm(String key) {
         return Algorithm.HMAC256(key);
     }
 
-    /**
-     * verifier 생성기
-     *
-     * @param algorithm
-     * @return
-     */
-    private JWTVerifier getVerifier(Algorithm algorithm) {
-        return JWT.require(algorithm)
+    private JWTVerifier getVerifier(String key) {
+        return JWT.require(Algorithm.HMAC256(key))
             .withIssuer(issuer)
             .build();
     }

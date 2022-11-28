@@ -1,6 +1,5 @@
 package com.nono.deluxe.controller;
 
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.nono.deluxe.controller.dto.MessageResponseDTO;
 import com.nono.deluxe.controller.dto.auth.AuthCodeResponseDTO;
 import com.nono.deluxe.controller.dto.auth.CreateAuthCodeRequestDTO;
@@ -35,30 +34,35 @@ public class AuthController {
     @PostMapping("/code")
     public ResponseEntity<AuthCodeResponseDTO> login(@Validated @RequestBody CreateAuthCodeRequestDTO requestDTO) {
         AuthCodeResponseDTO responseDTO = authService.createAuthCode(requestDTO);
+
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
     @PostMapping("/join")
     public ResponseEntity<JoinResponseDTO> joinUser(@Validated @RequestBody JoinRequestDTO requestDTO) {
         JoinResponseDTO responseDTO = authService.joinUser(requestDTO);
+
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
     @PostMapping("/email/duplicate")
     public ResponseEntity<MessageResponseDTO> checkDuplicateEmail(@Validated @RequestBody EmailRequestDTO requestDTO) {
         MessageResponseDTO responseDTO = authService.checkDuplicateEmail(requestDTO);
+
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
     @PostMapping("/email/check")
     public ResponseEntity<MessageResponseDTO> postCheckEmail(@Validated @RequestBody EmailRequestDTO requestDTO) {
         MessageResponseDTO responseDTO = authService.checkEmail(requestDTO);
+
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
     @PostMapping("/email/verify")
     public ResponseEntity<MessageResponseDTO> verifyEmail(@Validated @RequestBody VerifyEmailRequestDTO requestDTO) {
         MessageResponseDTO responseDTO = authService.verifyEmail(requestDTO);
+
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
@@ -71,21 +75,25 @@ public class AuthController {
     @PostMapping("/reissue")
     public ResponseEntity<MessageResponseDTO> reissueUser(@Validated @RequestBody ReissueUserRequestDTO requestDTO) {
         MessageResponseDTO responseDTO = authService.reissueUser(requestDTO);
+
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
     @PostMapping("/code/{userCode}")
-    public ResponseEntity<AuthCodeResponseDTO> createAuthCode(@RequestHeader(name = "Authorization") String token,
+    public ResponseEntity<AuthCodeResponseDTO> createAuthCode(
+        @RequestHeader(name = "Authorization") String token,
         @PathVariable(name = "userCode") long userCode) {
-        DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        authService.verifyAdminRole(jwt);
+        authService.validateAdminToken(token);
+
         AuthCodeResponseDTO responseDTO = authService.createAuthCode(userCode);
+
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
     @PostMapping("/token")
     public ResponseEntity<TokenResponseDTO> createToken(@Validated @RequestBody TokenRequestDTO requestDTO) {
         TokenResponseDTO responseDTO = authService.createToken(requestDTO);
+
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 }

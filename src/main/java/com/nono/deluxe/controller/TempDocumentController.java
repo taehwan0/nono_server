@@ -34,21 +34,25 @@ public class TempDocumentController {
     private final AuthService authService;
 
     @PostMapping("")
-    public ResponseEntity<Object> createTempDocument(@RequestHeader(name = "Authorization") String token,
+    public ResponseEntity<TempDocumentResponseDTO> createTempDocument(
+        @RequestHeader(name = "Authorization") String token,
         @Validated @RequestBody CreateTempDocumentRequestDTO requestDto) {
-        DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        authService.verifyParticipantRole(jwt);
-        long userId = authService.getUserIdByDecodedToken(jwt);
+        authService.validateParticipantToken(token);
+
+        DecodedJWT decodedJWT = authService.decodeJwt(token);
+        long userId = authService.getUserIdByDecodedToken(decodedJWT);
+
         TempDocumentResponseDTO responseDto = tempDocumentService.createDocument(userId, requestDto);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 
     @GetMapping("/{documentId}")
-    public ResponseEntity<TempDocumentResponseDTO> readTempDocument(@RequestHeader(name = "Authorization") String token,
+    public ResponseEntity<TempDocumentResponseDTO> readTempDocument(
+        @RequestHeader(name = "Authorization") String token,
         @PathVariable(name = "documentId") long documentId) {
-        DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        authService.verifyParticipantRole(jwt);
+        authService.validateParticipantToken(token);
+
         TempDocumentResponseDTO responseDto = tempDocumentService.readDocument(documentId);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
@@ -62,10 +66,10 @@ public class TempDocumentController {
         @RequestParam(required = false, defaultValue = "DESC") String order,
         @RequestParam(required = false, defaultValue = "10") int size,
         @RequestParam(required = false, defaultValue = "0") int page) {
-        DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        authService.verifyParticipantRole(jwt);
-        ReadTempDocumentListResponseDTO responseDto = tempDocumentService.readDocumentList(query, column, order, size,
-            page);
+        authService.validateParticipantToken(token);
+
+        ReadTempDocumentListResponseDTO responseDto =
+            tempDocumentService.readDocumentList(query, column, order, size, page);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
@@ -75,22 +79,22 @@ public class TempDocumentController {
         @RequestHeader(name = "Authorization") String token,
         @PathVariable(name = "documentId") long documentId,
         @Validated @RequestBody UpdateTempDocumentRequestDTO requestDto) {
-        DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        authService.verifyParticipantRole(jwt);
-        long userId = authService.getUserIdByDecodedToken(jwt);
-        log.info("Document: {} document updated By {}", documentId, userId);
+        authService.validateParticipantToken(token);
+
+        DecodedJWT decodedJWT = authService.decodeJwt(token);
+        long userId = authService.getUserIdByDecodedToken(decodedJWT);
+
         TempDocumentResponseDTO responseDto = tempDocumentService.updateDocument(documentId, userId, requestDto);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 
     @DeleteMapping("/{documentId}")
-    public ResponseEntity<MessageResponseDTO> deleteTempDocument(@RequestHeader(name = "Authorization") String token,
+    public ResponseEntity<MessageResponseDTO> deleteTempDocument(
+        @RequestHeader(name = "Authorization") String token,
         @PathVariable(name = "documentId") long documentId) {
-        DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        authService.verifyManagerRole(jwt);
-        long userId = authService.getUserIdByDecodedToken(jwt);
-        log.info("TempDocument: {} document deleted By {}", documentId, userId);
+        authService.validateManagerToken(token);
+
         MessageResponseDTO responseDto = tempDocumentService.deleteDocument(documentId);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);

@@ -1,6 +1,5 @@
 package com.nono.deluxe.controller;
 
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.nono.deluxe.controller.dto.MessageResponseDTO;
 import com.nono.deluxe.controller.dto.product.CreateProductRequestDto;
 import com.nono.deluxe.controller.dto.product.GetProductListResponseDTO;
@@ -36,11 +35,13 @@ public class ProductController {
 
     /// product 생성
     @PostMapping("")
-    public ResponseEntity<ProductResponseDTO> createProduct(@RequestHeader(value = "Authorization") String token,
+    public ResponseEntity<ProductResponseDTO> createProduct(
+        @RequestHeader(value = "Authorization") String token,
         @Validated @RequestBody CreateProductRequestDto requestDto) {
-        DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        authService.verifyManagerRole(jwt);
+        authService.validateManagerToken(token);
+
         ProductResponseDTO responseDTO = productService.createProduct(requestDto);
+
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
@@ -67,20 +68,23 @@ public class ProductController {
         @RequestParam(value = "size", defaultValue = "10") int size,
         @RequestParam(value = "page", defaultValue = "1") int page,
         @RequestParam(value = "active", defaultValue = "false") boolean active) {
-        DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        authService.verifyParticipantRole(jwt);
-        GetProductListResponseDTO responseDTO = productService.getProductList(query, column, order, size, (page - 1),
-            active);
+        authService.validateParticipantToken(token);
+
+        GetProductListResponseDTO responseDTO =
+            productService.getProductList(query, column, order, size, (page - 1), active);
+
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
     /// Product 상세 정보 조회.
     @GetMapping("/{productId}")
-    public ResponseEntity<ProductResponseDTO> getProductInfo(@RequestHeader(value = "Authorization") String token,
+    public ResponseEntity<ProductResponseDTO> getProductInfo(
+        @RequestHeader(value = "Authorization") String token,
         @PathVariable(name = "productId") long productId) {
-        DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        authService.verifyParticipantRole(jwt);
+        authService.validateParticipantToken(token);
+
         ProductResponseDTO responseDTO = productService.getProductInfo(productId);
+
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
@@ -89,9 +93,10 @@ public class ProductController {
     public ResponseEntity<ProductResponseDTO> getProductInfoByBarcode(
         @RequestHeader(value = "Authorization") String token,
         @PathVariable(name = "barcode") String barcode) {
-        DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        authService.verifyParticipantRole(jwt);
+        authService.validateParticipantToken(token);
+
         ProductResponseDTO responseDTO = productService.getProductInfoByBarcode(barcode);
+
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
@@ -101,30 +106,33 @@ public class ProductController {
         @PathVariable(name = "productId") long productId,
         @RequestParam(required = false, defaultValue = "0") int year,
         @RequestParam(required = false, defaultValue = "0") int month) {
-        DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        authService.verifyParticipantRole(jwt);
+        authService.validateParticipantToken(token);
+
         GetRecordListResponseDTO responseDTO = productService.readProductRecord(productId, year, month);
+
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
     @PutMapping("/{productId}")
-    public ResponseEntity<ProductResponseDTO> updateProduct(@RequestHeader(value = "Authorization") String token,
+    public ResponseEntity<ProductResponseDTO> updateProduct(
+        @RequestHeader(value = "Authorization") String token,
         @PathVariable(name = "productId") long productId,
         @Validated @RequestBody UpdateProductRequestDTO requestDto) {
-        DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        authService.verifyManagerRole(jwt);
+        authService.validateManagerToken(token);
+
         ProductResponseDTO responseDTO = productService.updateProduct(productId, requestDto);
+
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
     @DeleteMapping("/{productId}")
-    public ResponseEntity<MessageResponseDTO> deleteProduct(@RequestHeader(value = "Authorization") String token,
+    public ResponseEntity<MessageResponseDTO> deleteProduct(
+        @RequestHeader(value = "Authorization") String token,
         @PathVariable(name = "productId") long productId) {
-        DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        authService.verifyManagerRole(jwt);
+        authService.validateManagerToken(token);
+
         MessageResponseDTO responseDTO = productService.deleteProduct(productId);
-        return ResponseEntity
-            .status(HttpStatus.OK)
-            .body(responseDTO);
+
+        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 }

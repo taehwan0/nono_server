@@ -41,12 +41,15 @@ public class NoticeController {
      * @return
      */
     @PostMapping("")
-    public ResponseEntity<NoticeResponseDTO> createNotice(@RequestHeader(value = "Authorization") String token,
+    public ResponseEntity<NoticeResponseDTO> createNotice(
+        @RequestHeader(value = "Authorization") String token,
         @Validated @RequestBody CreateNoticeRequestDTO requestDto) {
 
-        DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        authService.verifyAdminRole(jwt);
-        long userId = authService.getUserIdByDecodedToken(jwt);
+        authService.validateAdminToken(token);
+
+        DecodedJWT decodedJWT = authService.decodeJwt(token);
+        long userId = authService.getUserIdByDecodedToken(decodedJWT);
+
         NoticeResponseDTO responseDto = noticeService.createNotice(userId, requestDto);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
@@ -68,10 +71,10 @@ public class NoticeController {
         @RequestParam(required = false, defaultValue = "1") int page,
         @RequestParam(required = false, defaultValue = "false") boolean focus,
         @RequestParam(required = false, defaultValue = "false") boolean content) {
-        DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        authService.verifyParticipantRole(jwt);
-        ReadNoticeListResponseDTO responseDto = noticeService.readNoticeList(query, column, order, size, (page - 1),
-            focus, content);
+        authService.validateParticipantToken(token);
+
+        ReadNoticeListResponseDTO responseDto =
+            noticeService.readNoticeList(query, column, order, size, (page - 1), focus, content);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
@@ -86,8 +89,8 @@ public class NoticeController {
     @GetMapping("/{noticeId}")
     public ResponseEntity<NoticeResponseDTO> readNotice(@RequestHeader(value = "Authorization") String token,
         @PathVariable(name = "noticeId") long noticeId) {
-        DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        authService.verifyParticipantRole(jwt);
+        authService.validateParticipantToken(token);
+
         NoticeResponseDTO responseDto = noticeService.readNotice(noticeId);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
@@ -101,8 +104,8 @@ public class NoticeController {
      */
     @GetMapping("/recent")
     public ResponseEntity<NoticeResponseDTO> readNoticeRecent(@RequestHeader(value = "Authorization") String token) {
-        DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        authService.verifyParticipantRole(jwt);
+        authService.validateParticipantToken(token);
+
         NoticeResponseDTO responseDto = noticeService.readNoticeRecent();
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
@@ -117,11 +120,12 @@ public class NoticeController {
      * @return
      */
     @PutMapping("/{noticeId}")
-    public ResponseEntity<NoticeResponseDTO> updateNotice(@RequestHeader(value = "Authorization") String token,
+    public ResponseEntity<NoticeResponseDTO> updateNotice(
+        @RequestHeader(value = "Authorization") String token,
         @PathVariable(name = "noticeId") long noticeId,
         @Validated @RequestBody UpdateNoticeRequestDTO requestDto) {
-        DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        authService.verifyAdminRole(jwt);
+        authService.validateAdminToken(token);
+
         NoticeResponseDTO responseDto = noticeService.updateNotice(noticeId, requestDto);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
@@ -137,8 +141,8 @@ public class NoticeController {
     @DeleteMapping("/{noticeId}")
     public ResponseEntity<MessageResponseDTO> deleteNotice(@RequestHeader(value = "Authorization") String token,
         @PathVariable(name = "noticeId") long noticeId) {
-        DecodedJWT jwt = authService.decodeAccessTokenByRequestHeader(token);
-        authService.verifyAdminRole(jwt);
+        authService.validateAdminToken(token);
+        
         MessageResponseDTO responseDto = noticeService.deleteNotice(noticeId);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
