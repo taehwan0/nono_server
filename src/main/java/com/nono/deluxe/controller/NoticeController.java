@@ -87,7 +87,8 @@ public class NoticeController {
      * @return
      */
     @GetMapping("/{noticeId}")
-    public ResponseEntity<NoticeResponseDTO> readNotice(@RequestHeader(value = "Authorization") String token,
+    public ResponseEntity<NoticeResponseDTO> readNotice(
+        @RequestHeader(value = "Authorization") String token,
         @PathVariable(name = "noticeId") long noticeId) {
         authService.validateParticipantToken(token);
 
@@ -103,7 +104,8 @@ public class NoticeController {
      * @return
      */
     @GetMapping("/recent")
-    public ResponseEntity<NoticeResponseDTO> readNoticeRecent(@RequestHeader(value = "Authorization") String token) {
+    public ResponseEntity<NoticeResponseDTO> readNoticeRecent(
+        @RequestHeader(value = "Authorization") String token) {
         authService.validateParticipantToken(token);
 
         NoticeResponseDTO responseDto = noticeService.readNoticeRecent();
@@ -139,7 +141,8 @@ public class NoticeController {
      * @return
      */
     @DeleteMapping("/{noticeId}")
-    public ResponseEntity<MessageResponseDTO> deleteNotice(@RequestHeader(value = "Authorization") String token,
+    public ResponseEntity<MessageResponseDTO> deleteNotice(
+        @RequestHeader(value = "Authorization") String token,
         @PathVariable(name = "noticeId") long noticeId) {
         authService.validateAdminToken(token);
         

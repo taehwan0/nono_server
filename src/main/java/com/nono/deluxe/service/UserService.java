@@ -1,5 +1,6 @@
 package com.nono.deluxe.service;
 
+import com.amazonaws.services.kms.model.NotFoundException;
 import com.nono.deluxe.controller.dto.MessageResponseDTO;
 import com.nono.deluxe.controller.dto.user.AddUserRequestDTO;
 import com.nono.deluxe.controller.dto.user.GetUserListResponseDTO;
@@ -62,14 +63,14 @@ public class UserService {
 
     public UserResponseDTO getUserInfo(long userCode) {
         User user = userRepository.findById(userCode)
-            .orElseThrow(() -> new RuntimeException("Not exist data."));
+            .orElseThrow(() -> new NotFoundException("Not exist data."));
 
         return new UserResponseDTO(user);
     }
 
     public UserResponseDTO updateUser(long userCode, UpdateUserRequestDTO requestDTO) {
         User updateUser = userRepository.findById(userCode)
-            .orElseThrow(() -> new RuntimeException("User: Not found user"));
+            .orElseThrow(() -> new NotFoundException("User: Not found user"));
 
         updateUser.update(requestDTO);
         userRepository.save(updateUser);
@@ -78,7 +79,7 @@ public class UserService {
 
     public MessageResponseDTO deleteUser(long userCode) {
         User user = userRepository.findById(userCode)
-            .orElseThrow(() -> new RuntimeException("User: Not found user"));
+            .orElseThrow(() -> new NotFoundException("User: Not found user"));
 
         user.delete();
 

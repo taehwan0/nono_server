@@ -1,5 +1,6 @@
 package com.nono.deluxe.service;
 
+import com.amazonaws.services.kms.model.NotFoundException;
 import com.nono.deluxe.controller.dto.MessageResponseDTO;
 import com.nono.deluxe.controller.dto.record.RecordRequestDTO;
 import com.nono.deluxe.controller.dto.tempdocument.CreateTempDocumentRequestDTO;
@@ -41,9 +42,9 @@ public class TempDocumentService {
     @Transactional
     public TempDocumentResponseDTO createDocument(long userId, CreateTempDocumentRequestDTO requestDto) {
         User writer = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("Not Found User"));
+            .orElseThrow(() -> new NotFoundException("Not Found User"));
         Company company = companyRepository.findById(requestDto.getCompanyId())
-            .orElseThrow(() -> new RuntimeException("Not Found Company"));
+            .orElseThrow(() -> new NotFoundException("Not Found Company"));
         TempDocument document = requestDto.toEntity(writer, company);
         tempDocumentRepository.save(document);
 
@@ -52,7 +53,7 @@ public class TempDocumentService {
 
         for (RecordRequestDTO recordRequestDto : recordRequestDtoList) {
             Product recordProductInfo = productRepository.findById(recordRequestDto.getProductId())
-                .orElseThrow(() -> new RuntimeException("Not Found product Info"));
+                .orElseThrow(() -> new NotFoundException("Not Found product Info"));
             TempRecord tempRecord = recordRequestDto.toTempEntity(document, recordProductInfo);
             // temp Record 저장.
 
@@ -76,7 +77,7 @@ public class TempDocumentService {
     @Transactional(readOnly = true)
     public TempDocumentResponseDTO readDocument(long documentId) {
         TempDocument document = tempDocumentRepository.findById(documentId)
-            .orElseThrow(() -> new RuntimeException("Not Found Document"));
+            .orElseThrow(() -> new NotFoundException("Not Found Document"));
         List<TempRecord> recordList = tempRecordRepository.findByDocumentId(documentId);
 
         long totalPrice = getTotalPrice(recordList);
@@ -113,14 +114,14 @@ public class TempDocumentService {
         long userId,
         UpdateTempDocumentRequestDTO requestDto) {
         TempDocument document = tempDocumentRepository.findById(documentId)
-            .orElseThrow(() -> new RuntimeException("Not Found Document"));
+            .orElseThrow(() -> new NotFoundException("Not Found Document"));
 
         User writer = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("Not Found User"));
+            .orElseThrow(() -> new NotFoundException("Not Found User"));
 
         long companyId = requestDto.getCompanyId();
         Company company = companyRepository.findById(companyId)
-            .orElseThrow(() -> new RuntimeException("Not Found Company"));
+            .orElseThrow(() -> new NotFoundException("Not Found Company"));
 
         updateDocumentInfo(document,
             writer,
@@ -128,7 +129,7 @@ public class TempDocumentService {
             requestDto);
 
         TempDocument updatedDocument = tempDocumentRepository.findById(documentId)
-            .orElseThrow(() -> new RuntimeException("Not Found Document"));
+            .orElseThrow(() -> new NotFoundException("Not Found Document"));
         List<TempRecord> updatedRecordList = tempRecordRepository.findByDocumentId(documentId);
 
         long recordCount = updatedRecordList.size();
@@ -154,7 +155,7 @@ public class TempDocumentService {
         for (RecordRequestDTO recordRequestDTO : requestDto.getRecordList()) {
             // TODO: 해당 레코드 내역이 잘 들어가는지 확인 필요.
             Product recordProductInfo = productRepository.findById(recordRequestDTO.getProductId())
-                .orElseThrow(() -> new RuntimeException("Not found product Info."));
+                .orElseThrow(() -> new NotFoundException("Not found product Info."));
             TempRecord tempRecord = recordRequestDTO.toTempEntity(tempDocument, recordProductInfo);
 
             long recordPrice = tempRecord.getPrice();
@@ -175,12 +176,10 @@ public class TempDocumentService {
     @Transactional
     public MessageResponseDTO deleteDocument(long documentId) {
         TempDocument document = tempDocumentRepository.findById(documentId)
-            .orElseThrow(() -> new RuntimeException("Not Found Document"));
+            .orElseThrow(() -> new NotFoundException("Not Found Document"));
         List<TempRecord> documentRecordList = tempRecordRepository.findByDocumentId(documentId);
 
-        for (TempRecord record : documentRecordList) {
-            tempRecordRepository.delete(record);
-        }
+        tempRecordRepository.deleteAll(documentRecordList);
 
         tempDocumentRepository.delete(document);
 

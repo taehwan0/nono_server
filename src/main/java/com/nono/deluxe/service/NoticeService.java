@@ -1,5 +1,6 @@
 package com.nono.deluxe.service;
 
+import com.amazonaws.services.kms.model.NotFoundException;
 import com.nono.deluxe.controller.dto.MessageResponseDTO;
 import com.nono.deluxe.controller.dto.notice.CreateNoticeRequestDTO;
 import com.nono.deluxe.controller.dto.notice.NoticeResponseDTO;
@@ -29,7 +30,7 @@ public class NoticeService {
     @Transactional
     public NoticeResponseDTO createNotice(long userId, CreateNoticeRequestDTO requestDto) {
         User writer = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("Notice: Not Found User"));
+            .orElseThrow(() -> new NotFoundException("Notice: Not Found User"));
         Notice notice = requestDto.toEntity(writer);
 
         return new NoticeResponseDTO(noticeRepository.save(notice));
@@ -54,7 +55,7 @@ public class NoticeService {
     @Transactional(readOnly = true)
     public NoticeResponseDTO readNotice(long noticeId) {
         Notice notice = noticeRepository.findById(noticeId)
-            .orElseThrow(() -> new RuntimeException("Not Found Notice"));
+            .orElseThrow(() -> new NotFoundException("Not Found Notice"));
         return new NoticeResponseDTO(notice);
     }
 
@@ -79,7 +80,7 @@ public class NoticeService {
     @Transactional
     public NoticeResponseDTO updateNotice(long noticeId, UpdateNoticeRequestDTO requestDto) {
         Notice notice = noticeRepository.findById(noticeId)
-            .orElseThrow(() -> new RuntimeException("Not Found Notice"));
+            .orElseThrow(() -> new NotFoundException("Not Found Notice"));
         notice.update(
             requestDto.getTitle(),
             requestDto.getContent(),
@@ -93,7 +94,7 @@ public class NoticeService {
     @Transactional
     public MessageResponseDTO deleteNotice(long noticeId) {
         Notice notice = noticeRepository.findById(noticeId)
-            .orElseThrow(() -> new RuntimeException("Not Found Notice"));
+            .orElseThrow(() -> new NotFoundException("Not Found Notice"));
         noticeRepository.delete(notice);
 
         return new MessageResponseDTO(true, "deleted");

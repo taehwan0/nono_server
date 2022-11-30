@@ -1,5 +1,6 @@
 package com.nono.deluxe.service;
 
+import com.amazonaws.services.kms.model.NotFoundException;
 import com.nono.deluxe.controller.dto.MessageResponseDTO;
 import com.nono.deluxe.controller.dto.product.CreateProductRequestDto;
 import com.nono.deluxe.controller.dto.product.GetProductListResponseDTO;
@@ -59,14 +60,14 @@ public class ProductService {
 
     public ProductResponseDTO getProductInfo(long productId) {
         Product product = productRepository.findById(productId)
-            .orElseThrow(() -> new RuntimeException("not exist data"));
+            .orElseThrow(() -> new NotFoundException("not exist data"));
 
         return new ProductResponseDTO(product);
     }
 
     public ProductResponseDTO getProductInfoByBarcode(String barcode) {
         Product product = productRepository.findByBarcode(barcode)
-            .orElseThrow(() -> new RuntimeException("not exist data"));
+            .orElseThrow(() -> new NotFoundException("not exist data"));
 
         return new ProductResponseDTO(product);
     }
@@ -97,7 +98,7 @@ public class ProductService {
     @Transactional
     public ProductResponseDTO updateProduct(long productId, UpdateProductRequestDTO requestDTO) {
         Product updatedProduct = productRepository.findById(productId)
-            .orElseThrow(() -> new RuntimeException("Not Exist product."));
+            .orElseThrow(() -> new NotFoundException("Not Exist product."));
 
         StorageType storageType = StorageType.valueOf(requestDTO.getStorageType().toUpperCase());
 
@@ -116,7 +117,7 @@ public class ProductService {
     @Transactional
     public MessageResponseDTO deleteProduct(long productId) {
         Product product = productRepository.findById(productId)
-            .orElseThrow(() -> new RuntimeException("Product: not found id"));
+            .orElseThrow(() -> new NotFoundException("Product: not found id"));
         product.delete();
 
         return new MessageResponseDTO(true, "deleted");

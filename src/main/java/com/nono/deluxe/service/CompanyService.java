@@ -1,5 +1,6 @@
 package com.nono.deluxe.service;
 
+import com.amazonaws.services.kms.model.NotFoundException;
 import com.nono.deluxe.controller.dto.MessageResponseDTO;
 import com.nono.deluxe.controller.dto.company.CompanyResponseDTO;
 import com.nono.deluxe.controller.dto.company.CreateCompanyRequestDTO;
@@ -45,7 +46,7 @@ public class CompanyService {
     @Transactional(readOnly = true)
     public CompanyResponseDTO readCompany(long companyId) {
         Company company = companyRepository.findById(companyId)
-            .orElseThrow(() -> new RuntimeException("Company: not found id"));
+            .orElseThrow(() -> new NotFoundException("Company: not found id"));
 
         return new CompanyResponseDTO(company);
     }
@@ -69,9 +70,9 @@ public class CompanyService {
     @Transactional(readOnly = true)
     public ReadDocumentListResponseDTO readCompanyDocument(long companyId, String order, int size, int page, int year,
         int month) {
-        Pageable limit = PageRequest.of(page, size, Sort.by(
-            new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), "date"),
-            new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), "createdAt")));
+        Pageable limit = PageRequest.of(page, size,
+            Sort.by(new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), "date"),
+                new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), "createdAt")));
 
         if (year == 0) {
             year = LocalDate.now().getYear();
@@ -84,42 +85,17 @@ public class CompanyService {
 
         LocalDate fromDate = LocalDate.of(year, month, 1);
         LocalDate toDate = LocalDate.of(year, toMonth, LocalDate.of(year, toMonth, 1).lengthOfMonth());
-        // 테스트 해보기
 
         Page<Document> documentPage = documentRepository.findByCompanyId(companyId, fromDate, toDate, limit);
 
         return new ReadDocumentListResponseDTO(documentPage);
     }
 
-    //    @Transactional(readOnly = true)
-    //    public CompanyRecordResponseDTO readCompanyRecord(long companyId, int year, int month) {
-    //
-    //        if(year == 0) year = LocalDate.now().getYear();
-    //        int toMonth = month;
-    //        if(month == 0) {
-    //            month = 1;
-    //            toMonth = 12;
-    //        }
-    //
-    //        LocalDate fromDate = LocalDate.of(year, month, 1);
-    //        LocalDate toDate = LocalDate.of(year, toMonth, LocalDate.of(year, toMonth, 1).lengthOfMonth());
-    //
-    //        Company company = companyRepository.findById(companyId)
-    //                .orElseThrow(() -> new RuntimeException("Not Found Company"));
-    //        List<Record> recordList = recordRepository.findByCompanyId(companyId, fromDate, toDate);
-    //
-    //        return new CompanyRecordResponseDTO(company, recordList);
-    //    }
-
     @Transactional
     public CompanyResponseDTO updateCompany(long companyId, UpdateCompanyRequestDTO requestDto) {
         Company company = companyRepository.findById(companyId)
             .orElseThrow(() -> new RuntimeException("Company: not found id"));
-        company.update(
-            requestDto.getName(),
-            requestDto.getCategory(),
-            requestDto.isActive()
-        );
+        company.update(requestDto.getName(), requestDto.getCategory(), requestDto.isActive());
 
         return new CompanyResponseDTO(company);
     }
@@ -131,7 +107,7 @@ public class CompanyService {
 
         for (UpdateCompanyActiveDTO dto : companyList) {
             Company company = companyRepository.findById(dto.getCompanyId())
-                .orElseThrow(() -> new RuntimeException("Not Found Company"));
+                .orElseThrow(() -> new NotFoundException("Not Found Company"));
             company.setActive(dto.isActive());
 
             updatedCompanyList.add(company);
@@ -143,7 +119,7 @@ public class CompanyService {
     @Transactional
     public MessageResponseDTO deleteCompany(long companyId) {
         Company company = companyRepository.findById(companyId)
-            .orElseThrow(() -> new RuntimeException("Company: not found id"));
+            .orElseThrow(() -> new NotFoundException("Company: not found id"));
         company.delete();
 
         return new MessageResponseDTO(true, "deleted");

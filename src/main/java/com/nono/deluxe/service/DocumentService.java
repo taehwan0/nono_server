@@ -1,5 +1,6 @@
 package com.nono.deluxe.service;
 
+import com.amazonaws.services.kms.model.NotFoundException;
 import com.nono.deluxe.controller.dto.MessageResponseDTO;
 import com.nono.deluxe.controller.dto.document.CreateDocumentRequestDTO;
 import com.nono.deluxe.controller.dto.document.DocumentResponseDTO;
@@ -45,10 +46,11 @@ public class DocumentService {
     @Transactional
     public DocumentResponseDTO createDocument(long userId, CreateDocumentRequestDTO requestDto) {
         User writer = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("Not Found User"));
+            .orElseThrow(() -> new NotFoundException("Not Found User"));
         Company company = companyRepository.findById(requestDto.getCompanyId())
-            .orElseThrow(() -> new RuntimeException("Not Found Company"));
+            .orElseThrow(() -> new NotFoundException("Not Found Company"));
         Document document = requestDto.toEntity(writer, company);
+
         documentRepository.save(document);
 
         List<RecordRequestDTO> recordRequestDtoList = requestDto.getRecordList();
@@ -58,7 +60,7 @@ public class DocumentService {
             long productId = recordRequestDto.getProductId();
             // update 대상 product
             Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product Not Found"));
+                .orElseThrow(() -> new NotFoundException("Product Not Found"));
 
             // record response 가 필요하면 여기서 리턴받아 사용 가능
             Record record = createRecord(document, product, recordRequestDto);
@@ -75,7 +77,7 @@ public class DocumentService {
     @Transactional(readOnly = true)
     public DocumentResponseDTO readDocument(long documentId) {
         Document document = documentRepository.findById(documentId)
-            .orElseThrow(() -> new RuntimeException("Not Found Document"));
+            .orElseThrow(() -> new NotFoundException("Not Found Document"));
         List<Record> recordList = recordRepository.findByDocumentId(documentId);
 
         long[] totalCountAndPrice = getTotalCountAndPrice(document);
@@ -113,11 +115,11 @@ public class DocumentService {
     @Transactional
     public DocumentResponseDTO updateDocument(long documentId, UpdateDocumentRequestDTO requestDto) {
         Document document = documentRepository.findById(documentId)
-            .orElseThrow(() -> new RuntimeException("Not Found Document"));
+            .orElseThrow(() -> new NotFoundException("Not Found Document"));
 
         long companyId = requestDto.getCompanyId();
         Company company = companyRepository.findById(companyId)
-            .orElseThrow(() -> new RuntimeException("Not Found Company"));
+            .orElseThrow(() -> new NotFoundException("Not Found Company"));
 
         document.updateCompany(company);
 
