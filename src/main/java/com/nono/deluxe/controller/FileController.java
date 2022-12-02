@@ -1,6 +1,6 @@
 package com.nono.deluxe.controller;
 
-import com.nono.deluxe.controller.dto.imagefile.UploadImageFileResponseDTO;
+import com.nono.deluxe.controller.dto.imagefile.ImageFileResponseDTO;
 import com.nono.deluxe.service.AuthService;
 import com.nono.deluxe.service.FileService;
 import java.io.IOException;
@@ -23,7 +23,7 @@ public class FileController {
     private final FileService fileService;
 
     @PostMapping("/image")
-    public ResponseEntity<UploadImageFileResponseDTO> uploadImageFile(
+    public ResponseEntity<ImageFileResponseDTO> uploadImageFile(
         @RequestHeader(name = "Authorization") String token,
         @RequestPart MultipartFile imageFile) throws IOException {
         authService.validateManagerToken(token);

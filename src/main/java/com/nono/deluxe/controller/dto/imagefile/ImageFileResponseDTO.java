@@ -4,13 +4,13 @@ import com.nono.deluxe.domain.imagefile.ImageFile;
 import lombok.Data;
 
 @Data
-public class UploadImageFileResponseDTO {
+public class ImageFileResponseDTO {
 
     private Long fileId;
     private String originalUrl;
     private String thumbnailUrl;
 
-    public UploadImageFileResponseDTO(ImageFile imageFile) {
+    public ImageFileResponseDTO(ImageFile imageFile) {
         this.fileId = imageFile.getId();
         this.originalUrl = imageFile.getOriginalUrl();
         this.thumbnailUrl = imageFile.getThumbnailUrl();
