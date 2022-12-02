@@ -32,5 +32,4 @@ public class RecordResponseDTO {
         this.price = tempRecord.getPrice();
         this.product = new ProductResponseDTO(tempRecord.getProduct());
     }
-
 }
