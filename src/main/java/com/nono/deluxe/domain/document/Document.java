@@ -35,11 +35,11 @@ public class Document extends BaseTimeEntity {
     @Column(nullable = false)
     private DocumentType type;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "writer_id", nullable = false, foreignKey = @ForeignKey(name = "document_user"))
     private User writer;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "company_id", nullable = false, foreignKey = @ForeignKey(name = "document_company"))
     private Company company;
 

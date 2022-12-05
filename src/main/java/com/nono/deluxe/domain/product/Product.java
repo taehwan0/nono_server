@@ -58,7 +58,7 @@ public class Product {
     @Column(columnDefinition = "tinyint(1) default 1")
     private boolean active;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "file_id", nullable = true, foreignKey = @ForeignKey(name = "product_image"))
     private ImageFile file;
 
