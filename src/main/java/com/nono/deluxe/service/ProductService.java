@@ -8,9 +8,9 @@ import com.nono.deluxe.controller.dto.product.GetRecordListResponseDTO;
 import com.nono.deluxe.controller.dto.product.ProductResponseDTO;
 import com.nono.deluxe.controller.dto.product.UpdateProductRequestDTO;
 import com.nono.deluxe.domain.imagefile.ImageFile;
+import com.nono.deluxe.domain.imagefile.ImageFileRepository;
 import com.nono.deluxe.domain.product.Product;
 import com.nono.deluxe.domain.product.ProductRepository;
-import com.nono.deluxe.domain.product.StorageType;
 import com.nono.deluxe.domain.record.Record;
 import com.nono.deluxe.domain.record.RecordRepository;
 import java.time.LocalDate;
@@ -33,10 +33,18 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final RecordRepository recordRepository;
+    private final ImageFileRepository imageFileRepository;
 
     @Transactional
     public ProductResponseDTO createProduct(CreateProductRequestDto requestDto) {
         Product product = requestDto.toEntity();
+        if (requestDto.getImageFileId() != null) {
+            ImageFile imageFile = imageFileRepository.findById(requestDto.getImageFileId())
+                .orElseThrow(() -> new NotFoundException("Not exist ImageFile"));
+
+            product.updateImageFile(imageFile);
+        }
+        
         return new ProductResponseDTO(productRepository.save(product));
     }
 
@@ -100,18 +108,17 @@ public class ProductService {
         Product updatedProduct = productRepository.findById(productId)
             .orElseThrow(() -> new NotFoundException("Not Exist product."));
 
-        StorageType storageType = StorageType.valueOf(requestDTO.getStorageType().toUpperCase());
+        updatedProduct.updateInfo(requestDTO);
 
-        ImageFile imageFile = updatedProduct.getFile();
-        if (imageFile != null) {
-            imageFile.update(requestDTO.getImage(), requestDTO.getName());
+        if (requestDTO.getImageFileId() != null) {
+            ImageFile newImageFile = imageFileRepository.findById(requestDTO.getImageFileId())
+                .orElseThrow(() -> new NotFoundException("Not Exist Image"));
+            updatedProduct.updateImageFile(newImageFile);
         }
 
-        updatedProduct.update(requestDTO);
-
         productRepository.save(updatedProduct);
-        return new ProductResponseDTO(updatedProduct);
 
+        return new ProductResponseDTO(updatedProduct);
     }
 
     @Transactional

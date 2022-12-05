@@ -29,7 +29,4 @@ public class ImageFile {
         this.originalUrl = originalUrl;
         this.thumbnailUrl = thumbnailUrl;
     }
-
-    public void update(String url, String fileName) {
-    }
 }

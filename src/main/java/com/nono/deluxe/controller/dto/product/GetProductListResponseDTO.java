@@ -30,9 +30,7 @@ public class GetProductListResponseDTO {
             productPage.isLast());
 
         List<Product> productList = productPage.getContent();
-        productList.forEach(product -> {
-            this.productList.add(new ProductResponseDTO(product));
-        });
+        productList.forEach(product -> this.productList.add(new ProductResponseDTO(product)));
     }
 }
 

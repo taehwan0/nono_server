@@ -52,5 +52,5 @@ public class UpdateProductRequestDTO {
     /// 마진율
     private int margin;
     // 이미지 데이터
-    private String image;
+    private Long imageFileId;
 }

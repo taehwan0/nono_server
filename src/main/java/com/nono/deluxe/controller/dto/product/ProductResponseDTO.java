@@ -1,5 +1,6 @@
 package com.nono.deluxe.controller.dto.product;
 
+import com.nono.deluxe.controller.dto.imagefile.ImageFileResponseDTO;
 import com.nono.deluxe.domain.product.Product;
 import lombok.Data;
 
@@ -33,7 +34,7 @@ public class ProductResponseDTO {
     /// 활성화 여부
     private boolean active;
     // 이미지 데이터
-    private String image;
+    private ImageFileResponseDTO image;
 
     public ProductResponseDTO(Product product) {
         this.productId = product.getId();
@@ -49,7 +50,6 @@ public class ProductResponseDTO {
         this.price = product.getPrice();
         this.margin = product.getMargin();
         this.active = product.isActive();
-        //TODO: 이미지 파일 변환
-        this.image = "TEMP";
+        this.image = new ImageFileResponseDTO(product.getFile());
     }
 }

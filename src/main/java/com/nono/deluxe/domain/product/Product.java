@@ -90,7 +90,7 @@ public class Product {
         this.margin = margin;
     }
 
-    public void update(UpdateProductRequestDTO requestDTO) {
+    public void updateInfo(UpdateProductRequestDTO requestDTO) {
         this.productCode = requestDTO.getProductCode();
         this.name = requestDTO.getName();
         this.description = requestDTO.getDescription();
@@ -101,13 +101,16 @@ public class Product {
         this.barcode = requestDTO.getBarcode();
         this.stock = requestDTO.getStock();
         this.active = requestDTO.isActive();
-        this.file = null; // requestDTO.getImage();
         this.price = requestDTO.getPrice();
         this.margin = requestDTO.getMargin();
     }
 
     public void updateStock(long stock) {
         this.stock = stock;
+    }
+
+    public void updateImageFile(ImageFile image) {
+        this.file = image;
     }
 
     public void delete() {
