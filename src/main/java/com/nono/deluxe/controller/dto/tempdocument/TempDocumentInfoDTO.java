@@ -2,7 +2,7 @@ package com.nono.deluxe.controller.dto.tempdocument;
 
 import com.nono.deluxe.domain.document.DocumentType;
 import com.nono.deluxe.domain.document.temp.TempDocument;
-import com.nono.deluxe.domain.temprecord.TempRecord;
+import com.nono.deluxe.domain.record.temp.TempRecord;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;

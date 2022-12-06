@@ -1,4 +1,4 @@
-package com.nono.deluxe.domain.temprecord;
+package com.nono.deluxe.domain.record.temp;
 
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;

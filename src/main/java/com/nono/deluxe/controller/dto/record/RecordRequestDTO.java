@@ -4,7 +4,7 @@ import com.nono.deluxe.domain.document.Document;
 import com.nono.deluxe.domain.document.temp.TempDocument;
 import com.nono.deluxe.domain.product.Product;
 import com.nono.deluxe.domain.record.Record;
-import com.nono.deluxe.domain.temprecord.TempRecord;
+import com.nono.deluxe.domain.record.temp.TempRecord;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import lombok.Getter;

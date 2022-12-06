@@ -1,4 +1,4 @@
-package com.nono.deluxe.domain.temprecord;
+package com.nono.deluxe.domain.record.temp;
 
 import com.nono.deluxe.domain.BaseTimeEntity;
 import com.nono.deluxe.domain.document.temp.TempDocument;

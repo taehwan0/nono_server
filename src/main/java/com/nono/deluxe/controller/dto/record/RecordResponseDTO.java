@@ -3,7 +3,7 @@ package com.nono.deluxe.controller.dto.record;
 import com.nono.deluxe.controller.dto.product.ProductResponseDTO;
 import com.nono.deluxe.domain.document.DocumentType;
 import com.nono.deluxe.domain.record.Record;
-import com.nono.deluxe.domain.temprecord.TempRecord;
+import com.nono.deluxe.domain.record.temp.TempRecord;
 import lombok.Data;
 
 @Data

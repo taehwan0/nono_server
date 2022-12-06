@@ -4,7 +4,7 @@ import com.nono.deluxe.controller.dto.tempdocument.UpdateTempDocumentRequestDTO;
 import com.nono.deluxe.domain.BaseTimeEntity;
 import com.nono.deluxe.domain.company.Company;
 import com.nono.deluxe.domain.document.DocumentType;
-import com.nono.deluxe.domain.temprecord.TempRecord;
+import com.nono.deluxe.domain.record.temp.TempRecord;
 import com.nono.deluxe.domain.user.User;
 import java.time.LocalDate;
 import java.time.LocalDateTime;

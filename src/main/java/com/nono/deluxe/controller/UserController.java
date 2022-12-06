@@ -34,15 +34,14 @@ public class UserController {
 
     // 사용자 생성 - Participant 추가.
     @PostMapping()
-    public ResponseEntity<UserResponseDTO> addUser(@
-        RequestHeader(value = "Authorization") String token,
+    public ResponseEntity<UserResponseDTO> addUser(
+        @RequestHeader(value = "Authorization") String token,
         @Validated @RequestBody AddUserRequestDTO userRequestDTO) {
         authService.validateManagerToken(token);
 
         UserResponseDTO responseDTO = userService.addUser(userRequestDTO);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
-
     }
 
     // 유저 리스트 조회.
