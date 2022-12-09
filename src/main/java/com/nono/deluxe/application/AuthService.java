@@ -55,7 +55,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final CheckEmailRepository checkEmailRepository;
     private final AuthCodeRepository authCodeRepository;
-    private final MailService mailService;
+    private final MailClient mailClient;
 
     @Transactional
     public JoinResponseDTO joinUser(JoinRequestDTO requestDTO) {
@@ -186,12 +186,12 @@ public class AuthService {
             if (optionalUser.isPresent()) {
                 throw new RuntimeException("already exist email");
             }
-            mailService.postJoinCheckMail(email, verifyCode);
+            mailClient.postJoinCheckMail(email, verifyCode);
         } else if (type.equals(CheckType.REISSUE)) {
             if (optionalUser.isEmpty()) {
                 throw new RuntimeException("not exist email");
             }
-            mailService.postReissueCheckMail(email, verifyCode);
+            mailClient.postReissueCheckMail(email, verifyCode);
         } else {
             throw new RuntimeException("invalid CheckType");
         }
@@ -232,7 +232,7 @@ public class AuthService {
 
             user.updatePassword(newPassword);
 
-            mailService.postReissuePasswordMail(email, newPassword);
+            mailClient.postReissuePasswordMail(email, newPassword);
 
             return new MessageResponseDTO(true, "password reset");
         }

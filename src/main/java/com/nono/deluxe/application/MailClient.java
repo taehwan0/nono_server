@@ -6,13 +6,13 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 @Slf4j
 @EnableAsync
 @RequiredArgsConstructor
-@Service
-public class MailService {
+@Component
+public class MailClient {
 
     private final JavaMailSender javaMailSender;
 
