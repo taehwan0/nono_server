@@ -1,8 +1,8 @@
 package com.nono.deluxe.domain.record;
 
-import com.nono.deluxe.controller.dto.record.RecordRequestDTO;
 import com.nono.deluxe.domain.document.Document;
 import com.nono.deluxe.domain.product.Product;
+import com.nono.deluxe.presentation.dto.record.RecordRequestDTO;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;

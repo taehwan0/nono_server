@@ -1,7 +1,7 @@
 package com.nono.deluxe.exception.handler;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
-import com.nono.deluxe.controller.dto.ErrorResponseDTO;
+import com.nono.deluxe.presentation.dto.ErrorResponseDTO;
 import javax.validation.ConstraintViolationException;
 import javax.validation.UnexpectedTypeException;
 import lombok.extern.slf4j.Slf4j;

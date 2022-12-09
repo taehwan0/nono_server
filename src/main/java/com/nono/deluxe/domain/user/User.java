@@ -1,6 +1,6 @@
 package com.nono.deluxe.domain.user;
 
-import com.nono.deluxe.controller.dto.user.UpdateUserRequestDTO;
+import com.nono.deluxe.presentation.dto.user.UpdateUserRequestDTO;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;

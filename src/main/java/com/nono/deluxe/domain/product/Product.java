@@ -1,7 +1,7 @@
 package com.nono.deluxe.domain.product;
 
-import com.nono.deluxe.controller.dto.product.UpdateProductRequestDTO;
 import com.nono.deluxe.domain.imagefile.ImageFile;
+import com.nono.deluxe.presentation.dto.product.UpdateProductRequestDTO;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
