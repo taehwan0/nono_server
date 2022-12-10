@@ -10,10 +10,8 @@ import com.nono.deluxe.presentation.dto.notice.CreateNoticeRequestDTO;
 import com.nono.deluxe.presentation.dto.notice.NoticeResponseDTO;
 import com.nono.deluxe.presentation.dto.notice.ReadNoticeListResponseDTO;
 import com.nono.deluxe.presentation.dto.notice.UpdateNoticeRequestDTO;
-import java.util.Locale;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -37,40 +35,36 @@ public class NoticeService {
     }
 
     @Transactional(readOnly = true)
-    public ReadNoticeListResponseDTO readNoticeList(String query, String column, String order, int size, int page,
-        boolean focus, boolean content) {
+    public ReadNoticeListResponseDTO readNoticeList(
+        String query,
+        String column,
+        String order,
+        int size,
+        int page,
+        boolean focus,
+        boolean content) {
         Pageable limit = PageRequest.of(page, size,
-            Sort.by(new Sort.Order(Sort.Direction.valueOf(order.toUpperCase(Locale.ROOT)), column)));
-        Page<Notice> noticePage;
+            Sort.by(new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), column)));
 
         if (focus) {
-            noticePage = noticeRepository.readNoticeListFocus(query, limit);
-        } else {
-            noticePage = noticeRepository.readNoticeList(query, limit);
+            return new ReadNoticeListResponseDTO(noticeRepository.readNoticeListFocus(query, limit), content);
         }
-
-        return new ReadNoticeListResponseDTO(noticePage, content);
+        return new ReadNoticeListResponseDTO(noticeRepository.readNoticeList(query, limit), content);
     }
 
     @Transactional(readOnly = true)
     public NoticeResponseDTO readNotice(long noticeId) {
         Notice notice = noticeRepository.findById(noticeId)
             .orElseThrow(() -> new NotFoundException("Not Found Notice"));
+
         return new NoticeResponseDTO(notice);
     }
 
-    /**
-     * 최근 공지사항 1개만 조회
-     *
-     * @return
-     */
     @Transactional(readOnly = true)
     public NoticeResponseDTO readNoticeRecent() {
-        Optional<Notice> optionalNotice = noticeRepository.readNoticeRecentOne();
-        if (optionalNotice.isEmpty()) {
-            return null;
-        }
-        return new NoticeResponseDTO(optionalNotice.get());
+        Optional<Notice> notice = noticeRepository.readNoticeRecentOne();
+
+        return notice.map(NoticeResponseDTO::new).orElseGet(NoticeResponseDTO::new);
     }
 
     /*
@@ -81,11 +75,13 @@ public class NoticeService {
     public NoticeResponseDTO updateNotice(long noticeId, UpdateNoticeRequestDTO requestDto) {
         Notice notice = noticeRepository.findById(noticeId)
             .orElseThrow(() -> new NotFoundException("Not Found Notice"));
+
         notice.update(
             requestDto.getTitle(),
             requestDto.getContent(),
             requestDto.isFocus()
         );
+
         noticeRepository.saveAndFlush(notice);
 
         return new NoticeResponseDTO(notice);
@@ -95,6 +91,7 @@ public class NoticeService {
     public MessageResponseDTO deleteNotice(long noticeId) {
         Notice notice = noticeRepository.findById(noticeId)
             .orElseThrow(() -> new NotFoundException("Not Found Notice"));
+
         noticeRepository.delete(notice);
 
         return new MessageResponseDTO(true, "deleted");
