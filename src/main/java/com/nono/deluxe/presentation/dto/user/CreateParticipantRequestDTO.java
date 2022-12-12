@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class AddUserRequestDTO {
+public class CreateParticipantRequestDTO {
 
     @NotNull
     @Size(max = 20)

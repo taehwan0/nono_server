@@ -60,6 +60,16 @@ public class User {
         this.deleted = false;
     }
 
+    public static User createParticipant(String name) {
+        return User.builder()
+            .name(name)
+            .email(UUID.randomUUID().toString())
+            .password(UUID.randomUUID().toString())
+            .role(Role.ROLE_PARTICIPANT)
+            .active(true)
+            .build();
+    }
+
     public void updatePassword(String newPassword) {
         this.password = newPassword;
     }

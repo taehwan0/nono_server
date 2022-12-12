@@ -3,7 +3,7 @@ package com.nono.deluxe.presentation;
 import com.nono.deluxe.application.AuthService;
 import com.nono.deluxe.application.UserService;
 import com.nono.deluxe.presentation.dto.MessageResponseDTO;
-import com.nono.deluxe.presentation.dto.user.AddUserRequestDTO;
+import com.nono.deluxe.presentation.dto.user.CreateParticipantRequestDTO;
 import com.nono.deluxe.presentation.dto.user.GetUserListResponseDTO;
 import com.nono.deluxe.presentation.dto.user.UpdateUserRequestDTO;
 import com.nono.deluxe.presentation.dto.user.UserResponseDTO;
@@ -36,10 +36,10 @@ public class UserController {
     @PostMapping()
     public ResponseEntity<UserResponseDTO> addUser(
         @RequestHeader(value = "Authorization") String token,
-        @Validated @RequestBody AddUserRequestDTO userRequestDTO) {
+        @Validated @RequestBody CreateParticipantRequestDTO userRequestDTO) {
         authService.validateManagerToken(token);
 
-        UserResponseDTO responseDTO = userService.addUser(userRequestDTO);
+        UserResponseDTO responseDTO = userService.createParticipant(userRequestDTO);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
@@ -55,7 +55,7 @@ public class UserController {
         @RequestParam(required = false, defaultValue = "1") int page) {
         authService.validateManagerToken(token);
 
-        GetUserListResponseDTO userList = userService.readUserList(query, column, order, size, (page - 1));
+        GetUserListResponseDTO userList = userService.getUserList(query, column, order, size, (page - 1));
 
         return ResponseEntity.status(HttpStatus.OK).body(userList);
     }
