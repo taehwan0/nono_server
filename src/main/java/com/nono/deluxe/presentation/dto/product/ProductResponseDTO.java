@@ -50,6 +50,11 @@ public class ProductResponseDTO {
         this.price = product.getPrice();
         this.margin = product.getMargin();
         this.active = product.isActive();
-        this.image = new ImageFileResponseDTO(product.getFile());
+
+        if (product.getFile() == null) {
+            this.image = new ImageFileResponseDTO();
+        } else {
+            this.image = new ImageFileResponseDTO(product.getFile());
+        }
     }
 }

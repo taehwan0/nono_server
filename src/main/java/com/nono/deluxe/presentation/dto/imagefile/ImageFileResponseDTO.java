@@ -10,6 +10,9 @@ public class ImageFileResponseDTO {
     private String originalUrl;
     private String thumbnailUrl;
 
+    public ImageFileResponseDTO() {
+    }
+
     public ImageFileResponseDTO(ImageFile imageFile) {
         this.fileId = imageFile.getId();
         this.originalUrl = imageFile.getOriginalUrl();
