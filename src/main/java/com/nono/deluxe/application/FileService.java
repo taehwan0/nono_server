@@ -36,6 +36,8 @@ public class FileService {
     private String bucket;
 
     public ImageFileResponseDTO uploadImageFile(MultipartFile imageFile) throws IOException {
+        validateImageFile(imageFile);
+
         BufferedImage bufferedImage = ImageIO.read(imageFile.getInputStream());
 
         String uuid = UUID.randomUUID().toString();
@@ -50,6 +52,12 @@ public class FileService {
         imageFileRepository.save(savedImageFile);
 
         return new ImageFileResponseDTO(savedImageFile);
+    }
+
+    private void validateImageFile(MultipartFile imageFile) {
+        if (imageFile.isEmpty()) {
+            throw new IllegalArgumentException("이미지 파일이 업로드되지 않았습니다.");
+        }
     }
 
     private BufferedImage convertToOriginal(BufferedImage bufferedImage) throws IOException {
