@@ -36,6 +36,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,6 +57,7 @@ public class AuthService {
     private final CheckEmailRepository checkEmailRepository;
     private final AuthCodeRepository authCodeRepository;
     private final MailClient mailClient;
+    private final BCryptPasswordEncoder encoder;
 
     @Transactional
     public JoinResponseDTO joinUser(JoinRequestDTO requestDTO) {
@@ -67,37 +69,45 @@ public class AuthService {
         if (checkEmail.isVerified()
             && checkEmail.getVerifyCode().equals(code)
             && checkEmail.getType().equals(CheckType.JOIN)) {
+
             User user = requestDTO.toEntity();
-            User savedUser = userRepository.save(user);
-            return new JoinResponseDTO(savedUser);
+            user.encodePassword(encoder);
+
+            return new JoinResponseDTO(userRepository.save(user));
         }
         throw new RuntimeException("Email Not Verified OR Verify Code Not Collect");
-    }
-
-    @Transactional
-    public AuthCodeResponseDTO createAuthCode(long userCode) {
-        deleteLegacyLoginCode(userCode);
-        User user = userRepository.findById(userCode)
-            .orElseThrow(() -> new RuntimeException("Not Found User"));
-        String authCode = createRandomString("1234567890", 6);
-
-        AuthCode loginCode = AuthCode.builder()
-            .user(user)
-            .verifyCode(authCode)
-            .build();
-        authCodeRepository.save(loginCode);
-
-        return new AuthCodeResponseDTO(loginCode);
     }
 
     @Transactional(readOnly = true)
     public AuthCodeResponseDTO createAuthCode(CreateAuthCodeRequestDTO requestDTO) {
         String email = requestDTO.getEmail();
         String password = requestDTO.getPassword();
-        User user = userRepository.findByEmailAndPassword(email, password)
+
+        User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new RuntimeException("Not Found User"));
 
-        return createAuthCode(user.getId());
+        if (encoder.matches(password, user.getPassword())) {
+            return createAuthCode(user.getId());
+        }
+        throw new IllegalArgumentException("올바르지 않은 패스워드");
+    }
+
+    @Transactional
+    public AuthCodeResponseDTO createAuthCode(long userCode) {
+        deleteLegacyLoginCode(userCode);
+
+        User user = userRepository.findById(userCode)
+            .orElseThrow(() -> new RuntimeException("Not Found User"));
+
+        String verifyCode = createRandomString("1234567890", 6);
+
+        AuthCode loginCode = AuthCode.builder()
+            .user(user)
+            .verifyCode(verifyCode)
+            .build();
+        authCodeRepository.save(loginCode);
+
+        return new AuthCodeResponseDTO(loginCode);
     }
 
     private TokenResponseDTO createTokenResponseDTO(User user) {
@@ -159,7 +169,8 @@ public class AuthService {
     @Transactional
     public MessageResponseDTO checkEmail(EmailRequestDTO requestDTO) {
         String email = requestDTO.getEmail();
-        deleteLegacyEmailCode(email); // 이전 인증 메일이 있다면 최신화를 위해 삭제시킴
+
+        deleteLegacyEmailCode(email);
 
         CheckType type = CheckType.valueOf(requestDTO.getType().toUpperCase());
         String verifyCode = getVerifyCode();
@@ -221,22 +232,27 @@ public class AuthService {
         CheckEmail checkEmail = checkEmailRepository.findByEmail(email)
             .orElseThrow(() -> new RuntimeException("Not Found Check Email"));
 
-        if (checkEmail.isVerified()
-            && checkEmail.getVerifyCode().equals(code)
-            && checkEmail.getType().equals(CheckType.REISSUE)) {
+        if (validateReissueEmail(checkEmail, code)) {
             User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Not Found User"));
 
             String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
             String newPassword = createRandomString(chars, 12);
 
-            user.updatePassword(newPassword);
-
             mailClient.postReissuePasswordMail(email, newPassword);
 
+            user.updatePassword(newPassword);
+            user.encodePassword(encoder);
+            
             return new MessageResponseDTO(true, "password reset");
         }
         throw new RuntimeException("Email Not Verified OR Verify Code Not Collect");
+    }
+
+    private boolean validateReissueEmail(CheckEmail checkEmail, String verifyCode) {
+        return checkEmail.isVerified()
+            && checkEmail.getVerifyCode().equals(verifyCode)
+            && checkEmail.getType().equals(CheckType.REISSUE);
     }
 
     private void deleteLegacyLoginCode(long userCode) {
