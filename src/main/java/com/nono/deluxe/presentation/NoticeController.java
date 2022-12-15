@@ -1,6 +1,5 @@
 package com.nono.deluxe.presentation;
 
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.nono.deluxe.application.AuthService;
 import com.nono.deluxe.application.NoticeService;
 import com.nono.deluxe.presentation.dto.MessageResponseDTO;
@@ -45,10 +44,7 @@ public class NoticeController {
         @RequestHeader(value = "Authorization") String token,
         @Validated @RequestBody CreateNoticeRequestDTO requestDto) {
 
-        authService.validateAdminToken(token);
-
-        DecodedJWT decodedJWT = authService.decodeJwt(token);
-        long userId = authService.getUserIdByDecodedToken(decodedJWT);
+        long userId = authService.validateTokenOverAdminRole(token);
 
         NoticeResponseDTO responseDto = noticeService.createNotice(userId, requestDto);
 
@@ -71,7 +67,7 @@ public class NoticeController {
         @RequestParam(required = false, defaultValue = "1") int page,
         @RequestParam(required = false, defaultValue = "false") boolean focus,
         @RequestParam(required = false, defaultValue = "false") boolean content) {
-        authService.validateParticipantToken(token);
+        authService.validateTokenOverParticipantRole(token);
 
         ReadNoticeListResponseDTO responseDto =
             noticeService.readNoticeList(query, column, order, size, (page - 1), focus, content);
@@ -90,7 +86,7 @@ public class NoticeController {
     public ResponseEntity<NoticeResponseDTO> readNotice(
         @RequestHeader(value = "Authorization") String token,
         @PathVariable(name = "noticeId") long noticeId) {
-        authService.validateParticipantToken(token);
+        authService.validateTokenOverParticipantRole(token);
 
         NoticeResponseDTO responseDto = noticeService.readNotice(noticeId);
 
@@ -106,7 +102,7 @@ public class NoticeController {
     @GetMapping("/recent")
     public ResponseEntity<NoticeResponseDTO> readNoticeRecent(
         @RequestHeader(value = "Authorization") String token) {
-        authService.validateParticipantToken(token);
+        authService.validateTokenOverParticipantRole(token);
 
         NoticeResponseDTO responseDto = noticeService.readNoticeRecent();
 
@@ -126,7 +122,7 @@ public class NoticeController {
         @RequestHeader(value = "Authorization") String token,
         @PathVariable(name = "noticeId") long noticeId,
         @Validated @RequestBody UpdateNoticeRequestDTO requestDto) {
-        authService.validateAdminToken(token);
+        authService.validateTokenOverAdminRole(token);
 
         NoticeResponseDTO responseDto = noticeService.updateNotice(noticeId, requestDto);
 
@@ -144,7 +140,7 @@ public class NoticeController {
     public ResponseEntity<MessageResponseDTO> deleteNotice(
         @RequestHeader(value = "Authorization") String token,
         @PathVariable(name = "noticeId") long noticeId) {
-        authService.validateAdminToken(token);
+        authService.validateTokenOverAdminRole(token);
 
         MessageResponseDTO responseDto = noticeService.deleteNotice(noticeId);
 

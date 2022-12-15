@@ -38,7 +38,7 @@ public class ProductController {
     public ResponseEntity<ProductResponseDTO> createProduct(
         @RequestHeader(value = "Authorization") String token,
         @Validated @RequestBody CreateProductRequestDto requestDto) {
-        authService.validateManagerToken(token);
+        authService.validateTokenOverManagerRole(token);
 
         ProductResponseDTO responseDTO = productService.createProduct(requestDto);
 
@@ -68,7 +68,7 @@ public class ProductController {
         @RequestParam(value = "size", defaultValue = "10") int size,
         @RequestParam(value = "page", defaultValue = "1") int page,
         @RequestParam(value = "active", defaultValue = "false") boolean active) {
-        authService.validateParticipantToken(token);
+        authService.validateTokenOverParticipantRole(token);
 
         GetProductListResponseDTO responseDTO =
             productService.getProductList(query, column, order, size, (page - 1), active);
@@ -81,7 +81,7 @@ public class ProductController {
     public ResponseEntity<ProductResponseDTO> getProductInfo(
         @RequestHeader(value = "Authorization") String token,
         @PathVariable(name = "productId") long productId) {
-        authService.validateParticipantToken(token);
+        authService.validateTokenOverParticipantRole(token);
 
         ProductResponseDTO responseDTO = productService.getProductInfo(productId);
 
@@ -93,7 +93,7 @@ public class ProductController {
     public ResponseEntity<ProductResponseDTO> getProductInfoByBarcode(
         @RequestHeader(value = "Authorization") String token,
         @PathVariable(name = "barcode") String barcode) {
-        authService.validateParticipantToken(token);
+        authService.validateTokenOverParticipantRole(token);
 
         ProductResponseDTO responseDTO = productService.getProductInfoByBarcode(barcode);
 
@@ -106,7 +106,7 @@ public class ProductController {
         @PathVariable(name = "productId") long productId,
         @RequestParam(required = false, defaultValue = "0") int year,
         @RequestParam(required = false, defaultValue = "0") int month) {
-        authService.validateParticipantToken(token);
+        authService.validateTokenOverParticipantRole(token);
 
         GetRecordListResponseDTO responseDTO = productService.readProductRecord(productId, year, month);
 
@@ -118,7 +118,7 @@ public class ProductController {
         @RequestHeader(value = "Authorization") String token,
         @PathVariable(name = "productId") long productId,
         @Validated @RequestBody UpdateProductRequestDTO requestDto) {
-        authService.validateManagerToken(token);
+        authService.validateTokenOverManagerRole(token);
 
         ProductResponseDTO responseDTO = productService.updateProduct(productId, requestDto);
 
@@ -129,7 +129,7 @@ public class ProductController {
     public ResponseEntity<MessageResponseDTO> deleteProduct(
         @RequestHeader(value = "Authorization") String token,
         @PathVariable(name = "productId") long productId) {
-        authService.validateManagerToken(token);
+        authService.validateTokenOverManagerRole(token);
 
         MessageResponseDTO responseDTO = productService.deleteProduct(productId);
 

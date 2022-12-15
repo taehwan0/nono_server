@@ -37,7 +37,7 @@ public class UserController {
     public ResponseEntity<UserResponseDTO> addUser(
         @RequestHeader(value = "Authorization") String token,
         @Validated @RequestBody CreateParticipantRequestDTO userRequestDTO) {
-        authService.validateManagerToken(token);
+        authService.validateTokenOverManagerRole(token);
 
         UserResponseDTO responseDTO = userService.createParticipant(userRequestDTO);
 
@@ -53,7 +53,7 @@ public class UserController {
         @RequestParam(required = false, defaultValue = "ASC") String order,
         @RequestParam(required = false, defaultValue = "10") int size,
         @RequestParam(required = false, defaultValue = "1") int page) {
-        authService.validateManagerToken(token);
+        authService.validateTokenOverManagerRole(token);
 
         GetUserListResponseDTO userList = userService.getUserList(query, column, order, size, (page - 1));
 
@@ -64,7 +64,7 @@ public class UserController {
     public ResponseEntity<UserResponseDTO> getUserInfo(
         @RequestHeader(value = "Authorization") String token,
         @PathVariable(name = "userCode") long userCode) {
-        authService.validateManagerToken(token);
+        authService.validateTokenOverManagerRole(token);
 
         UserResponseDTO responseDTO = userService.getUserInfo(userCode);
 
@@ -76,7 +76,7 @@ public class UserController {
         @RequestHeader(value = "Authorization") String token,
         @PathVariable(name = "userCode") long userCode,
         @Validated @RequestBody UpdateUserRequestDTO userRequestDTO) {
-        authService.validateManagerToken(token);
+        authService.validateTokenOverManagerRole(token);
 
         UserResponseDTO responseDTO = userService.updateUser(userCode, userRequestDTO);
 
@@ -87,7 +87,7 @@ public class UserController {
     public ResponseEntity<MessageResponseDTO> deleteUser(
         @RequestHeader(name = "Authorization") String token,
         @PathVariable(name = "userCode") long userCode) {
-        authService.validateAdminToken(token);
+        authService.validateTokenOverAdminRole(token);
 
         MessageResponseDTO responseDto = userService.deleteUser(userCode);
 

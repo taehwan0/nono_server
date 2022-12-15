@@ -1,6 +1,5 @@
 package com.nono.deluxe.presentation;
 
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.nono.deluxe.application.AuthService;
 import com.nono.deluxe.application.DocumentService;
 import com.nono.deluxe.presentation.dto.MessageResponseDTO;
@@ -38,10 +37,7 @@ public class DocumentController {
         @RequestHeader(name = "Authorization") String token,
         @Validated @RequestBody CreateDocumentRequestDTO requestDto) {
 
-        authService.validateParticipantToken(token);
-
-        DecodedJWT decodedJWT = authService.decodeJwt(token);
-        long userId = authService.getUserIdByDecodedToken(decodedJWT);
+        long userId = authService.validateTokenOverParticipantRole(token);
 
         DocumentResponseDTO responseDto = documentService.createDocument(userId, requestDto);
 
@@ -52,7 +48,7 @@ public class DocumentController {
     public ResponseEntity<DocumentResponseDTO> readDocument(
         @RequestHeader(name = "Authorization") String token,
         @PathVariable(name = "documentId") long documentId) {
-        authService.validateParticipantToken(token);
+        authService.validateTokenOverParticipantRole(token);
 
         DocumentResponseDTO responseDto = documentService.readDocument(documentId);
 
@@ -69,7 +65,7 @@ public class DocumentController {
         @RequestParam(required = false, defaultValue = "1") int page,
         @RequestParam(required = false, defaultValue = "0") int year,
         @RequestParam(required = false, defaultValue = "0") int month) {
-        authService.validateParticipantToken(token);
+        authService.validateTokenOverParticipantRole(token);
 
         ReadDocumentListResponseDTO responseDto =
             documentService.readDocumentList(query, column, order, size, (page - 1), year, month);
@@ -82,7 +78,7 @@ public class DocumentController {
         @RequestHeader(name = "Authorization") String token,
         @PathVariable(name = "documentId") long documentId,
         @Validated @RequestBody UpdateDocumentRequestDTO requestDto) {
-        authService.validateParticipantToken(token);
+        authService.validateTokenOverParticipantRole(token);
 
         DocumentResponseDTO responseDto = documentService.updateDocument(documentId, requestDto);
 
@@ -93,7 +89,7 @@ public class DocumentController {
     public ResponseEntity<MessageResponseDTO> deleteDocument(
         @RequestHeader(name = "Authorization") String token,
         @PathVariable(name = "documentId") long documentId) {
-        authService.validateAdminToken(token);
+        authService.validateTokenOverAdminRole(token);
 
         MessageResponseDTO responseDto = documentService.deleteDocument(documentId);
 

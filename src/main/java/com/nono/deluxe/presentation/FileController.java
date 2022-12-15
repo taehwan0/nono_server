@@ -26,7 +26,7 @@ public class FileController {
     public ResponseEntity<ImageFileResponseDTO> uploadImageFile(
         @RequestHeader(name = "Authorization") String token,
         @RequestPart MultipartFile imageFile) throws IOException {
-        authService.validateManagerToken(token);
+        authService.validateTokenOverManagerRole(token);
 
         return ResponseEntity
             .status(HttpStatus.OK)

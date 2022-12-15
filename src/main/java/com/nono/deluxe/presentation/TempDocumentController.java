@@ -1,6 +1,5 @@
 package com.nono.deluxe.presentation;
 
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.nono.deluxe.application.AuthService;
 import com.nono.deluxe.application.TempDocumentService;
 import com.nono.deluxe.presentation.dto.MessageResponseDTO;
@@ -37,10 +36,7 @@ public class TempDocumentController {
     public ResponseEntity<TempDocumentResponseDTO> createTempDocument(
         @RequestHeader(name = "Authorization") String token,
         @Validated @RequestBody CreateTempDocumentRequestDTO requestDto) {
-        authService.validateParticipantToken(token);
-
-        DecodedJWT decodedJWT = authService.decodeJwt(token);
-        long userId = authService.getUserIdByDecodedToken(decodedJWT);
+        long userId = authService.validateTokenOverParticipantRole(token);
 
         TempDocumentResponseDTO responseDto = tempDocumentService.createDocument(userId, requestDto);
 
@@ -51,7 +47,7 @@ public class TempDocumentController {
     public ResponseEntity<TempDocumentResponseDTO> readTempDocument(
         @RequestHeader(name = "Authorization") String token,
         @PathVariable(name = "documentId") long documentId) {
-        authService.validateParticipantToken(token);
+        authService.validateTokenOverParticipantRole(token);
 
         TempDocumentResponseDTO responseDto = tempDocumentService.readDocument(documentId);
 
@@ -66,7 +62,7 @@ public class TempDocumentController {
         @RequestParam(required = false, defaultValue = "DESC") String order,
         @RequestParam(required = false, defaultValue = "10") int size,
         @RequestParam(required = false, defaultValue = "0") int page) {
-        authService.validateParticipantToken(token);
+        authService.validateTokenOverParticipantRole(token);
 
         ReadTempDocumentListResponseDTO responseDto =
             tempDocumentService.readDocumentList(query, column, order, size, page);
@@ -79,10 +75,7 @@ public class TempDocumentController {
         @RequestHeader(name = "Authorization") String token,
         @PathVariable(name = "documentId") long documentId,
         @Validated @RequestBody UpdateTempDocumentRequestDTO requestDto) {
-        authService.validateParticipantToken(token);
-
-        DecodedJWT decodedJWT = authService.decodeJwt(token);
-        long userId = authService.getUserIdByDecodedToken(decodedJWT);
+        long userId = authService.validateTokenOverParticipantRole(token);
 
         TempDocumentResponseDTO responseDto = tempDocumentService.updateDocument(documentId, userId, requestDto);
 
@@ -93,7 +86,7 @@ public class TempDocumentController {
     public ResponseEntity<MessageResponseDTO> deleteTempDocument(
         @RequestHeader(name = "Authorization") String token,
         @PathVariable(name = "documentId") long documentId) {
-        authService.validateManagerToken(token);
+        authService.validateTokenOverManagerRole(token);
 
         MessageResponseDTO responseDto = tempDocumentService.deleteDocument(documentId);
 
