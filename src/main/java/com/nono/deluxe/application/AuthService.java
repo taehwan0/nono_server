@@ -20,9 +20,7 @@ import com.nono.deluxe.presentation.dto.auth.TokenRequestDTO;
 import com.nono.deluxe.presentation.dto.auth.TokenResponseDTO;
 import com.nono.deluxe.presentation.dto.auth.VerifyEmailRequestDTO;
 import java.security.SecureRandom;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -38,6 +36,9 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Service
 public class AuthService {
+
+    private static final long CHECK_MAIL_VALID_MILLISECOND = 1000L * 60 * 30;
+    private static final long LOGIN_CODE_VALID_MILLISECOND = 1000L * 60 * 10;
 
     private final TokenClient tokenClient;
     private final UserRepository userRepository;
@@ -115,9 +116,18 @@ public class AuthService {
 
         authCodeRepository.delete(loginCode);
 
+        validateLoginCodeExpireTime(loginCode);
+
         User user = loginCode.getUser();
 
         return tokenClient.createToken(user);
+    }
+
+    private void validateLoginCodeExpireTime(AuthCode loginCode) {
+        long createdMilliSeconds = loginCode.getCreatedAt().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        if (System.currentTimeMillis() > createdMilliSeconds + LOGIN_CODE_VALID_MILLISECOND) {
+            throw new RuntimeException("로그인 코드 유효시간 만료");
+        }
     }
 
     private TokenResponseDTO createTokenByRefreshToken(String refreshToken) {
@@ -190,12 +200,20 @@ public class AuthService {
         CheckEmail checkEmail = checkEmailRepository.findByEmail(email)
             .orElseThrow(() -> new RuntimeException("Not Found Check Email"));
 
-        if (checkEmail.getVerifyCode().equals(code) && validateValidTime(checkEmail)) {
-            // code 가 맞았을 경우, 시간 또한 제한시간 안쪽일때
+        if (checkEmail.getVerifyCode().equals(code)) {
+            validateEmailCodeExpireTime(checkEmail);
+
             checkEmail.verify();
             return new MessageResponseDTO(true, "success");
         }
         return new MessageResponseDTO(false, "fail");
+    }
+
+    private void validateEmailCodeExpireTime(CheckEmail checkEmail) {
+        long createdAt = checkEmail.getCreatedAt().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        if (System.currentTimeMillis() > createdAt + CHECK_MAIL_VALID_MILLISECOND) {
+            throw new RuntimeException("인증메일 유효시간 만료");
+        }
     }
 
     @Transactional
@@ -248,14 +266,6 @@ public class AuthService {
         }
 
         return sb.toString();
-    }
-
-    // 유효하다
-    // TODO 동작 확인 필요!
-    private boolean validateValidTime(CheckEmail checkEmail) {
-        LocalDateTime createdAt = checkEmail.getCreatedAt();
-        long milliOfCreatedAt = ZonedDateTime.of(createdAt, ZoneId.systemDefault()).toInstant().toEpochMilli();
-        return milliOfCreatedAt + (1000L * 60 * 10) >= System.currentTimeMillis();
     }
 
     private void deleteLegacyEmailCode(String email) {
