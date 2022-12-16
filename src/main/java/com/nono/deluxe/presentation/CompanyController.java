@@ -46,7 +46,7 @@ public class CompanyController {
     public ResponseEntity<CompanyResponseDTO> createCompany(
         @RequestHeader(name = "Authorization") String token,
         @Validated @RequestBody CreateCompanyRequestDTO requestDto) {
-        authService.validateManagerToken(token);
+        authService.validateTokenOverManagerRole(token);
 
         CompanyResponseDTO responseDto = companyService.createCompany(requestDto);
 
@@ -74,7 +74,7 @@ public class CompanyController {
         @RequestParam(required = false, defaultValue = "10") int size,
         @RequestParam(required = false, defaultValue = "1") int page,
         @RequestParam(required = false, defaultValue = "false") boolean active) {
-        authService.validateParticipantToken(token);
+        authService.validateTokenOverParticipantRole(token);
 
         ReadCompanyListResponseDTO responseDto =
             companyService.readCompanyList(query, column, order, size, (page - 1), active);
@@ -93,7 +93,7 @@ public class CompanyController {
     public ResponseEntity<CompanyResponseDTO> readCompany(
         @RequestHeader(name = "Authorization") String token,
         @PathVariable(name = "companyId") long companyId) {
-        authService.validateParticipantToken(token);
+        authService.validateTokenOverParticipantRole(token);
 
         CompanyResponseDTO responseDto = companyService.readCompany(companyId);
 
@@ -117,7 +117,7 @@ public class CompanyController {
         @RequestParam(required = false, defaultValue = "1") int page,
         @RequestParam(required = false, defaultValue = "0") int year,
         @RequestParam(required = false, defaultValue = "0") int month) {
-        authService.validateParticipantToken(token);
+        authService.validateTokenOverParticipantRole(token);
 
         ReadDocumentListResponseDTO responseDto =
             companyService.readCompanyDocument(companyId, order, size, (page - 1), year, month);
@@ -138,7 +138,7 @@ public class CompanyController {
         @RequestHeader(name = "Authorization") String token,
         @Validated @RequestBody UpdateCompanyRequestDTO requestDto,
         @PathVariable(name = "companyId") long companyId) {
-        authService.validateAdminToken(token);
+        authService.validateTokenOverAdminRole(token);
 
         CompanyResponseDTO responseDto = companyService.updateCompany(companyId, requestDto);
 
@@ -149,7 +149,7 @@ public class CompanyController {
     public ResponseEntity<UpdateCompanyActiveResponseDTO> updateCompanyActive(
         @RequestHeader(name = "Authorization") String token,
         @Validated @RequestBody UpdateCompanyActiveRequestDTO requestDto) {
-        authService.validateAdminToken(token);
+        authService.validateTokenOverAdminRole(token);
 
         UpdateCompanyActiveResponseDTO responseDto = companyService.updateCompanyActive(requestDto);
 
@@ -167,7 +167,7 @@ public class CompanyController {
     @DeleteMapping("/{companyId}")
     public ResponseEntity<MessageResponseDTO> updateCompany(@RequestHeader(name = "Authorization") String token,
         @PathVariable(name = "companyId") long companyId) {
-        authService.validateAdminToken(token);
+        authService.validateTokenOverAdminRole(token);
 
         MessageResponseDTO responseDto = companyService.deleteCompany(companyId);
 

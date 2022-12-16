@@ -83,7 +83,7 @@ public class AuthController {
     public ResponseEntity<AuthCodeResponseDTO> createAuthCode(
         @RequestHeader(name = "Authorization") String token,
         @PathVariable(name = "userCode") long userCode) {
-        authService.validateAdminToken(token);
+        authService.validateTokenOverAdminRole(token);
 
         AuthCodeResponseDTO responseDTO = authService.createAuthCode(userCode);
 
