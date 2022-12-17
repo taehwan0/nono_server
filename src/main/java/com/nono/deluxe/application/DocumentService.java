@@ -18,6 +18,7 @@ import com.nono.deluxe.presentation.dto.document.DocumentResponseDTO;
 import com.nono.deluxe.presentation.dto.document.ReadDocumentListResponseDTO;
 import com.nono.deluxe.presentation.dto.document.UpdateDocumentRequestDTO;
 import com.nono.deluxe.presentation.dto.record.RecordRequestDTO;
+import com.nono.deluxe.utils.LocalDateCreator;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -94,24 +95,16 @@ public class DocumentService {
             new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), column),
             new Sort.Order(Sort.Direction.ASC, "createdAt")));
 
-        if (year == 0) {
-            year = LocalDate.now().getYear();
-        }
-        int toMonth = month;
-        if (month == 0) {
-            month = 1;
-            toMonth = 12;
-        }
+        LocalDate fromDate = LocalDateCreator.getFromDate(year, month);
+        LocalDate toDate = LocalDateCreator.getToDate(year, month);
 
-        LocalDate fromDate = LocalDate.of(year, month, 1);
-        LocalDate toDate = LocalDate.of(year, toMonth, LocalDate.of(year, toMonth, 1).lengthOfMonth());
         // 테스트 해보기
-
         Page<Document> documentPage = documentRepository.readDocumentList(query, fromDate, toDate, limit);
 
         return new ReadDocumentListResponseDTO(documentPage);
     }
 
+    // TODO: 로직 확인 필요!
     @Transactional
     public DocumentResponseDTO updateDocument(long documentId, UpdateDocumentRequestDTO requestDto) {
         Document document = documentRepository.findById(documentId)
@@ -125,7 +118,6 @@ public class DocumentService {
 
         List<RecordRequestDTO> recordList = requestDto.getRecordList();
         List<Long> updateProductIdList = new ArrayList<>(); // 새로이 변경될 record 들의 productId List
-
         for (RecordRequestDTO recordRequestDto : recordList) {
             // update 목록에 있는 record 가 db 에 존재하면 update
             // 존재하지 않는다면 create
@@ -136,12 +128,14 @@ public class DocumentService {
             updateProductIdList.add(productId);
 
             Optional<Record> optionalRecord = recordRepository.findUpdateTargetRecord(productId, documentId);
+            Record record;
             if (optionalRecord.isEmpty()) {
                 // create 로직
-                Record record = createRecord(document, product, recordRequestDto);
+                record = createRecord(document, product, recordRequestDto);
+                recordRepository.save(record);
             } else {
                 // update 로직
-                Record record = optionalRecord.get();
+                record = optionalRecord.get();
                 int typeSwitch = getTypeSwitch(document);
                 // quantity 변화량을 구해 stock 에 저장할 것
                 long changeQuantity = (recordRequestDto.getQuantity() - record.getQuantity()) * typeSwitch;
@@ -199,15 +193,12 @@ public class DocumentService {
     }
 
     /**
-     * document 에 해당하는 record 를 모두 찾아, 개수와 총 가격 (quantity * price) 을 연산하여 반환
-     *
-     * @param document
-     * @return long[] // totalRecordCount, totalPrice
+     * document 에 해당하는 record 를 모두 찾아, 개수와 총 가격 (quantity * price) 을 연산하여 반환 long[] // totalRecordCount, totalPrice
      */
     private long[] getTotalCountAndPrice(Document document) {
         List<Record> finalRecord = recordRepository.findByDocumentId(document.getId());
         int totalCount = finalRecord.size();
-        long totalPrice = 0;
+        int totalPrice = 0;
         for (Record record : finalRecord) {
             totalPrice += (record.getQuantity() * record.getPrice());
         }
@@ -219,11 +210,6 @@ public class DocumentService {
      * document 의 product 에 해당하는 record 를 생성함, 입력한 document 의 날짜가 최신 날짜일 시 record 생성 및 product stock 에 반영, 최신 날짜가 아닐시 입력
      * 날짜 이후의 record 중 가장 오래된 record 의 quantity, stock 을 통하여 해당 시점의 product stock 을 구하고 record 생성 및 product stock, 입력 날짜
      * 이후의 record stock 에 반영
-     *
-     * @param document
-     * @param product
-     * @param recordRequestDto
-     * @return record
      */
     private Record createRecord(Document document, Product product, RecordRequestDTO recordRequestDto) {
         List<Record> futureDateRecordList = recordRepository.findFutureDateRecordList(product.getId(),
@@ -266,8 +252,6 @@ public class DocumentService {
 
     /**
      * 입력받은 record 를 삭제하고, 삭제된 record 에 해당하는 product stock, 이후 날짜에 해당하는 record stock 에 삭제 내용을 반영 후 해당 record 를 삭제
-     *
-     * @param record
      */
     private void deleteRecord(Record record) {
         Document document = record.getDocument();
@@ -286,10 +270,7 @@ public class DocumentService {
 
     /**
      * 문서의 타입을 통해 + 또는 - 하기 위한 switch 반환
-     *
-     * @param document
-     * @return
-     */
+     **/
     private int getTypeSwitch(Document document) {
         if (document.getType().equals(DocumentType.INPUT)) {
             return 1;

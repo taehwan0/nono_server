@@ -3,6 +3,7 @@ package com.nono.deluxe.application;
 import com.amazonaws.services.kms.model.NotFoundException;
 import com.nono.deluxe.domain.company.Company;
 import com.nono.deluxe.domain.company.CompanyRepository;
+import com.nono.deluxe.domain.document.DocumentType;
 import com.nono.deluxe.domain.document.temp.TempDocument;
 import com.nono.deluxe.domain.document.temp.TempDocumentRepository;
 import com.nono.deluxe.domain.product.Product;
@@ -59,7 +60,12 @@ public class TempDocumentService {
 
             long recordPrice = tempRecord.getPrice();
             if (recordPrice == 0) {
-                long productPrice = recordProductInfo.getPrice();
+                long productPrice;
+                if (tempRecord.getDocument().getType().equals(DocumentType.INPUT)) {
+                    productPrice = recordProductInfo.getInputPrice();
+                } else {
+                    productPrice = recordProductInfo.getOutputPrice();
+                }
                 tempRecord.updatePrice(productPrice);
             }
             tempRecordRepository.save(tempRecord);
@@ -148,7 +154,7 @@ public class TempDocumentService {
         UpdateTempDocumentRequestDTO requestDto) {
         // 기존 tempRecord 삭제
         List<TempRecord> originRecordList = tempRecordRepository.findByDocumentId(tempDocument.getId());
-        originRecordList.forEach(tempRecordRepository::delete);
+        tempRecordRepository.deleteAll(originRecordList);
 
         // 새로운 Record 데이터 등록
         List<TempRecord> updatedRecordList = new ArrayList<>();
@@ -160,7 +166,12 @@ public class TempDocumentService {
 
             long recordPrice = tempRecord.getPrice();
             if (recordPrice == 0) {
-                long productPrice = recordProductInfo.getPrice();
+                long productPrice;
+                if (tempRecord.getDocument().getType().equals(DocumentType.INPUT)) {
+                    productPrice = recordProductInfo.getInputPrice();
+                } else {
+                    productPrice = recordProductInfo.getOutputPrice();
+                }
                 tempRecord.updatePrice(productPrice);
             }
 
@@ -198,7 +209,6 @@ public class TempDocumentService {
             long recordTotalPrice = record.getPrice() * record.getQuantity();
             totalPrice += recordTotalPrice;
         }
-
         return totalPrice;
     }
 }
