@@ -63,7 +63,10 @@ public class Product {
     private ImageFile file;
 
     @Column(nullable = true)
-    private long price;
+    private long inputPrice;
+
+    @Column(nullable = true)
+    private long outputPrice;
 
     @Column(nullable = true)
     private long margin;
@@ -72,8 +75,18 @@ public class Product {
     private boolean deleted;
 
     @Builder
-    public Product(String productCode, String name, String description, String category, String maker, String unit,
-        StorageType storageType, String barcode, long stock, boolean active, ImageFile file, long price,
+    public Product(
+        String productCode,
+        String name,
+        String description,
+        String category,
+        String maker,
+        String unit,
+        StorageType storageType,
+        String barcode,
+        long stock,
+        long inputPrice,
+        long outputPrice,
         long margin) {
         this.productCode = productCode;
         this.name = name;
@@ -84,10 +97,10 @@ public class Product {
         this.storageType = storageType;
         this.barcode = barcode;
         this.stock = stock;
-        this.active = active;
-        this.file = file;
-        this.price = price;
+        this.inputPrice = inputPrice;
+        this.outputPrice = outputPrice;
         this.margin = margin;
+        this.active = true;
     }
 
     public void updateInfo(UpdateProductRequestDTO requestDTO) {
@@ -101,7 +114,8 @@ public class Product {
         this.barcode = requestDTO.getBarcode();
         this.stock = requestDTO.getStock();
         this.active = requestDTO.isActive();
-        this.price = requestDTO.getPrice();
+        this.inputPrice = requestDTO.getInputPrice();
+        this.outputPrice = requestDTO.getOutputPrice();
         this.margin = requestDTO.getMargin();
     }
 

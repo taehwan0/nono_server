@@ -1,39 +1,27 @@
 package com.nono.deluxe.presentation.dto.product;
 
 import com.nono.deluxe.domain.product.Product;
+import com.nono.deluxe.domain.product.StorageType;
 import com.nono.deluxe.presentation.dto.imagefile.ImageFileResponseDTO;
 import lombok.Data;
 
 @Data
 public class ProductResponseDTO {
 
-    /// 상품 고유 아이디
-    private long productId;
-    /// 상품 코드
+    private Long productId;
     private String productCode;
-    /// 상품 이름
     private String name;
-    /// 상품에 대한 설명
     private String description;
-    /// 상품 분류
     private String category;
-    /// 제조사
     private String maker;
-    /// 규격
     private String unit;
-    /// 보관 방법 - Ice / Cold / Room
-    private String storageType;
-    /// 바코드
+    private StorageType storageType;
     private String barcode;
-    /// 생성시 가지고 있는 재고.
     private long stock;
-    /// 기준 가격
-    private long price;
-    /// 마진율
+    private long inputPrice;
+    private long outputPrice;
     private long margin;
-    /// 활성화 여부
     private boolean active;
-    // 이미지 데이터
     private ImageFileResponseDTO image;
 
     public ProductResponseDTO(Product product) {
@@ -44,10 +32,11 @@ public class ProductResponseDTO {
         this.category = product.getCategory();
         this.maker = product.getMaker();
         this.unit = product.getUnit();
-        this.storageType = product.getStorageType().name();
+        this.storageType = product.getStorageType();
         this.barcode = product.getBarcode();
         this.stock = product.getStock();
-        this.price = product.getPrice();
+        this.inputPrice = product.getInputPrice();
+        this.outputPrice = product.getOutputPrice();
         this.margin = product.getMargin();
         this.active = product.isActive();
 
