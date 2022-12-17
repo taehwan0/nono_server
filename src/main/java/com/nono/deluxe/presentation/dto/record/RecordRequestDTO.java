@@ -1,6 +1,7 @@
 package com.nono.deluxe.presentation.dto.record;
 
 import com.nono.deluxe.domain.document.Document;
+import com.nono.deluxe.domain.document.DocumentType;
 import com.nono.deluxe.domain.document.temp.TempDocument;
 import com.nono.deluxe.domain.product.Product;
 import com.nono.deluxe.domain.record.Record;
@@ -35,7 +36,11 @@ public class RecordRequestDTO {
     public TempRecord toTempEntity(TempDocument document, Product product) {
         long tempPrice = this.price;
         if (this.price <= 0) {
-            tempPrice = product.getPrice();
+            if (document.getType().equals(DocumentType.INPUT)) {
+                tempPrice = product.getInputPrice();
+            } else {
+                tempPrice = product.getOutputPrice();
+            }
         }
         return TempRecord.builder()
             .document(document)
