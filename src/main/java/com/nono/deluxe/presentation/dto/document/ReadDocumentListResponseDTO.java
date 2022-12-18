@@ -11,12 +11,12 @@ import org.springframework.data.domain.Page;
 public class ReadDocumentListResponseDTO {
 
     private Meta meta;
-    private List<SimpleDocumentResponseDTO> documentList = new ArrayList<>();
+    private List<DocumentResponseDTO> documentList = new ArrayList<>();
 
     public ReadDocumentListResponseDTO(Page<Document> documentPage) {
         List<Document> documentList = documentPage.getContent();
         documentList.forEach(document -> {
-            this.documentList.add(new SimpleDocumentResponseDTO(document));
+            this.documentList.add(new DocumentResponseDTO(document));
         });
         this.meta = new Meta(
             documentPage.getPageable().getPageNumber() + 1,

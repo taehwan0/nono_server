@@ -25,19 +25,41 @@ public class DocumentResponseDTO {
 
     List<RecordResponseDTO> recordList = new ArrayList<>();
 
-    public DocumentResponseDTO(Document document, long recordCount, long totalPrice, List<Record> recordList) {
+    public DocumentResponseDTO(Document document) {
         this.documentId = document.getId();
         this.date = document.getDate();
         this.type = document.getType();
         this.companyName = document.getCompany().getName();
         this.writer = document.getWriter().getName();
-        this.recordCount = recordCount;
-        this.totalPrice = totalPrice;
         this.createdAt = document.getCreatedAt();
         this.updatedAt = document.getUpdatedAt();
 
-        for (Record record : recordList) {
+        for (Record record : document.getRecords()) {
             this.recordList.add(new RecordResponseDTO(record));
         }
+
+        this.recordCount = recordList.size();
+        this.totalPrice = recordList.stream()
+            .mapToLong(record -> record.getPrice() * record.getQuantity())
+            .sum();
+    }
+
+    public DocumentResponseDTO(Document document, List<Record> records) {
+        this.documentId = document.getId();
+        this.date = document.getDate();
+        this.type = document.getType();
+        this.companyName = document.getCompany().getName();
+        this.writer = document.getWriter().getName();
+        this.createdAt = document.getCreatedAt();
+        this.updatedAt = document.getUpdatedAt();
+
+        for (Record record : records) {
+            this.recordList.add(new RecordResponseDTO(record));
+        }
+
+        this.recordCount = recordList.size();
+        this.totalPrice = recordList.stream()
+            .mapToLong(record -> record.getPrice() * record.getQuantity())
+            .sum();
     }
 }

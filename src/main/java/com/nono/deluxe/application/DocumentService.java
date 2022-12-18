@@ -55,7 +55,8 @@ public class DocumentService {
         documentRepository.save(document);
 
         List<RecordRequestDTO> recordRequestDtoList = requestDto.getRecordList();
-        List<Record> createdRecordList = new ArrayList<>();
+
+        List<Record> records = new ArrayList<>();
 
         for (RecordRequestDTO recordRequestDto : recordRequestDtoList) {
             long productId = recordRequestDto.getProductId();
@@ -64,28 +65,18 @@ public class DocumentService {
                 .orElseThrow(() -> new NotFoundException("Product Not Found"));
 
             // record response 가 필요하면 여기서 리턴받아 사용 가능
-            Record record = createRecord(document, product, recordRequestDto);
-            createdRecordList.add(record);
+            records.add(createRecord(document, product, recordRequestDto));
         }
 
-        long[] totalCountAndPrice = getTotalCountAndPrice(document);
-        long totalCount = totalCountAndPrice[0];
-        long totalPrice = totalCountAndPrice[1];
-
-        return new DocumentResponseDTO(document, totalCount, totalPrice, createdRecordList);
+        return new DocumentResponseDTO(document, records);
     }
 
     @Transactional(readOnly = true)
     public DocumentResponseDTO readDocument(long documentId) {
         Document document = documentRepository.findById(documentId)
             .orElseThrow(() -> new NotFoundException("Not Found Document"));
-        List<Record> recordList = recordRepository.findByDocumentId(documentId);
 
-        long[] totalCountAndPrice = getTotalCountAndPrice(document);
-        long totalCount = totalCountAndPrice[0];
-        long totalPrice = totalCountAndPrice[1];
-
-        return new DocumentResponseDTO(document, totalCount, totalPrice, recordList);
+        return new DocumentResponseDTO(document);
     }
 
     @Transactional(readOnly = true)
@@ -166,15 +157,9 @@ public class DocumentService {
             }
         }
 
-        long[] totalCountAndPrice = getTotalCountAndPrice(document);
-        long totalCount = totalCountAndPrice[0];
-        long totalPrice = totalCountAndPrice[1];
-
-        List<Record> finalRecordList = recordRepository.findByDocumentId(documentId);
-
         document.setUpdatedAt(LocalDateTime.now());
 
-        return new DocumentResponseDTO(document, totalCount, totalPrice, finalRecordList);
+        return new DocumentResponseDTO(document);
     }
 
     @Transactional
@@ -190,20 +175,6 @@ public class DocumentService {
         documentRepository.delete(document);
 
         return new MessageResponseDTO(true, "deleted");
-    }
-
-    /**
-     * document 에 해당하는 record 를 모두 찾아, 개수와 총 가격 (quantity * price) 을 연산하여 반환 long[] // totalRecordCount, totalPrice
-     */
-    private long[] getTotalCountAndPrice(Document document) {
-        List<Record> finalRecord = recordRepository.findByDocumentId(document.getId());
-        int totalCount = finalRecord.size();
-        int totalPrice = 0;
-        for (Record record : finalRecord) {
-            totalPrice += (record.getQuantity() * record.getPrice());
-        }
-
-        return new long[]{totalCount, totalPrice};
     }
 
     /**
@@ -246,7 +217,6 @@ public class DocumentService {
             // 현재 생성된 record 의 date 이후 날짜가 되는 모든 레코드 stock 에 연산
             recordRepository.updateStockFutureDateRecord(product.getId(), document.getDate(), changeQuantity);
         }
-
         return record;
     }
 
