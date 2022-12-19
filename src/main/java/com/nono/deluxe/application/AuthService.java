@@ -61,6 +61,8 @@ public class AuthService {
             User user = requestDTO.toEntity();
             user.encodePassword(encoder);
 
+            checkEmailRepository.delete(checkEmail);
+
             return new JoinResponseDTO(userRepository.save(user));
         }
         throw new RuntimeException("Email Not Verified OR Verify Code Not Collect");
@@ -235,6 +237,8 @@ public class AuthService {
 
             user.updatePassword(newPassword);
             user.encodePassword(encoder);
+
+            checkEmailRepository.delete(checkEmail);
 
             return new MessageResponseDTO(true, "password reset");
         }
