@@ -14,6 +14,7 @@ import com.nono.deluxe.presentation.dto.company.UpdateCompanyActiveRequestDTO;
 import com.nono.deluxe.presentation.dto.company.UpdateCompanyActiveResponseDTO;
 import com.nono.deluxe.presentation.dto.company.UpdateCompanyRequestDTO;
 import com.nono.deluxe.presentation.dto.document.ReadDocumentListResponseDTO;
+import com.nono.deluxe.utils.LocalDateCreator;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,17 +75,8 @@ public class CompanyService {
             Sort.by(new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), "date"),
                 new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), "createdAt")));
 
-        if (year == 0) {
-            year = LocalDate.now().getYear();
-        }
-        int toMonth = month;
-        if (month == 0) {
-            month = 1;
-            toMonth = 12;
-        }
-
-        LocalDate fromDate = LocalDate.of(year, month, 1);
-        LocalDate toDate = LocalDate.of(year, toMonth, LocalDate.of(year, toMonth, 1).lengthOfMonth());
+        LocalDate fromDate = LocalDateCreator.getFromDate(year, month);
+        LocalDate toDate = LocalDateCreator.getToDate(year, month);
 
         Page<Document> documentPage = documentRepository.findByCompanyId(companyId, fromDate, toDate, limit);
 
