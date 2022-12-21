@@ -2,6 +2,7 @@ package com.nono.deluxe.presentation;
 
 import com.nono.deluxe.application.AuthService;
 import com.nono.deluxe.application.DocumentService;
+import com.nono.deluxe.application.LegacyDocumentService;
 import com.nono.deluxe.presentation.dto.MessageResponseDTO;
 import com.nono.deluxe.presentation.dto.document.CreateDocumentRequestDTO;
 import com.nono.deluxe.presentation.dto.document.DocumentResponseDTO;
@@ -31,6 +32,7 @@ public class DocumentController {
 
     private final DocumentService documentService;
     private final AuthService authService;
+    private final LegacyDocumentService legacyDocumentService;
 
     @PostMapping("")
     public ResponseEntity<Object> createDocument(
@@ -102,5 +104,12 @@ public class DocumentController {
     @GetMapping("/{documentId}/xls")
     public void exportDocumentToExcel() {
 
+    }
+
+    @PostMapping("/legacy/trans")
+    public ResponseEntity<String> transLegacyDocument() {
+        legacyDocumentService.importLegacyDocument();
+
+        return ResponseEntity.status(HttpStatus.OK).body("SUCCESS");
     }
 }

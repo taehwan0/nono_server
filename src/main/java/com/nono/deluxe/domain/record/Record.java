@@ -1,7 +1,9 @@
 package com.nono.deluxe.domain.record;
 
 import com.nono.deluxe.domain.document.Document;
+import com.nono.deluxe.domain.document.DocumentType;
 import com.nono.deluxe.domain.product.Product;
+import com.nono.deluxe.domain.record.legacy.LegacyRecord;
 import com.nono.deluxe.presentation.dto.record.RecordRequestDTO;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -42,15 +44,6 @@ public class Record {
     @Column(nullable = false)
     private long price;
 
-    public void updateRecord(RecordRequestDTO requestDTO) {
-        this.quantity = requestDTO.getQuantity();
-        this.price = requestDTO.getPrice();
-    }
-
-    public void updateStock(long stock) {
-        this.stock = stock;
-    }
-
     @Builder
     public Record(Document document, Product product, long quantity, long stock, long price) {
         this.document = document;
@@ -58,5 +51,31 @@ public class Record {
         this.quantity = quantity;
         this.stock = stock;
         this.price = price;
+    }
+
+    private Record(Document document, Product product, LegacyRecord legacyRecord) {
+        this.document = document;
+        this.product = product;
+        this.quantity = legacyRecord.getQuantity();
+        this.stock = legacyRecord.getStock();
+
+        if (document.getType().equals(DocumentType.INPUT)) {
+            this.price = product.getInputPrice();
+        } else {
+            this.price = product.getOutputPrice();
+        }
+    }
+
+    public static Record of(Document document, Product product, LegacyRecord legacyRecord) {
+        return new Record(document, product, legacyRecord);
+    }
+
+    public void updateRecord(RecordRequestDTO requestDTO) {
+        this.quantity = requestDTO.getQuantity();
+        this.price = requestDTO.getPrice();
+    }
+
+    public void updateStock(long stock) {
+        this.stock = stock;
     }
 }
