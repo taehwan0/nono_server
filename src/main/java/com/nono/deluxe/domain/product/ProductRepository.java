@@ -25,6 +25,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT p FROM Product p WHERE p.barcode like :barcode AND p.deleted = false")
     Optional<Product> findByBarcode(@Param("barcode") String barcode);
 
+    Optional<Product> findByProductCode(String productCode);
+
     @Query(value = "SELECT p "
         + "FROM Product p "
         + "WHERE p.name LIKE CONCAT('%', :query, '%') AND p.active = true AND p.deleted = false")

@@ -2,6 +2,7 @@ package com.nono.deluxe.domain.document;
 
 import com.nono.deluxe.domain.BaseTimeEntity;
 import com.nono.deluxe.domain.company.Company;
+import com.nono.deluxe.domain.document.legacy.LegacyDocument;
 import com.nono.deluxe.domain.record.Record;
 import com.nono.deluxe.domain.user.User;
 import java.time.LocalDate;
@@ -60,5 +61,13 @@ public class Document extends BaseTimeEntity {
 
     public void updateCompany(Company company) {
         this.company = company;
+    }
+
+    public static Document of(LegacyDocument legacyDocument, User writer, Company company) {
+        return new Document(
+            legacyDocument.getDate(),
+            DocumentType.valueOf(legacyDocument.getDocsType().toUpperCase()),
+            writer,
+            company);
     }
 }
