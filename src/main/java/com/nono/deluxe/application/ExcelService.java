@@ -1,9 +1,12 @@
 package com.nono.deluxe.application;
 
 import com.nono.deluxe.domain.document.DocumentRepository;
+import com.nono.deluxe.domain.document.DocumentType;
 import com.nono.deluxe.domain.product.Product;
 import com.nono.deluxe.domain.product.ProductRepository;
+import com.nono.deluxe.domain.record.Record;
 import com.nono.deluxe.domain.record.RecordRepository;
+import com.nono.deluxe.utils.LocalDateCreator;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -47,14 +50,29 @@ public class ExcelService {
 
                 stockRow.createCell(2).setCellValue("재고");
                 inputRow.createCell(2).setCellValue("입고");
-                inputRow.createCell(3).setCellValue(recordRepository.getInputQuantityOf(product.getId(), year, month));
                 outputRow.createCell(2).setCellValue("출고");
+
+                List<Record> records = recordRepository.findAllByProductIdAndDocumentDateBetween(
+                    product.getId(),
+                    LocalDateCreator.getFromDate(year, month),
+                    LocalDateCreator.getToDate(year, month));
+
+                // stockRow.createCell(3).setCellValue(recentStock);
+                inputRow.createCell(3).setCellValue(getTotalQuantityTypeOf(records, DocumentType.INPUT));
+                outputRow.createCell(3).setCellValue(getTotalQuantityTypeOf(records, DocumentType.OUTPUT));
 
                 rowIndex += 3;
             }
         }
 
         return exportWorkbook(workbook);
+    }
+
+    private long getTotalQuantityTypeOf(List<Record> records, DocumentType documentType) {
+        return records.stream()
+            .filter(record -> record.getDocument().getType().equals(documentType))
+            .mapToLong(Record::getQuantity)
+            .sum();
     }
 
     private void setHeader(Sheet sheet, int year, int month) {
