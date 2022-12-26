@@ -6,7 +6,6 @@ import com.nono.deluxe.application.FileService;
 import com.nono.deluxe.presentation.dto.imagefile.ImageFileResponseDTO;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FileUtils;
 import org.springframework.http.HttpHeaders;
@@ -17,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -42,14 +42,15 @@ public class FileController {
     }
 
     @GetMapping(value = "/excel")
-    public ResponseEntity<byte[]> test() throws IOException {
+    public ResponseEntity<byte[]> getMonthlyDocument(@RequestParam int year, @RequestParam int month)
+        throws IOException {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(
             MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
         );
 
-        File file = excelService.getProductsRecord(2022, List.of(1, 2, 3));
+        File file = excelService.getProductsRecord(year, month);
         byte[] bytes = FileUtils.readFileToByteArray(file);
 
         return ResponseEntity
