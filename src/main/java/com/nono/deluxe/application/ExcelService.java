@@ -1,6 +1,5 @@
 package com.nono.deluxe.application;
 
-import com.nono.deluxe.domain.document.DocumentRepository;
 import com.nono.deluxe.domain.document.DocumentType;
 import com.nono.deluxe.domain.product.Product;
 import com.nono.deluxe.domain.product.ProductRepository;
@@ -14,6 +13,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -25,46 +27,74 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ExcelService {
 
-    private final DocumentRepository documentRepository;
     private final RecordRepository recordRepository;
     private final ProductRepository productRepository;
 
     @Transactional
-    public File getProductsRecord(int year, List<Integer> months) {
+    public File getProductsRecord(int year, int month) {
         Workbook workbook = new SXSSFWorkbook();
 
         int rowIndex = 1;
 
-        for (int month : months) {
-            Sheet sheet = workbook.createSheet(month + "월");
+        Sheet sheet = workbook.createSheet(month + "월");
 
-            setHeader(sheet, year, month);
+        setHeader(sheet, year, month);
 
-            for (Product product : productRepository.findAll()) {
-                Row stockRow = sheet.createRow(rowIndex);
-                Row inputRow = sheet.createRow(rowIndex + 1);
-                Row outputRow = sheet.createRow(rowIndex + 2);
+        for (Product product : productRepository.findAll()) {
+            Row stockRow = sheet.createRow(rowIndex);
+            Row inputRow = sheet.createRow(rowIndex + 1);
+            Row outputRow = sheet.createRow(rowIndex + 2);
 
-                stockRow.createCell(0).setCellValue(product.getName());
-                stockRow.createCell(1).setCellValue(product.getUnit());
+            CellStyle cellStyle = workbook.createCellStyle();
+            cellStyle.setFillBackgroundColor(IndexedColors.AQUA.getIndex());
+            cellStyle.setFillPattern(FillPatternType.BIG_SPOTS);
+            stockRow.setRowStyle(cellStyle);
 
-                stockRow.createCell(2).setCellValue("재고");
-                inputRow.createCell(2).setCellValue("입고");
-                outputRow.createCell(2).setCellValue("출고");
+            stockRow.createCell(0).setCellValue(product.getName());
+            stockRow.createCell(1).setCellValue(product.getUnit());
 
-                List<Record> records = recordRepository.findAllByProductIdAndDocumentDateBetween(
+            stockRow.createCell(2).setCellValue("재고");
+            inputRow.createCell(2).setCellValue("입고");
+            outputRow.createCell(2).setCellValue("출고");
+
+            List<Record> records = recordRepository.findAllByProductIdAndDocumentDateBetween(
+                product.getId(),
+                LocalDateCreator.getFromDate(year, month),
+                LocalDateCreator.getToDate(year, month));
+
+            long recentStock = recordRepository.findRecentStock(
+                LocalDateCreator.getToDate(year, month),
+                product.getId()).orElse(0L);
+
+            stockRow.createCell(3).setCellValue(recentStock);
+            inputRow.createCell(3).setCellValue(getTotalQuantityTypeOf(records, DocumentType.INPUT));
+            outputRow.createCell(3).setCellValue(getTotalQuantityTypeOf(records, DocumentType.OUTPUT));
+
+            for (int i = 1; i <= LocalDate.of(year, month, 1).lengthOfMonth(); i++) {
+
+                long inputQuantity = recordRepository.sumTotalQuantityOfDate(
+                    LocalDate.of(year, month, i),
                     product.getId(),
-                    LocalDateCreator.getFromDate(year, month),
-                    LocalDateCreator.getToDate(year, month));
+                    DocumentType.INPUT.toString()
+                ).orElse(0L);
 
-                // stockRow.createCell(3).setCellValue(recentStock);
-                inputRow.createCell(3).setCellValue(getTotalQuantityTypeOf(records, DocumentType.INPUT));
-                outputRow.createCell(3).setCellValue(getTotalQuantityTypeOf(records, DocumentType.OUTPUT));
+                long outputQuantity = recordRepository.sumTotalQuantityOfDate(
+                    LocalDate.of(year, month, i),
+                    product.getId(),
+                    DocumentType.OUTPUT.toString()
+                ).orElse(0L);
 
-                rowIndex += 3;
+                recentStock = recentStock + inputQuantity - outputQuantity;
+
+                stockRow.createCell(i + 3).setCellValue(recentStock);
+
+                inputRow.createCell(i + 3).setCellValue(inputQuantity);
+
+                outputRow.createCell(i + 3).setCellValue(outputQuantity);
             }
-        }
 
+            rowIndex += 3;
+        }
         return exportWorkbook(workbook);
     }
 
