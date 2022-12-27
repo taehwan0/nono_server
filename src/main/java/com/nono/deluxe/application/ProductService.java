@@ -15,12 +15,12 @@ import com.nono.deluxe.presentation.dto.product.UpdateProductRequestDTO;
 import com.nono.deluxe.utils.LocalDateCreator;
 import java.time.LocalDate;
 import java.util.List;
-import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -42,6 +42,7 @@ public class ProductService {
         return new ProductResponseDTO(productRepository.save(product));
     }
 
+    @Transactional(readOnly = true)
     public GetProductListResponseDTO getProductList(
         String query,
         String column,
@@ -58,6 +59,7 @@ public class ProductService {
         return new GetProductListResponseDTO(productRepository.readProductList(query, pageable));
     }
 
+    @Transactional(readOnly = true)
     public ProductResponseDTO getProductInfo(long productId) {
         Product product = productRepository.findById(productId)
             .orElseThrow(() -> new NotFoundException("not exist data"));
@@ -65,6 +67,7 @@ public class ProductService {
         return new ProductResponseDTO(product);
     }
 
+    @Transactional(readOnly = true)
     public ProductResponseDTO getProductInfoByBarcode(String barcode) {
         Product product = productRepository.findByBarcode(barcode)
             .orElseThrow(() -> new NotFoundException("not exist data"));
@@ -72,6 +75,7 @@ public class ProductService {
         return new ProductResponseDTO(product);
     }
 
+    @Transactional(readOnly = true)
     public GetRecordListResponseDTO readProductRecord(long productId, int year, int month) {
         LocalDate fromDate = LocalDateCreator.getFromDate(year, month);
         LocalDate toDate = LocalDateCreator.getToDate(year, month);

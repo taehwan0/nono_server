@@ -31,6 +31,7 @@ public class UserService {
         return new UserResponseDTO(user);
     }
 
+    @Transactional(readOnly = true)
     public GetUserListResponseDTO getUserList(String query, String column, String order, int size, int page) {
         if (column.equals("userName")) {
             column = "name";
@@ -44,6 +45,7 @@ public class UserService {
         return new GetUserListResponseDTO(userPage);
     }
 
+    @Transactional(readOnly = true)
     public UserResponseDTO getUserInfo(long userCode) {
         User user = userRepository.findById(userCode)
             .orElseThrow(() -> new NotFoundException("Not exist data."));
@@ -51,6 +53,7 @@ public class UserService {
         return new UserResponseDTO(user);
     }
 
+    @Transactional
     public UserResponseDTO updateUser(long userCode, UpdateUserRequestDTO requestDTO) {
         User user = userRepository.findById(userCode)
             .orElseThrow(() -> new NotFoundException("User: Not found user"));
@@ -60,6 +63,7 @@ public class UserService {
         return new UserResponseDTO(user);
     }
 
+    @Transactional
     public MessageResponseDTO deleteUser(long userCode) {
         User user = userRepository.findById(userCode)
             .orElseThrow(() -> new NotFoundException("User: Not found user"));
