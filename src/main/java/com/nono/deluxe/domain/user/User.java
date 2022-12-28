@@ -1,6 +1,5 @@
 package com.nono.deluxe.domain.user;
 
-import com.nono.deluxe.presentation.dto.user.UpdateUserRequestDTO;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -89,11 +88,8 @@ public class User {
         this.active = isActive;
     }
 
-    public void update(UpdateUserRequestDTO userRequestDTO) {
-        this.name = userRequestDTO.getUserName();
-        this.email = userRequestDTO.getEmail();
-        this.role = userRequestDTO.getRole();
-        this.active = userRequestDTO.isActive();
-        this.deleted = userRequestDTO.isDeleted();
+    public void update(String name, boolean active) {
+        this.name = name;
+        this.active = active;
     }
 }

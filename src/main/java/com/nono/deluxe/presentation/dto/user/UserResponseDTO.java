@@ -7,18 +7,17 @@ import lombok.Data;
 @Data
 public class UserResponseDTO {
 
-    private long userCode;
+    private long id;
     private String email;
-    private String userName;
-    private Role userType;
-
-    private boolean isActive;
+    private String name;
+    private Role role;
+    private boolean active;
 
     public UserResponseDTO(User user) {
-        this.userCode = user.getId();
+        this.id = user.getId();
         this.email = user.getEmail();
-        this.userName = user.getName();
-        this.userType = user.getRole();
-        this.isActive = user.isActive();
+        this.name = user.getName();
+        this.role = user.getRole();
+        this.active = user.isActive();
     }
 }

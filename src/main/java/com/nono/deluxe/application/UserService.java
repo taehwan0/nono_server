@@ -1,6 +1,7 @@
 package com.nono.deluxe.application;
 
 import com.amazonaws.services.kms.model.NotFoundException;
+import com.nono.deluxe.domain.user.Role;
 import com.nono.deluxe.domain.user.User;
 import com.nono.deluxe.domain.user.UserRepository;
 import com.nono.deluxe.presentation.dto.MessageResponseDTO;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final BCryptPasswordEncoder encoder;
 
     @Transactional
     public UserResponseDTO createParticipant(CreateParticipantRequestDTO createParticipantRequestDTO) {
@@ -58,7 +61,12 @@ public class UserService {
         User user = userRepository.findById(userCode)
             .orElseThrow(() -> new NotFoundException("User: Not found user"));
 
-        user.update(requestDTO);
+        if (user.getRole().equals(Role.ROLE_PARTICIPANT)) {
+            user.update(requestDTO.getName(), requestDTO.isActive());
+        } else {
+            // 관리자 유저의 이름은 변경할 수 없다.
+            user.update(user.getName(), requestDTO.isActive());
+        }
 
         return new UserResponseDTO(user);
     }
@@ -67,6 +75,10 @@ public class UserService {
     public MessageResponseDTO deleteUser(long userCode) {
         User user = userRepository.findById(userCode)
             .orElseThrow(() -> new NotFoundException("User: Not found user"));
+
+        if (!user.getRole().equals(Role.ROLE_PARTICIPANT)) {
+            throw new RuntimeException("참여자의 정보만 수정 가능합니다.");
+        }
 
         user.delete();
 
