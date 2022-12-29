@@ -1,8 +1,8 @@
 package com.nono.deluxe.presentation;
 
-import com.nono.deluxe.application.AuthService;
-import com.nono.deluxe.application.DocumentService;
-import com.nono.deluxe.application.LegacyDocumentService;
+import com.nono.deluxe.application.service.AuthService;
+import com.nono.deluxe.application.service.DocumentService;
+import com.nono.deluxe.application.service.LegacyDocumentService;
 import com.nono.deluxe.presentation.dto.MessageResponseDTO;
 import com.nono.deluxe.presentation.dto.document.CreateDocumentRequestDTO;
 import com.nono.deluxe.presentation.dto.document.DocumentResponseDTO;

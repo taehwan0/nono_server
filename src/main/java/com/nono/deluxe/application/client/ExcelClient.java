@@ -1,4 +1,4 @@
-package com.nono.deluxe.application;
+package com.nono.deluxe.application.client;
 
 import com.nono.deluxe.domain.document.DocumentType;
 import com.nono.deluxe.domain.product.Product;

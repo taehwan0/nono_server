@@ -1,4 +1,4 @@
-package com.nono.deluxe.application;
+package com.nono.deluxe.application.service;
 
 import com.amazonaws.services.kms.model.NotFoundException;
 import com.nono.deluxe.domain.user.Role;
@@ -14,7 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final BCryptPasswordEncoder encoder;
 
     @Transactional
     public UserResponseDTO createParticipant(CreateParticipantRequestDTO createParticipantRequestDTO) {

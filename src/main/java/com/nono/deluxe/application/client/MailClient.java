@@ -1,4 +1,4 @@
-package com.nono.deluxe.application;
+package com.nono.deluxe.application.client;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;

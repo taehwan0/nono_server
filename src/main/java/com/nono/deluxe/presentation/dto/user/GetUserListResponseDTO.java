@@ -23,8 +23,6 @@ public class GetUserListResponseDTO {
         );
 
         List<User> userList = userPage.getContent();
-        userList.forEach(user -> {
-            this.userList.add(new UserResponseDTO(user));
-        });
+        userList.forEach(user -> this.userList.add(new UserResponseDTO(user)));
     }
 }

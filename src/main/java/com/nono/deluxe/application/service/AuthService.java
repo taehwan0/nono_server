@@ -1,7 +1,9 @@
-package com.nono.deluxe.application;
+package com.nono.deluxe.application.service;
 
 import com.amazonaws.services.kms.model.NotFoundException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.nono.deluxe.application.client.MailClient;
+import com.nono.deluxe.application.client.TokenClient;
 import com.nono.deluxe.domain.authcode.AuthCode;
 import com.nono.deluxe.domain.authcode.AuthCodeRepository;
 import com.nono.deluxe.domain.checkemail.CheckEmail;

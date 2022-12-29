@@ -1,4 +1,4 @@
-package com.nono.deluxe.application;
+package com.nono.deluxe.application.client;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
@@ -18,8 +18,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class TokenClient {
 
-    private static final long accessTokenExpireTime = 1000L * 60 * 60 * 2;
-    private static final long refreshTokenExpireTime = 1000L * 60 * 60 * 24 * 30;
+    private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000L * 60 * 60 * 2;
+    private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000L * 60 * 60 * 24 * 30;
 
     private final String accessKey;
     private final String refreshKey;
@@ -55,7 +55,7 @@ public class TokenClient {
         log.info("AccessToken Created By: {}", userId);
         Algorithm algorithm = getAlgorithm(accessKey);
         return JWT.create().withIssuedAt(new Date())
-            .withExpiresAt(new Date(System.currentTimeMillis() + (accessTokenExpireTime))).withIssuer(issuer)
+            .withExpiresAt(new Date(System.currentTimeMillis() + (ACCESS_TOKEN_EXPIRE_TIME))).withIssuer(issuer)
             .withClaim("username", username).withClaim("userId", userId).withClaim("ROLE", userRole.toString())
             .sign(algorithm);
     }
@@ -64,7 +64,7 @@ public class TokenClient {
         log.info("RefreshToken Created By: {}", userId);
         Algorithm algorithm = getAlgorithm(refreshKey);
         return JWT.create().withIssuedAt(new Date())
-            .withExpiresAt(new Date(System.currentTimeMillis() + (refreshTokenExpireTime))).withIssuer(issuer)
+            .withExpiresAt(new Date(System.currentTimeMillis() + (REFRESH_TOKEN_EXPIRE_TIME))).withIssuer(issuer)
             .withClaim("username", username).withClaim("userId", userId).withClaim("ROLE", userRole.toString())
             .sign(algorithm);
     }

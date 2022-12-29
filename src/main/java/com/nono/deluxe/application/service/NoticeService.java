@@ -1,4 +1,4 @@
-package com.nono.deluxe.application;
+package com.nono.deluxe.application.service;
 
 import com.amazonaws.services.kms.model.NotFoundException;
 import com.nono.deluxe.domain.notice.Notice;

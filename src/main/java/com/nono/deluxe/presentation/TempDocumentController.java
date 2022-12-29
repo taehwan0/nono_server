@@ -1,7 +1,7 @@
 package com.nono.deluxe.presentation;
 
-import com.nono.deluxe.application.AuthService;
-import com.nono.deluxe.application.TempDocumentService;
+import com.nono.deluxe.application.service.AuthService;
+import com.nono.deluxe.application.service.TempDocumentService;
 import com.nono.deluxe.presentation.dto.MessageResponseDTO;
 import com.nono.deluxe.presentation.dto.tempdocument.CreateTempDocumentRequestDTO;
 import com.nono.deluxe.presentation.dto.tempdocument.ReadTempDocumentListResponseDTO;
