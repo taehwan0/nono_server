@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 public class LocalDateCreator {
 
-    public static LocalDate getFromDate(int year, int month) {
+    public static LocalDate getDateOfFirstDay(int year, int month) {
         if (year == 0) {
             year = LocalDate.now().getYear();
         }
@@ -16,7 +16,7 @@ public class LocalDateCreator {
         return LocalDate.of(year, month, 1);
     }
 
-    public static LocalDate getToDate(int year, int month) {
+    public static LocalDate getDateOfLastDay(int year, int month) {
         if (year == 0) {
             year = LocalDate.now().getYear();
         }

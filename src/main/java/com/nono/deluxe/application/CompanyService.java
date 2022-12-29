@@ -75,8 +75,8 @@ public class CompanyService {
             Sort.by(new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), "date"),
                 new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), "createdAt")));
 
-        LocalDate fromDate = LocalDateCreator.getFromDate(year, month);
-        LocalDate toDate = LocalDateCreator.getToDate(year, month);
+        LocalDate fromDate = LocalDateCreator.getDateOfFirstDay(year, month);
+        LocalDate toDate = LocalDateCreator.getDateOfLastDay(year, month);
 
         Page<Document> documentPage = documentRepository.findByCompanyId(companyId, fromDate, toDate, limit);
 
