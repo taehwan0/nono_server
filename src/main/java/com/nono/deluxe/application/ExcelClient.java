@@ -1,20 +1,15 @@
 package com.nono.deluxe.application;
 
-import com.amazonaws.services.kms.model.NotFoundException;
 import com.nono.deluxe.domain.document.DocumentType;
 import com.nono.deluxe.domain.product.Product;
 import com.nono.deluxe.domain.product.ProductRepository;
 import com.nono.deluxe.domain.record.RecordRepository;
-import com.nono.deluxe.domain.user.User;
-import com.nono.deluxe.domain.user.UserRepository;
 import com.nono.deluxe.utils.LocalDateCreator;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 import java.util.UUID;
-import javax.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.hssf.util.HSSFColor.HSSFColorPredefined;
 import org.apache.poi.ss.usermodel.Cell;
@@ -24,39 +19,23 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @EnableAsync
 @RequiredArgsConstructor
 @Service
-public class ExcelService {
+public class ExcelClient {
 
     private static final int INDEX_OF_NAME = 0;
     private static final int INDEX_OF_UNIT = 1;
     private static final int INDEX_OF_TYPE = 2;
     private static final int INDEX_OF_TOTAL = 3;
 
-    private final MailClient mailClient;
-    private final UserRepository userRepository;
     private final RecordRepository recordRepository;
     private final ProductRepository productRepository;
 
-    @Async
-    @Transactional(readOnly = true)
-    public void postMonthDocument(long userId, int year, int month)
-        throws MessagingException, UnsupportedEncodingException {
-        File excelFile = getProductsRecord(year, month);
-
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new NotFoundException("NotFountUser"));
-
-        mailClient.postExcelFile(user.getEmail(), excelFile);
-    }
-
-    private File getProductsRecord(int year, int month) {
+    public File createMonthlyDocumentFile(int year, int month) {
         Workbook workbook = new SXSSFWorkbook();
 
         CellStyle style = createCellStyle(workbook);

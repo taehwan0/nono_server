@@ -23,14 +23,14 @@ public class MailClient {
     private final JavaMailSender javaMailSender;
 
     @Async("mailExecutor")
-    public void postExcelFile(String email, File file)
+    public void postExcelFile(String email, String subject, File file)
         throws MessagingException, UnsupportedEncodingException {
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, "UTF-8");
 
         messageHelper.setTo(email);
         messageHelper.setText("text", true);
-        message.setSubject("subject", "UTF-8");
+        message.setSubject(subject, "UTF-8");
         messageHelper.addAttachment(MimeUtility.encodeText("excel.xlsx"), file);
 
         javaMailSender.send(message);

@@ -1,20 +1,29 @@
 package com.nono.deluxe.application;
 
+import com.amazonaws.services.kms.model.NotFoundException;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.nono.deluxe.domain.imagefile.ImageFile;
 import com.nono.deluxe.domain.imagefile.ImageFileRepository;
+import com.nono.deluxe.domain.user.User;
+import com.nono.deluxe.domain.user.UserRepository;
 import com.nono.deluxe.presentation.dto.imagefile.ImageFileResponseDTO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 import javax.imageio.ImageIO;
+import javax.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+@EnableAsync
 @RequiredArgsConstructor
 @Service
 public class FileService {
@@ -29,12 +38,17 @@ public class FileService {
     private static final int THUMBNAIL_IMAGE_HEIGHT = 800;
     private static final double THUMBNAIL_OUTPUT_QUALITY = 0.7;
 
-    private final ImageFileRepository imageFileRepository;
+    private final ExcelClient excelClient;
+    private final MailClient mailClient;
     private final AmazonS3Client amazonS3Client;
+
+    private final ImageFileRepository imageFileRepository;
+    private final UserRepository userRepository;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
+    @Transactional
     public ImageFileResponseDTO uploadImageFile(MultipartFile imageFile) throws IOException {
         validateImageFile(imageFile);
 
@@ -94,5 +108,23 @@ public class FileService {
         if (!file.delete()) {
             throw new RuntimeException("썸네일 파일 제거에 실패했습니다.");
         }
+    }
+
+    @Async
+    @Transactional(readOnly = true)
+    public void postMonthDocument(long userId, int year, int month)
+        throws MessagingException, UnsupportedEncodingException {
+        File excelFile = excelClient.createMonthlyDocumentFile(year, month);
+
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new NotFoundException("NotFountUser"));
+
+        String subject = subjectBuilder(year, month);
+
+        mailClient.postExcelFile(user.getEmail(), subject, excelFile);
+    }
+
+    private String subjectBuilder(int year, int month) {
+        return year + "년 " + month + "월 노노유통 월간 문서";
     }
 }
