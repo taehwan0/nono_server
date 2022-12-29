@@ -11,7 +11,7 @@ public class UpdateUserRequestDTO {
 
     @NotNull
     @Size(max = 20)
-    private String name;
+    private String userName;
     @NotNull
     private boolean active;
 }

@@ -7,16 +7,16 @@ import lombok.Data;
 @Data
 public class UserResponseDTO {
 
-    private long id;
+    private long userId;
     private String email;
-    private String name;
+    private String userName;
     private Role role;
     private boolean active;
 
     public UserResponseDTO(User user) {
-        this.id = user.getId();
+        this.userId = user.getId();
         this.email = user.getEmail();
-        this.name = user.getName();
+        this.userName = user.getName();
         this.role = user.getRole();
         this.active = user.isActive();
     }
