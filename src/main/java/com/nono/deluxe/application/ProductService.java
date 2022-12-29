@@ -77,8 +77,8 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public GetRecordListResponseDTO readProductRecord(long productId, int year, int month) {
-        LocalDate fromDate = LocalDateCreator.getDateOfFirstDay(year, month);
-        LocalDate toDate = LocalDateCreator.getDateOfLastDay(year, month);
+        LocalDate fromDate = LocalDateCreator.getFromDate(year, month);
+        LocalDate toDate = LocalDateCreator.getToDate(year, month);
 
         Product product = productRepository.findById(productId)
             .orElseThrow(() -> new RuntimeException("Not Exist Product."));

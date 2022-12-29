@@ -1,15 +1,9 @@
 package com.nono.deluxe.application;
 
-import java.io.File;
-import java.io.UnsupportedEncodingException;
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeUtility;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
@@ -21,20 +15,6 @@ import org.springframework.stereotype.Component;
 public class MailClient {
 
     private final JavaMailSender javaMailSender;
-
-    @Async("mailExecutor")
-    public void postExcelFile(String email, File file)
-        throws MessagingException, UnsupportedEncodingException {
-        MimeMessage message = javaMailSender.createMimeMessage();
-        MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, "UTF-8");
-
-        messageHelper.setTo(email);
-        messageHelper.setText("text", true);
-        message.setSubject("subject", "UTF-8");
-        messageHelper.addAttachment(MimeUtility.encodeText("excel.xlsx"), file);
-
-        javaMailSender.send(message);
-    }
 
     @Async("mailExecutor")
     public void postJoinCheckMail(String email, String verifyCode) {

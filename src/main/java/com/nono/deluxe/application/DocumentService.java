@@ -86,8 +86,8 @@ public class DocumentService {
             new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), column),
             new Sort.Order(Sort.Direction.ASC, "createdAt")));
 
-        LocalDate fromDate = LocalDateCreator.getDateOfFirstDay(year, month);
-        LocalDate toDate = LocalDateCreator.getDateOfLastDay(year, month);
+        LocalDate fromDate = LocalDateCreator.getFromDate(year, month);
+        LocalDate toDate = LocalDateCreator.getToDate(year, month);
 
         // 테스트 해보기
         Page<Document> documentPage = documentRepository.readDocumentList(query, fromDate, toDate, limit);

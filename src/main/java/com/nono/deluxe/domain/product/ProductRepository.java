@@ -1,6 +1,5 @@
 package com.nono.deluxe.domain.product;
 
-import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,7 +34,4 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query(value = "SELECT p FROM Product p WHERE p.name LIKE CONCAT('%', :query, '%') AND p.deleted = false")
     Page<Product> readProductList(@Param("query") String query, Pageable pageable);
-
-    @Query("SELECT p FROM Product p ORDER BY p.productCode ASC")
-    List<Product> findAllOrderByProductCodeASC();
 }
