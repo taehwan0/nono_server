@@ -4,13 +4,10 @@ import com.nono.deluxe.application.AuthService;
 import com.nono.deluxe.application.ExcelService;
 import com.nono.deluxe.application.FileService;
 import com.nono.deluxe.presentation.dto.imagefile.ImageFileResponseDTO;
-import java.io.File;
 import java.io.IOException;
+import javax.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.io.FileUtils;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,20 +39,18 @@ public class FileController {
     }
 
     @GetMapping(value = "/excel")
-    public ResponseEntity<byte[]> getMonthlyDocument(@RequestParam int year, @RequestParam int month)
-        throws IOException {
+    public ResponseEntity<String> postMonthlyDocument(
+        @RequestHeader(name = "Authorization") String token,
+        @RequestParam int year,
+        @RequestParam int month)
+        throws IOException, MessagingException {
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(
-            MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-        );
+        long userId = authService.validateTokenOverManagerRole(token);
 
-        File file = excelService.getProductsRecord(year, month);
-        byte[] bytes = FileUtils.readFileToByteArray(file);
+        excelService.postMonthDocument(userId, year, month);
 
         return ResponseEntity
             .ok()
-            .headers(headers)
-            .body(bytes);
+            .body("hello");
     }
 }
