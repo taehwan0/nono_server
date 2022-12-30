@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.hssf.util.HSSFColor.HSSFColorPredefined;
@@ -35,55 +36,57 @@ public class ExcelClient {
     private final RecordRepository recordRepository;
     private final ProductRepository productRepository;
 
-    public File createMonthlyDocumentFile(int year, int month) {
-        Workbook workbook = new SXSSFWorkbook();
+    public Optional<File> createMonthlyDocumentFile(int year, int month) {
+        try (Workbook workbook = new SXSSFWorkbook()) {
+            CellStyle style = createCellStyle(workbook);
 
-        CellStyle style = createCellStyle(workbook);
+            Sheet sheet = workbook.createSheet(month + "월");
+            setHeader(sheet, year, month);
 
-        Sheet sheet = workbook.createSheet(month + "월");
-        setHeader(sheet, year, month);
+            int rowIndex = 1; // header 를 제외한 시작 인덱스
+            for (Product product : productRepository.findAllOrderByProductCodeASC()) {
+                // 해당 상품의 행 생성
+                Row stockRow = sheet.createRow(rowIndex);
+                Row inputRow = sheet.createRow(rowIndex + 1);
+                Row outputRow = sheet.createRow(rowIndex + 2);
 
-        int rowIndex = 1; // header 를 제외한 시작 인덱스
-        for (Product product : productRepository.findAllOrderByProductCodeASC()) {
-            // 해당 상품의 행 생성
-            Row stockRow = sheet.createRow(rowIndex);
-            Row inputRow = sheet.createRow(rowIndex + 1);
-            Row outputRow = sheet.createRow(rowIndex + 2);
+                // 행 기본 정보 채우기
+                stockRow.createCell(INDEX_OF_NAME).setCellValue(product.getName());
+                stockRow.createCell(INDEX_OF_UNIT).setCellValue(product.getUnit());
 
-            // 행 기본 정보 채우기
-            stockRow.createCell(INDEX_OF_NAME).setCellValue(product.getName());
-            stockRow.createCell(INDEX_OF_UNIT).setCellValue(product.getUnit());
+                stockRow.createCell(INDEX_OF_TYPE).setCellValue("재고");
+                inputRow.createCell(INDEX_OF_TYPE).setCellValue("입고");
+                outputRow.createCell(INDEX_OF_TYPE).setCellValue("출고");
 
-            stockRow.createCell(INDEX_OF_TYPE).setCellValue("재고");
-            inputRow.createCell(INDEX_OF_TYPE).setCellValue("입고");
-            outputRow.createCell(INDEX_OF_TYPE).setCellValue("출고");
+                // 이전 stock 찾기
+                long recentStock = getRecentStock(year, month, product);
 
-            // 이전 stock 찾기
-            long recentStock = getRecentStock(year, month, product);
+                Cell totalStockCell = stockRow.createCell(INDEX_OF_TOTAL);
+                totalStockCell.setCellValue(recentStock);
+                totalStockCell.setCellStyle(style);
 
-            Cell totalStockCell = stockRow.createCell(INDEX_OF_TOTAL);
-            totalStockCell.setCellValue(recentStock);
-            totalStockCell.setCellStyle(style);
+                // input, output, stock row 의 day(column)에 해당하는 cell 을 채움
+                for (int day = 1; day <= LocalDate.of(year, month, 1).lengthOfMonth(); day++) {
+                    long inputQuantity = getTotalQuantityOfDate(year, month, day, product, DocumentType.INPUT);
+                    Cell inputCell = inputRow.createCell(day + 3);
+                    inputCell.setCellValue(inputQuantity);
 
-            // input, output, stock row 의 day(column)에 해당하는 cell 을 채움
-            for (int day = 1; day <= LocalDate.of(year, month, 1).lengthOfMonth(); day++) {
-                long inputQuantity = getTotalQuantityOfDate(year, month, day, product, DocumentType.INPUT);
-                Cell inputCell = inputRow.createCell(day + 3);
-                inputCell.setCellValue(inputQuantity);
+                    long outputQuantity = getTotalQuantityOfDate(year, month, day, product, DocumentType.OUTPUT);
+                    Cell outputCell = outputRow.createCell(day + 3);
+                    outputCell.setCellValue(outputQuantity);
 
-                long outputQuantity = getTotalQuantityOfDate(year, month, day, product, DocumentType.OUTPUT);
-                Cell outputCell = outputRow.createCell(day + 3);
-                outputCell.setCellValue(outputQuantity);
-
-                recentStock = recentStock + inputQuantity - outputQuantity;
-                Cell stockCell = stockRow.createCell(day + 3);
-                stockCell.setCellValue(recentStock);
-                stockCell.setCellStyle(style);
+                    recentStock = recentStock + inputQuantity - outputQuantity;
+                    Cell stockCell = stockRow.createCell(day + 3);
+                    stockCell.setCellValue(recentStock);
+                    stockCell.setCellStyle(style);
+                }
+                // 다음 상품 진행
+                rowIndex += 3;
             }
-            // 다음 상품 진행
-            rowIndex += 3;
+            return Optional.of(exportWorkbook(workbook));
+        } catch (Exception e) {
+            return Optional.empty();
         }
-        return exportWorkbook(workbook);
     }
 
     private CellStyle createCellStyle(Workbook workbook) {
@@ -120,17 +123,13 @@ public class ExcelClient {
         }
     }
 
-    private File exportWorkbook(Workbook workbook) {
-        try {
-            File file = File.createTempFile(UUID.randomUUID().toString(), "xlsx");
-            FileOutputStream fileOutputStream = new FileOutputStream(file);
-            workbook.write(fileOutputStream);
+    private File exportWorkbook(Workbook workbook) throws IOException {
+        File file = File.createTempFile(UUID.randomUUID().toString(), "xlsx");
 
-            workbook.close();
+        try (FileOutputStream outputStream = new FileOutputStream(file)) {
+            workbook.write(outputStream);
 
             return file;
-        } catch (IOException exception) {
-            throw new RuntimeException("파일 생성 실패");
         }
     }
 }

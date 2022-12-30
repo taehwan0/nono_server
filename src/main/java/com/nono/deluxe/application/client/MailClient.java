@@ -2,6 +2,7 @@ package com.nono.deluxe.application.client;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.util.Optional;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
@@ -23,15 +24,20 @@ public class MailClient {
     private final JavaMailSender javaMailSender;
 
     @Async("mailExecutor")
-    public void postExcelFile(String email, String subject, File file)
+    public void postExcelFile(String email, String subject, Optional<File> file)
         throws MessagingException, UnsupportedEncodingException {
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, "UTF-8");
 
         messageHelper.setTo(email);
-        messageHelper.setText("text", true);
-        message.setSubject(subject, "UTF-8");
-        messageHelper.addAttachment(MimeUtility.encodeText("excel.xlsx"), file);
+        messageHelper.setSubject(subject);
+
+        if (file.isPresent()) {
+            messageHelper.setText("success", true);
+            messageHelper.addAttachment(MimeUtility.encodeText("excel.xlsx"), file.get());
+        } else {
+            messageHelper.setText("fail", true);
+        }
 
         javaMailSender.send(message);
     }

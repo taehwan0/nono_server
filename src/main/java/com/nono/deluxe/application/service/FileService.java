@@ -12,7 +12,7 @@ import com.nono.deluxe.presentation.dto.imagefile.ImageFileResponseDTO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.util.Optional;
 import java.util.UUID;
 import javax.imageio.ImageIO;
 import javax.mail.MessagingException;
@@ -115,8 +115,8 @@ public class FileService {
     @Async
     @Transactional(readOnly = true)
     public void postMonthDocument(long userId, int year, int month)
-        throws MessagingException, UnsupportedEncodingException {
-        File excelFile = excelClient.createMonthlyDocumentFile(year, month);
+        throws MessagingException, IOException {
+        Optional<File> excelFile = excelClient.createMonthlyDocumentFile(year, month);
 
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new NotFoundException("NotFountUser"));
