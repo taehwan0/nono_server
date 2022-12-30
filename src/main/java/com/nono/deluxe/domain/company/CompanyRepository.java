@@ -15,7 +15,7 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     Optional<Company> findByName(String name);
 
     @Query(value = "SELECT c FROM Company c WHERE c.name LIKE concat('%', :query, '%') AND c.deleted = false ")
-    Page<Company> readCompanyList(@Param("query") String query,
+    Page<Company> getCompanyList(@Param("query") String query,
         Pageable limit);
 
     @Query(value
@@ -23,6 +23,36 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
         + "FROM Company c "
         + "WHERE c.name "
         + "LIKE concat('%', :query, '%') and c.active = true AND c.deleted = false")
-    Page<Company> readActiveCompanyList(@Param("query") String query,
+    Page<Company> getActiveCompanyList(@Param("query") String query,
         Pageable limit);
+
+    @Query("SELECT c "
+        + "FROM Company c "
+        + "WHERE c.name LIKE CONCAT('%', :query, '%') "
+        + "AND c.type = 'INPUT' "
+        + "AND c.deleted = false")
+    Page<Company> getInputCompanyList(@Param("query") String query, Pageable pageable);
+
+    @Query("SELECT c "
+        + "FROM Company c "
+        + "WHERE c.name LIKE CONCAT('%', :query, '%') "
+        + "AND c.type = 'INPUT' "
+        + "AND c.active = true "
+        + "AND c.deleted = false")
+    Page<Company> getActiveInputCompanyList(@Param("query") String query, Pageable pageable);
+
+    @Query("SELECT c "
+        + "FROM Company c "
+        + "WHERE c.name LIKE CONCAT('%', :query, '%') "
+        + "AND c.type = 'OUTPUT' "
+        + "AND c.deleted = false")
+    Page<Company> getOutputCompanyList(@Param("query") String query, Pageable pageable);
+
+    @Query("SELECT c "
+        + "FROM Company c "
+        + "WHERE c.name LIKE CONCAT('%', :query, '%') "
+        + "AND c.type = 'OUTPUT' "
+        + "AND c.active = true "
+        + "AND c.deleted = false")
+    Page<Company> getActiveOutputCompanyList(@Param("query") String query, Pageable pageable);
 }

@@ -8,7 +8,7 @@ import com.nono.deluxe.domain.document.DocumentRepository;
 import com.nono.deluxe.presentation.dto.MessageResponseDTO;
 import com.nono.deluxe.presentation.dto.company.CompanyResponseDTO;
 import com.nono.deluxe.presentation.dto.company.CreateCompanyRequestDTO;
-import com.nono.deluxe.presentation.dto.company.ReadCompanyListResponseDTO;
+import com.nono.deluxe.presentation.dto.company.GetCompanyListResponseDTO;
 import com.nono.deluxe.presentation.dto.company.UpdateCompanyActiveDTO;
 import com.nono.deluxe.presentation.dto.company.UpdateCompanyActiveRequestDTO;
 import com.nono.deluxe.presentation.dto.company.UpdateCompanyActiveResponseDTO;
@@ -18,13 +18,14 @@ import com.nono.deluxe.utils.LocalDateCreator;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,23 +54,64 @@ public class CompanyService {
     }
 
     @Transactional(readOnly = true)
-    public ReadCompanyListResponseDTO readCompanyList(String query, String column, String order, int size, int page,
+    public GetCompanyListResponseDTO getCompanyList(
+        String query,
+        String column,
+        String order,
+        int size,
+        int page,
         boolean active) {
-        Pageable limit = PageRequest.of(page, size,
-            Sort.by(new Sort.Order(Sort.Direction.valueOf(order.toUpperCase(Locale.ROOT)), column)));
+        Pageable pageRequest =
+            PageRequest.of(page, size, Sort.by(new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), column)));
         Page<Company> companyPage;
 
         if (active) {
-            companyPage = companyRepository.readActiveCompanyList(query, limit); // true -> active 만 읽기
+            companyPage = companyRepository.getActiveCompanyList(query, pageRequest); // true -> active 만 읽기
         } else {
-            companyPage = companyRepository.readCompanyList(query, limit); // false -> 전체 읽기
+            companyPage = companyRepository.getCompanyList(query, pageRequest); // false -> 전체 읽기
         }
 
-        return new ReadCompanyListResponseDTO(companyPage);
+        return new GetCompanyListResponseDTO(companyPage);
     }
 
     @Transactional(readOnly = true)
-    public ReadDocumentListResponseDTO readCompanyDocument(long companyId, String order, int size, int page, int year,
+    public GetCompanyListResponseDTO getInputCompanyList(
+        String query,
+        String column,
+        String order,
+        int size,
+        int page,
+        boolean active
+    ) {
+        PageRequest pageRequest =
+            PageRequest.of(page, size, Sort.by(new Order(Direction.valueOf(order.toUpperCase()), column)));
+
+        if (active) {
+            return new GetCompanyListResponseDTO(companyRepository.getActiveInputCompanyList(query, pageRequest));
+        }
+        return new GetCompanyListResponseDTO(companyRepository.getInputCompanyList(query, pageRequest));
+    }
+
+    @Transactional(readOnly = true)
+    public GetCompanyListResponseDTO getOutputCompanyList(
+        String query,
+        String column,
+        String order,
+        int size,
+        int page,
+        boolean active
+    ) {
+        PageRequest pageRequest =
+            PageRequest.of(page, size, Sort.by(new Order(Direction.valueOf(order.toUpperCase()), column)));
+
+        if (active) {
+            return new GetCompanyListResponseDTO(companyRepository.getActiveOutputCompanyList(query, pageRequest));
+        }
+        return new GetCompanyListResponseDTO(companyRepository.getOutputCompanyList(query, pageRequest));
+    }
+
+    @Transactional(readOnly = true)
+    public ReadDocumentListResponseDTO getCompanyDocument(long companyId, String order, int size, int page, int year,
         int month) {
         Pageable limit = PageRequest.of(page, size,
             Sort.by(new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), "date"),
