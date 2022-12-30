@@ -8,12 +8,12 @@ import lombok.Data;
 import org.springframework.data.domain.Page;
 
 @Data
-public class GetCompanyListResponseDTO {
+public class CompanyListResponseDTO {
 
     private Meta meta;
     private List<CompanyResponseDTO> companyList = new ArrayList<>();
 
-    public GetCompanyListResponseDTO(Page<Company> companyPage) {
+    public CompanyListResponseDTO(Page<Company> companyPage) {
         List<Company> companyList = companyPage.getContent();
         companyList.forEach(company -> this.companyList.add(new CompanyResponseDTO(company)));
         this.meta = new Meta(

@@ -3,9 +3,9 @@ package com.nono.deluxe.presentation;
 import com.nono.deluxe.application.service.AuthService;
 import com.nono.deluxe.application.service.CompanyService;
 import com.nono.deluxe.presentation.dto.MessageResponseDTO;
+import com.nono.deluxe.presentation.dto.company.CompanyListResponseDTO;
 import com.nono.deluxe.presentation.dto.company.CompanyResponseDTO;
 import com.nono.deluxe.presentation.dto.company.CreateCompanyRequestDTO;
-import com.nono.deluxe.presentation.dto.company.GetCompanyListResponseDTO;
 import com.nono.deluxe.presentation.dto.company.UpdateCompanyActiveRequestDTO;
 import com.nono.deluxe.presentation.dto.company.UpdateCompanyActiveResponseDTO;
 import com.nono.deluxe.presentation.dto.company.UpdateCompanyRequestDTO;
@@ -47,7 +47,7 @@ public class CompanyController {
     }
 
     @GetMapping("")
-    public ResponseEntity<GetCompanyListResponseDTO> readCompanyList(
+    public ResponseEntity<CompanyListResponseDTO> getCompanyList(
         @RequestHeader(name = "Authorization") String token,
         @RequestParam(required = false, defaultValue = "") String query,
         @RequestParam(required = false, defaultValue = "name") String column,
@@ -57,14 +57,14 @@ public class CompanyController {
         @RequestParam(required = false, defaultValue = "false") boolean active) {
         authService.validateTokenOverParticipantRole(token);
 
-        GetCompanyListResponseDTO responseDto =
+        CompanyListResponseDTO responseDto =
             companyService.getCompanyList(query, column, order, size, (page - 1), active);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 
     @GetMapping("/input")
-    public ResponseEntity<GetCompanyListResponseDTO> getInputCompanyList(
+    public ResponseEntity<CompanyListResponseDTO> getInputCompanyList(
         @RequestHeader(name = "Authorization") String token,
         @RequestParam(required = false, defaultValue = "") String query,
         @RequestParam(required = false, defaultValue = "name") String column,
@@ -74,14 +74,14 @@ public class CompanyController {
         @RequestParam(required = false, defaultValue = "false") boolean active) {
         authService.validateTokenOverParticipantRole(token);
 
-        GetCompanyListResponseDTO responseDto =
+        CompanyListResponseDTO responseDto =
             companyService.getInputCompanyList(query, column, order, size, (page - 1), active);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 
     @GetMapping("/output")
-    public ResponseEntity<GetCompanyListResponseDTO> getOutputCompanyList(
+    public ResponseEntity<CompanyListResponseDTO> getOutputCompanyList(
         @RequestHeader(name = "Authorization") String token,
         @RequestParam(required = false, defaultValue = "") String query,
         @RequestParam(required = false, defaultValue = "name") String column,
@@ -91,26 +91,26 @@ public class CompanyController {
         @RequestParam(required = false, defaultValue = "false") boolean active) {
         authService.validateTokenOverParticipantRole(token);
 
-        GetCompanyListResponseDTO responseDto =
+        CompanyListResponseDTO responseDto =
             companyService.getOutputCompanyList(query, column, order, size, (page - 1), active);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 
     @GetMapping("/{companyId}")
-    public ResponseEntity<CompanyResponseDTO> readCompany(
+    public ResponseEntity<CompanyResponseDTO> getCompany(
         @RequestHeader(name = "Authorization") String token,
         @PathVariable(name = "companyId") long companyId) {
         authService.validateTokenOverParticipantRole(token);
 
-        CompanyResponseDTO responseDto = companyService.readCompany(companyId);
+        CompanyResponseDTO responseDto = companyService.getCompany(companyId);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
 
     }
 
     @GetMapping("/{companyId}/document")
-    public ResponseEntity<ReadDocumentListResponseDTO> readDocumentList(
+    public ResponseEntity<ReadDocumentListResponseDTO> getCompanyDocument(
         @RequestHeader(name = "Authorization") String token,
         @PathVariable(name = "companyId") long companyId,
         @RequestParam(required = false, defaultValue = "DESC") String order,
@@ -151,7 +151,7 @@ public class CompanyController {
     }
 
     @DeleteMapping("/{companyId}")
-    public ResponseEntity<MessageResponseDTO> updateCompany(@RequestHeader(name = "Authorization") String token,
+    public ResponseEntity<MessageResponseDTO> deleteCompany(@RequestHeader(name = "Authorization") String token,
         @PathVariable(name = "companyId") long companyId) {
         authService.validateTokenOverAdminRole(token);
 

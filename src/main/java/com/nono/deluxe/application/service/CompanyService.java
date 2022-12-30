@@ -6,9 +6,9 @@ import com.nono.deluxe.domain.company.CompanyRepository;
 import com.nono.deluxe.domain.document.Document;
 import com.nono.deluxe.domain.document.DocumentRepository;
 import com.nono.deluxe.presentation.dto.MessageResponseDTO;
+import com.nono.deluxe.presentation.dto.company.CompanyListResponseDTO;
 import com.nono.deluxe.presentation.dto.company.CompanyResponseDTO;
 import com.nono.deluxe.presentation.dto.company.CreateCompanyRequestDTO;
-import com.nono.deluxe.presentation.dto.company.GetCompanyListResponseDTO;
 import com.nono.deluxe.presentation.dto.company.UpdateCompanyActiveDTO;
 import com.nono.deluxe.presentation.dto.company.UpdateCompanyActiveRequestDTO;
 import com.nono.deluxe.presentation.dto.company.UpdateCompanyActiveResponseDTO;
@@ -46,7 +46,7 @@ public class CompanyService {
     }
 
     @Transactional(readOnly = true)
-    public CompanyResponseDTO readCompany(long companyId) {
+    public CompanyResponseDTO getCompany(long companyId) {
         Company company = companyRepository.findById(companyId)
             .orElseThrow(() -> new NotFoundException("Company: not found id"));
 
@@ -54,7 +54,7 @@ public class CompanyService {
     }
 
     @Transactional(readOnly = true)
-    public GetCompanyListResponseDTO getCompanyList(
+    public CompanyListResponseDTO getCompanyList(
         String query,
         String column,
         String order,
@@ -63,19 +63,16 @@ public class CompanyService {
         boolean active) {
         Pageable pageRequest =
             PageRequest.of(page, size, Sort.by(new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), column)));
-        Page<Company> companyPage;
 
         if (active) {
-            companyPage = companyRepository.getActiveCompanyList(query, pageRequest); // true -> active 만 읽기
-        } else {
-            companyPage = companyRepository.getCompanyList(query, pageRequest); // false -> 전체 읽기
+            return new CompanyListResponseDTO(
+                companyRepository.getActiveCompanyList(query, pageRequest)); // true -> active 만 읽기
         }
-
-        return new GetCompanyListResponseDTO(companyPage);
+        return new CompanyListResponseDTO(companyRepository.getCompanyList(query, pageRequest)); // false -> 전체 읽기
     }
 
     @Transactional(readOnly = true)
-    public GetCompanyListResponseDTO getInputCompanyList(
+    public CompanyListResponseDTO getInputCompanyList(
         String query,
         String column,
         String order,
@@ -87,13 +84,13 @@ public class CompanyService {
             PageRequest.of(page, size, Sort.by(new Order(Direction.valueOf(order.toUpperCase()), column)));
 
         if (active) {
-            return new GetCompanyListResponseDTO(companyRepository.getActiveInputCompanyList(query, pageRequest));
+            return new CompanyListResponseDTO(companyRepository.getActiveInputCompanyList(query, pageRequest));
         }
-        return new GetCompanyListResponseDTO(companyRepository.getInputCompanyList(query, pageRequest));
+        return new CompanyListResponseDTO(companyRepository.getInputCompanyList(query, pageRequest));
     }
 
     @Transactional(readOnly = true)
-    public GetCompanyListResponseDTO getOutputCompanyList(
+    public CompanyListResponseDTO getOutputCompanyList(
         String query,
         String column,
         String order,
@@ -105,9 +102,9 @@ public class CompanyService {
             PageRequest.of(page, size, Sort.by(new Order(Direction.valueOf(order.toUpperCase()), column)));
 
         if (active) {
-            return new GetCompanyListResponseDTO(companyRepository.getActiveOutputCompanyList(query, pageRequest));
+            return new CompanyListResponseDTO(companyRepository.getActiveOutputCompanyList(query, pageRequest));
         }
-        return new GetCompanyListResponseDTO(companyRepository.getOutputCompanyList(query, pageRequest));
+        return new CompanyListResponseDTO(companyRepository.getOutputCompanyList(query, pageRequest));
     }
 
     @Transactional(readOnly = true)
