@@ -1,12 +1,15 @@
 package com.nono.deluxe.application.service;
 
 import com.amazonaws.services.kms.model.NotFoundException;
+import com.nono.deluxe.application.client.MailClient;
 import com.nono.deluxe.domain.user.Role;
 import com.nono.deluxe.domain.user.User;
 import com.nono.deluxe.domain.user.UserRepository;
 import com.nono.deluxe.presentation.dto.MessageResponseDTO;
 import com.nono.deluxe.presentation.dto.user.CreateParticipantRequestDTO;
+import com.nono.deluxe.presentation.dto.user.DeleteMeRequestDTO;
 import com.nono.deluxe.presentation.dto.user.GetUserListResponseDTO;
+import com.nono.deluxe.presentation.dto.user.UpdatePasswordRequestDTO;
 import com.nono.deluxe.presentation.dto.user.UpdateUserRequestDTO;
 import com.nono.deluxe.presentation.dto.user.UserResponseDTO;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +25,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UserService {
 
+    private final MailClient mailClient;
+
     private final UserRepository userRepository;
+
+    private final BCryptPasswordEncoder encoder;
 
     @Transactional
     public UserResponseDTO createParticipant(CreateParticipantRequestDTO createParticipantRequestDTO) {
@@ -81,5 +89,42 @@ public class UserService {
         user.delete();
 
         return new MessageResponseDTO(true, "Deleted");
+    }
+
+    @Transactional
+    public UserResponseDTO updateMe(long userId, UpdateUserRequestDTO updateUserRequestDTO) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new NotFoundException("Not Found User"));
+
+        user.update(updateUserRequestDTO.getUserName(), updateUserRequestDTO.isActive());
+
+        return new UserResponseDTO(user);
+    }
+
+    @Transactional
+    public MessageResponseDTO updatePassword(long userId, UpdatePasswordRequestDTO updatePasswordRequestDTO) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new NotFoundException("Not Found User"));
+
+        if (encoder.matches(updatePasswordRequestDTO.getPassword(), user.getPassword())) {
+            user.updatePassword(updatePasswordRequestDTO.getNewPassword());
+            user.encodePassword(encoder);
+            mailClient.postUpdatePasswordMail(user.getEmail());
+
+            return new MessageResponseDTO(true, "success");
+        }
+        return new MessageResponseDTO(false, "fail");
+    }
+
+    @Transactional
+    public MessageResponseDTO deleteMe(long userId, DeleteMeRequestDTO deleteMeRequestDTO) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new NotFoundException("Not Found User"));
+
+        if (encoder.matches(deleteMeRequestDTO.getPassword(), user.getPassword())) {
+            user.delete();
+            return new MessageResponseDTO(true, "success");
+        }
+        return new MessageResponseDTO(false, "fail");
     }
 }

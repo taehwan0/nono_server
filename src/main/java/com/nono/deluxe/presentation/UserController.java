@@ -4,7 +4,9 @@ import com.nono.deluxe.application.service.AuthService;
 import com.nono.deluxe.application.service.UserService;
 import com.nono.deluxe.presentation.dto.MessageResponseDTO;
 import com.nono.deluxe.presentation.dto.user.CreateParticipantRequestDTO;
+import com.nono.deluxe.presentation.dto.user.DeleteMeRequestDTO;
 import com.nono.deluxe.presentation.dto.user.GetUserListResponseDTO;
+import com.nono.deluxe.presentation.dto.user.UpdatePasswordRequestDTO;
 import com.nono.deluxe.presentation.dto.user.UpdateUserRequestDTO;
 import com.nono.deluxe.presentation.dto.user.UserResponseDTO;
 import lombok.RequiredArgsConstructor;
@@ -92,5 +94,48 @@ public class UserController {
         MessageResponseDTO responseDto = userService.deleteUser(userCode);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserResponseDTO> getMe(
+        @RequestHeader(value = "Authorization") String token) {
+        long userId = authService.validateTokenOverParticipantRole(token);
+
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(userService.getUserInfo(userId));
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<UserResponseDTO> updateMe(
+        @RequestHeader(value = "Authorization") String token,
+        @Validated @RequestBody UpdateUserRequestDTO updateUserRequestDTO) {
+        long userId = authService.validateTokenOverParticipantRole(token);
+
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(userService.updateMe(userId, updateUserRequestDTO));
+    }
+
+    @PutMapping("/me/password")
+    public ResponseEntity<MessageResponseDTO> updatePassword(
+        @RequestHeader(value = "Authorization") String token,
+        @Validated @RequestBody UpdatePasswordRequestDTO updatePasswordRequestDTO) {
+        long userId = authService.validateTokenOverManagerRole(token);
+
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(userService.updatePassword(userId, updatePasswordRequestDTO));
+    }
+
+    @DeleteMapping("/me")
+    public ResponseEntity<MessageResponseDTO> deleteMe(
+        @RequestHeader(value = "Authorization") String token,
+        @RequestBody DeleteMeRequestDTO deleteMeRequestDTO) {
+        long userId = authService.validateTokenOverManagerRole(token);
+
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(userService.deleteMe(userId, deleteMeRequestDTO));
     }
 }
