@@ -21,6 +21,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class MailClient {
 
+    private static final String JOIN_CHECK_MAIL_SUBJECT = "NONO DELUXE 회원가입 인증 메일입니다.";
+    private static final String REISSUE_CHECK_MAIL_SUBJECT = "NONO DELUXE 비밀번호 재설정 인증 메일입니다.";
+    private static final String REISSUE_PASSWORD_MAIL_SUBJECT = "NONO DELUXE 재설정된 비밀번호 메일입니다.";
+    private static final String UPDATE_PASSWORD_MAIL_SUBJECT = "NONO DELUXE 비밀번호가 변경 되었습니다.";
+    private static final String UPDATE_PASSWORD_MAIL_CONTENT = "비밀번호 변경을 요청하지 않았다면 비밀번호를 재발급하거나 관리자에 문의하세요.";
+
     private final JavaMailSender javaMailSender;
 
     @Async("mailExecutor")
@@ -44,37 +50,32 @@ public class MailClient {
 
     @Async("mailExecutor")
     public void postJoinCheckMail(String email, String verifyCode) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(email);
-        message.setSubject("노노 Deluxe 회원가입 확인 인증번호");
-        message.setText(verifyCode);
-
-        javaMailSender.send(message);
-
-        log.info("Mail Posted: joinCheckMail to {}", email);
+        postSimpleMail(email, JOIN_CHECK_MAIL_SUBJECT, verifyCode);
     }
 
     @Async("mailExecutor")
     public void postReissueCheckMail(String email, String verifyCode) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(email);
-        message.setSubject("노노 Deluxe 비밀번호 재설정 확인 인증번호");
-        message.setText(verifyCode);
-
-        javaMailSender.send(message);
-
-        log.info("Mail Posted: reissueCheckMail to {}", email);
+        postSimpleMail(email, REISSUE_CHECK_MAIL_SUBJECT, verifyCode);
     }
 
     @Async("mailExecutor")
     public void postReissuePasswordMail(String email, String newPassword) {
+        postSimpleMail(email, REISSUE_PASSWORD_MAIL_SUBJECT, newPassword);
+    }
+
+    @Async("mailExecutor")
+    public void postUpdatePasswordMail(String email) {
+        postSimpleMail(email, UPDATE_PASSWORD_MAIL_SUBJECT, UPDATE_PASSWORD_MAIL_CONTENT);
+    }
+
+    private void postSimpleMail(String email, String subject, String content) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);
-        message.setSubject("노노 Deluxe 재설정된 비밀번호");
-        message.setText(newPassword);
+        message.setSubject(subject);
+        message.setText(content);
 
         javaMailSender.send(message);
 
-        log.info("Mail Posted: reissuePasswordMail to {}", email);
+        log.info("Mail Posted To {}: {}", email, subject);
     }
 }
