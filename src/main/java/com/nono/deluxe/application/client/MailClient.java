@@ -14,6 +14,8 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 @Slf4j
 @EnableAsync
@@ -26,8 +28,11 @@ public class MailClient {
     private static final String REISSUE_PASSWORD_MAIL_SUBJECT = "NONO DELUXE 재설정된 비밀번호 메일입니다.";
     private static final String UPDATE_PASSWORD_MAIL_SUBJECT = "NONO DELUXE 비밀번호가 변경 되었습니다.";
     private static final String UPDATE_PASSWORD_MAIL_CONTENT = "비밀번호 변경을 요청하지 않았다면 비밀번호를 재발급하거나 관리자에 문의하세요.";
+    private static final String EXCEPTION_MAIL_SUBJECT = "NONO DELUXE 오류 메일입니다.";
+    private static final String EXCEPTION_MAIL_CONTENT = "해당 메일을 받았다면 관리자에 문의하세요.";
 
     private final JavaMailSender javaMailSender;
+    private final TemplateEngine templateEngine;
 
     @Async("mailExecutor")
     public void postExcelFile(String email, String subject, Optional<File> file)
@@ -50,32 +55,54 @@ public class MailClient {
 
     @Async("mailExecutor")
     public void postJoinCheckMail(String email, String verifyCode) {
-        postSimpleMail(email, JOIN_CHECK_MAIL_SUBJECT, verifyCode);
+        postMail(email, JOIN_CHECK_MAIL_SUBJECT, verifyCode);
     }
 
     @Async("mailExecutor")
     public void postReissueCheckMail(String email, String verifyCode) {
-        postSimpleMail(email, REISSUE_CHECK_MAIL_SUBJECT, verifyCode);
+        postMail(email, REISSUE_CHECK_MAIL_SUBJECT, verifyCode);
     }
 
     @Async("mailExecutor")
     public void postReissuePasswordMail(String email, String newPassword) {
-        postSimpleMail(email, REISSUE_PASSWORD_MAIL_SUBJECT, newPassword);
+        postMail(email, REISSUE_PASSWORD_MAIL_SUBJECT, newPassword);
     }
 
     @Async("mailExecutor")
     public void postUpdatePasswordMail(String email) {
-        postSimpleMail(email, UPDATE_PASSWORD_MAIL_SUBJECT, UPDATE_PASSWORD_MAIL_CONTENT);
+        postMail(email, UPDATE_PASSWORD_MAIL_SUBJECT, UPDATE_PASSWORD_MAIL_CONTENT);
     }
 
-    private void postSimpleMail(String email, String subject, String content) {
+    private void postMail(String email, String subject, String content) {
+        try {
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper messageHelper = new MimeMessageHelper(message);
+
+            messageHelper.setTo(email);
+            messageHelper.setSubject(subject);
+            messageHelper.setText(getTextWithTemplate(content), true);
+
+            javaMailSender.send(message);
+
+            log.info("Mail Posted To {}: {}", email, subject);
+        } catch (Exception e) {
+            postExceptionMessage(email);
+        }
+    }
+
+    private String getTextWithTemplate(String code) {
+        Context context = new Context();
+        context.setVariable("code", code);
+
+        return templateEngine.process("code-mail", context);
+    }
+
+    private void postExceptionMessage(String email) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);
-        message.setSubject(subject);
-        message.setText(content);
+        message.setSubject(EXCEPTION_MAIL_SUBJECT);
+        message.setText(EXCEPTION_MAIL_CONTENT);
 
         javaMailSender.send(message);
-
-        log.info("Mail Posted To {}: {}", email, subject);
     }
 }
