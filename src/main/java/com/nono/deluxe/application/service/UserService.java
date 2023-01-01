@@ -55,7 +55,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserResponseDTO getUserInfo(long userCode) {
+    public UserResponseDTO getUser(long userCode) {
         User user = userRepository.findById(userCode)
             .orElseThrow(() -> new NotFoundException("Not exist data."));
 
@@ -78,7 +78,7 @@ public class UserService {
     }
 
     @Transactional
-    public MessageResponseDTO deleteUser(long userCode) {
+    public MessageResponseDTO deleteParticipant(long userCode) {
         User user = userRepository.findById(userCode)
             .orElseThrow(() -> new NotFoundException("User: Not found user"));
 

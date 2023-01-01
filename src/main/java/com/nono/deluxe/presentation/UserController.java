@@ -34,9 +34,8 @@ public class UserController {
     private final UserService userService;
     private final AuthService authService;
 
-    // 사용자 생성 - Participant 추가.
     @PostMapping()
-    public ResponseEntity<UserResponseDTO> addUser(
+    public ResponseEntity<UserResponseDTO> createParticipant(
         @RequestHeader(value = "Authorization") String token,
         @Validated @RequestBody CreateParticipantRequestDTO userRequestDTO) {
         authService.validateTokenOverManagerRole(token);
@@ -48,7 +47,7 @@ public class UserController {
 
     // 유저 리스트 조회.
     @GetMapping()
-    public ResponseEntity<GetUserListResponseDTO> readUserList(
+    public ResponseEntity<GetUserListResponseDTO> getUserList(
         @RequestHeader(value = "Authorization") String token,
         @RequestParam(required = false, defaultValue = "") String query,
         @RequestParam(required = false, defaultValue = "userName") String column,
@@ -63,12 +62,12 @@ public class UserController {
     }
 
     @GetMapping("/{userCode}")
-    public ResponseEntity<UserResponseDTO> getUserInfo(
+    public ResponseEntity<UserResponseDTO> getUser(
         @RequestHeader(value = "Authorization") String token,
         @PathVariable(name = "userCode") long userCode) {
         authService.validateTokenOverManagerRole(token);
 
-        UserResponseDTO responseDTO = userService.getUserInfo(userCode);
+        UserResponseDTO responseDTO = userService.getUser(userCode);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
@@ -86,12 +85,12 @@ public class UserController {
     }
 
     @DeleteMapping("/{userCode}")
-    public ResponseEntity<MessageResponseDTO> deleteUser(
+    public ResponseEntity<MessageResponseDTO> deleteParticipant(
         @RequestHeader(name = "Authorization") String token,
         @PathVariable(name = "userCode") long userCode) {
         authService.validateTokenOverAdminRole(token);
 
-        MessageResponseDTO responseDto = userService.deleteUser(userCode);
+        MessageResponseDTO responseDto = userService.deleteParticipant(userCode);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
@@ -103,7 +102,7 @@ public class UserController {
 
         return ResponseEntity
             .status(HttpStatus.OK)
-            .body(userService.getUserInfo(userId));
+            .body(userService.getUser(userId));
     }
 
     @PutMapping("/me")
