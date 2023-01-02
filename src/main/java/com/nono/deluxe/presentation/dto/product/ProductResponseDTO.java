@@ -17,6 +17,7 @@ public class ProductResponseDTO {
     private String unit;
     private StorageType storageType;
     private String barcode;
+    private String barcodeType;
     private long stock;
     private double inputPrice;
     private double outputPrice;
@@ -34,6 +35,7 @@ public class ProductResponseDTO {
         this.unit = product.getUnit();
         this.storageType = product.getStorageType();
         this.barcode = product.getBarcode();
+        this.barcodeType = product.getBarcodeType();
         this.stock = product.getStock();
         this.inputPrice = product.getInputPrice();
         this.outputPrice = product.getOutputPrice();

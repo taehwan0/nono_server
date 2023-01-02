@@ -52,6 +52,9 @@ public class Product {
     @Column(nullable = true, length = 50)
     private String barcode;
 
+    @Column(nullable = true, length = 50)
+    private String barcodeType;
+
     @Column(nullable = false)
     private long stock;
 
@@ -84,6 +87,7 @@ public class Product {
         String unit,
         StorageType storageType,
         String barcode,
+        String barcodeType,
         long stock,
         double inputPrice,
         double outputPrice,
@@ -96,6 +100,7 @@ public class Product {
         this.unit = unit;
         this.storageType = storageType;
         this.barcode = barcode;
+        this.barcodeType = barcodeType;
         this.stock = stock;
         this.inputPrice = inputPrice;
         this.outputPrice = outputPrice;
@@ -112,6 +117,7 @@ public class Product {
         this.unit = requestDTO.getUnit();
         this.storageType = StorageType.valueOf(requestDTO.getStorageType().toUpperCase());
         this.barcode = requestDTO.getBarcode();
+        this.barcodeType = requestDTO.getBarcodeType();
         this.stock = requestDTO.getStock();
         this.active = requestDTO.isActive();
         this.inputPrice = requestDTO.getInputPrice();

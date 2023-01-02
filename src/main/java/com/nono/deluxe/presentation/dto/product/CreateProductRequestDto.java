@@ -41,6 +41,9 @@ public class CreateProductRequestDto {
     @Size(max = 50)
     private String barcode;
 
+    @Size(max = 50)
+    private String barcodeType;
+
     @NotNull
     @Min(0)
     private long stock;
@@ -65,6 +68,7 @@ public class CreateProductRequestDto {
             .unit(unit)
             .storageType(StorageType.valueOf(storageType.toUpperCase()))
             .barcode(barcode)
+            .barcodeType(barcodeType)
             .stock(stock)
             .inputPrice(inputPrice)
             .outputPrice(outputPrice)

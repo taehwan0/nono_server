@@ -39,6 +39,9 @@ public class UpdateProductRequestDTO {
     @Size(max = 50)
     private String barcode;
 
+    @Size(max = 50)
+    private String barcodeType;
+
     @NotNull
     private boolean active;
 
