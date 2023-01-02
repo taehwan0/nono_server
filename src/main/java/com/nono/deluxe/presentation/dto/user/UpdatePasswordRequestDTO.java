@@ -10,6 +10,6 @@ public class UpdatePasswordRequestDTO {
 
     private String password;
 
-    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$")
+    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()\\-_+=])[A-Za-z\\d!@#$%^&*()]{8,}$")
     private String newPassword;
 }

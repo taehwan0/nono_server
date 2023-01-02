@@ -23,6 +23,8 @@ import com.nono.deluxe.presentation.dto.auth.TokenResponseDTO;
 import com.nono.deluxe.presentation.dto.auth.VerifyEmailRequestDTO;
 import java.security.SecureRandom;
 import java.time.ZoneId;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -232,8 +234,7 @@ public class AuthService {
             User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Not Found User"));
 
-            String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
-            String newPassword = createRandomString(chars, 12);
+            String newPassword = createRandomPassword();
 
             mailClient.postReissuePasswordMail(email, newPassword);
 
@@ -245,6 +246,23 @@ public class AuthService {
             return new MessageResponseDTO(true, "password reset");
         }
         throw new RuntimeException("Email Not Verified OR Verify Code Not Collect");
+    }
+
+    private String createRandomPassword() {
+        String upperChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        String lowerChars = "abcdefghijklmnopqrstuvwxyz";
+        String numbers = "0123456789";
+        String marks = "!@#$%^&*()-_=+";
+
+        String newWords = createRandomString(upperChars, 3)
+            + createRandomString(lowerChars, 3)
+            + createRandomString(numbers, 3)
+            + createRandomString(marks, 3);
+
+        List<String> newPassword = Arrays.asList(newWords.split(""));
+        Collections.shuffle(newPassword);
+
+        return String.join("", newPassword);
     }
 
     private boolean validateReissueEmail(CheckEmail checkEmail, String verifyCode) {
