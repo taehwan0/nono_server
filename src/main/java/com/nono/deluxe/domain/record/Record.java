@@ -42,10 +42,10 @@ public class Record {
     private long stock;
 
     @Column(nullable = false)
-    private long price;
+    private double price;
 
     @Builder
-    public Record(Document document, Product product, long quantity, long stock, long price) {
+    public Record(Document document, Product product, long quantity, long stock, double price) {
         this.document = document;
         this.product = product;
         this.quantity = quantity;

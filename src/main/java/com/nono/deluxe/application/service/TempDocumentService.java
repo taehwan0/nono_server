@@ -58,9 +58,9 @@ public class TempDocumentService {
             TempRecord tempRecord = recordRequestDto.toTempEntity(document, recordProductInfo);
             // temp Record 저장.
 
-            long recordPrice = tempRecord.getPrice();
+            double recordPrice = tempRecord.getPrice();
             if (recordPrice == 0) {
-                long productPrice;
+                double productPrice;
                 if (tempRecord.getDocument().getType().equals(DocumentType.INPUT)) {
                     productPrice = recordProductInfo.getInputPrice();
                 } else {
@@ -164,9 +164,9 @@ public class TempDocumentService {
                 .orElseThrow(() -> new NotFoundException("Not found product Info."));
             TempRecord tempRecord = recordRequestDTO.toTempEntity(tempDocument, recordProductInfo);
 
-            long recordPrice = tempRecord.getPrice();
+            double recordPrice = tempRecord.getPrice();
             if (recordPrice == 0) {
-                long productPrice;
+                double productPrice;
                 if (tempRecord.getDocument().getType().equals(DocumentType.INPUT)) {
                     productPrice = recordProductInfo.getInputPrice();
                 } else {
@@ -206,7 +206,7 @@ public class TempDocumentService {
     private long getTotalPrice(List<TempRecord> createdRecordList) {
         long totalPrice = 0;
         for (TempRecord record : createdRecordList) {
-            long recordTotalPrice = record.getPrice() * record.getQuantity();
+            double recordTotalPrice = record.getPrice() * record.getQuantity();
             totalPrice += recordTotalPrice;
         }
         return totalPrice;

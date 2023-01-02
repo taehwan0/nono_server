@@ -63,13 +63,13 @@ public class Product {
     private ImageFile file;
 
     @Column(nullable = true)
-    private long inputPrice;
+    private double inputPrice;
 
     @Column(nullable = true)
-    private long outputPrice;
+    private double outputPrice;
 
     @Column(nullable = true)
-    private long margin;
+    private double margin;
 
     @Column(columnDefinition = "tinyint(1) default 0")
     private boolean deleted;
@@ -85,9 +85,9 @@ public class Product {
         StorageType storageType,
         String barcode,
         long stock,
-        long inputPrice,
-        long outputPrice,
-        long margin) {
+        double inputPrice,
+        double outputPrice,
+        double margin) {
         this.productCode = productCode;
         this.name = name;
         this.description = description;

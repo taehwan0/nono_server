@@ -12,7 +12,7 @@ public class RecordResponseDTO {
     private long recordId;
     private long quantity;
     private long stock;
-    private long price;
+    private double price;
     private DocumentType type;
     private ProductResponseDTO product;
 

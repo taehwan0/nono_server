@@ -19,7 +19,7 @@ public class DocumentResponseDTO {
     String companyName;
     String writer;
     long recordCount;
-    long totalPrice;
+    double totalPrice;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
 
@@ -40,7 +40,7 @@ public class DocumentResponseDTO {
 
         this.recordCount = recordList.size();
         this.totalPrice = recordList.stream()
-            .mapToLong(record -> record.getPrice() * record.getQuantity())
+            .mapToDouble(record -> record.getPrice() * record.getQuantity())
             .sum();
     }
 
@@ -59,7 +59,7 @@ public class DocumentResponseDTO {
 
         this.recordCount = recordList.size();
         this.totalPrice = recordList.stream()
-            .mapToLong(record -> record.getPrice() * record.getQuantity())
+            .mapToDouble(record -> record.getPrice() * record.getQuantity())
             .sum();
     }
 }

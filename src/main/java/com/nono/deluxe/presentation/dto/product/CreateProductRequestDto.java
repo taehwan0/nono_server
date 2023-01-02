@@ -21,7 +21,7 @@ public class CreateProductRequestDto {
     @NotNull
     @Size(max = 30)
     private String name;
-    
+
     private String description;
 
     @NotNull
@@ -46,12 +46,12 @@ public class CreateProductRequestDto {
     private long stock;
 
     @Min(0)
-    private long inputPrice;
+    private double inputPrice;
 
     @Min(0)
-    private long outputPrice;
+    private double outputPrice;
 
-    private long margin;
+    private double margin;
 
     private Long imageFileId;
 

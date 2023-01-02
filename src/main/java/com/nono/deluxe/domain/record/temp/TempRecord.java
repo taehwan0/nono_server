@@ -42,20 +42,20 @@ public class TempRecord extends BaseTimeEntity {
 
     // 개당 단가.
     @Column(nullable = false)
-    private long price;
+    private double price;
 
     @Builder
     public TempRecord(TempDocument document,
         Product product,
         long quantity,
-        long price) {
+        double price) {
         this.document = document;
         this.product = product;
         this.quantity = quantity;
         this.price = price;
     }
 
-    public void updatePrice(long price) {
+    public void updatePrice(double price) {
         this.price = price;
     }
 }

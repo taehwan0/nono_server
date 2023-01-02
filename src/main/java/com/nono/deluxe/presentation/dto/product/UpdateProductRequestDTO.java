@@ -47,12 +47,12 @@ public class UpdateProductRequestDTO {
     private long stock;
 
     @Min(0)
-    private long inputPrice;
+    private double inputPrice;
 
     @Min(0)
-    private long outputPrice;
+    private double outputPrice;
 
-    private long margin;
+    private double margin;
 
     private Long imageFileId;
 }

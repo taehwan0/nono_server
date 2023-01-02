@@ -12,7 +12,7 @@ public class ProductRecordResponseDTO {
     private String writer;
     private long quantity;
     private long stock;
-    private long price;
+    private double price;
     private Long documentId;
     private DocumentType type;
     private LocalDate date;

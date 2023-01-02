@@ -18,9 +18,9 @@ public class ProductResponseDTO {
     private StorageType storageType;
     private String barcode;
     private long stock;
-    private long inputPrice;
-    private long outputPrice;
-    private long margin;
+    private double inputPrice;
+    private double outputPrice;
+    private double margin;
     private boolean active;
     private ImageFileResponseDTO image;
 

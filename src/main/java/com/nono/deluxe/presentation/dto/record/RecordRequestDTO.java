@@ -21,32 +21,36 @@ public class RecordRequestDTO {
     @Min(1)
     long quantity;
     @Min(0)
-    long price = 0;
+    double price;
 
     public Record toEntity(Document document, Product product, long stock) {
         return Record.builder()
             .document(document)
             .product(product)
-            .quantity(this.quantity)
-            .price(this.price)
+            .quantity(quantity)
+            .price(price)
             .stock(stock)
             .build();
     }
 
     public TempRecord toTempEntity(TempDocument document, Product product) {
-        long tempPrice = this.price;
-        if (this.price <= 0) {
-            if (document.getType().equals(DocumentType.INPUT)) {
-                tempPrice = product.getInputPrice();
-            } else {
-                tempPrice = product.getOutputPrice();
-            }
-        }
+        // 입력 금액이 0원이면, product 의 기준 가격으로 대입함?
+//        if (price == 0) {
+//            price = getStandardPrice(document, product);
+//        }
+
         return TempRecord.builder()
             .document(document)
             .product(product)
             .quantity(quantity)
-            .price(tempPrice)
+            .price(price)
             .build();
+    }
+
+    private double getStandardPrice(TempDocument document, Product product) {
+        if (document.getType().equals(DocumentType.INPUT)) {
+            return product.getInputPrice();
+        }
+        return product.getOutputPrice();
     }
 }
