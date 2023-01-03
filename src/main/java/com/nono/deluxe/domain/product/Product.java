@@ -49,7 +49,7 @@ public class Product {
     @Column(nullable = false)
     private StorageType storageType;
 
-    @Column(nullable = true, length = 50)
+    @Column(nullable = true, length = 50, unique = true)
     private String barcode;
 
     @Column(nullable = true, length = 50)
@@ -137,5 +137,6 @@ public class Product {
         this.deleted = true;
         this.active = false;
         this.productCode = UUID.randomUUID().toString().substring(0, 18);
+        this.barcode = null;
     }
 }
