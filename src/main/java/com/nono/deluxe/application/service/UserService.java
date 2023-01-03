@@ -67,12 +67,7 @@ public class UserService {
         User user = userRepository.findById(userCode)
             .orElseThrow(() -> new NotFoundException("User: Not found user"));
 
-        if (user.getRole().equals(Role.ROLE_PARTICIPANT)) {
-            user.update(requestDTO.getUserName(), requestDTO.isActive());
-        } else {
-            // 관리자 유저의 이름은 변경할 수 없다.
-            user.update(user.getName(), requestDTO.isActive());
-        }
+        user.updateByAdmin(requestDTO.getUserName(), requestDTO.isActive());
 
         return new UserResponseDTO(user);
     }
