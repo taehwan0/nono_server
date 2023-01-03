@@ -47,9 +47,9 @@ public class NoticeService {
             Sort.by(new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), column)));
 
         if (focus) {
-            return new ReadNoticeListResponseDTO(noticeRepository.readNoticeListFocus(query, limit), content);
+            return new ReadNoticeListResponseDTO(noticeRepository.findFocusPageByTitle(query, limit), content);
         }
-        return new ReadNoticeListResponseDTO(noticeRepository.readNoticeList(query, limit), content);
+        return new ReadNoticeListResponseDTO(noticeRepository.findPageByTitle(query, limit), content);
     }
 
     @Transactional(readOnly = true)
@@ -62,7 +62,7 @@ public class NoticeService {
 
     @Transactional(readOnly = true)
     public NoticeResponseDTO readNoticeRecent() {
-        Optional<Notice> notice = noticeRepository.readNoticeRecentOne();
+        Optional<Notice> notice = noticeRepository.findRecent();
 
         return notice.map(NoticeResponseDTO::new).orElseGet(NoticeResponseDTO::new);
     }

@@ -12,6 +12,6 @@ public interface CheckEmailRepository extends JpaRepository<CheckEmail, Long> {
 
     Optional<CheckEmail> findByEmail(String email);
 
-    @Query("SELECT c FROM CheckEmail c WHERE c.email like :email")
+    @Query("SELECT c FROM CheckEmail c WHERE c.email LIKE :email")
     List<CheckEmail> findAllByEmail(@Param("email") String email);
 }

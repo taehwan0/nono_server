@@ -66,9 +66,9 @@ public class CompanyService {
 
         if (active) {
             return new CompanyListResponseDTO(
-                companyRepository.getActiveCompanyList(query, pageRequest)); // true -> active 만 읽기
+                companyRepository.findActivePageByName(query, pageRequest)); // true -> active 만 읽기
         }
-        return new CompanyListResponseDTO(companyRepository.getCompanyList(query, pageRequest)); // false -> 전체 읽기
+        return new CompanyListResponseDTO(companyRepository.findPageByName(query, pageRequest)); // false -> 전체 읽기
     }
 
     @Transactional(readOnly = true)
@@ -84,9 +84,9 @@ public class CompanyService {
             PageRequest.of(page, size, Sort.by(new Order(Direction.valueOf(order.toUpperCase()), column)));
 
         if (active) {
-            return new CompanyListResponseDTO(companyRepository.getActiveInputCompanyList(query, pageRequest));
+            return new CompanyListResponseDTO(companyRepository.findActiveInputPageByName(query, pageRequest));
         }
-        return new CompanyListResponseDTO(companyRepository.getInputCompanyList(query, pageRequest));
+        return new CompanyListResponseDTO(companyRepository.findInputPageByName(query, pageRequest));
     }
 
     @Transactional(readOnly = true)
@@ -102,9 +102,9 @@ public class CompanyService {
             PageRequest.of(page, size, Sort.by(new Order(Direction.valueOf(order.toUpperCase()), column)));
 
         if (active) {
-            return new CompanyListResponseDTO(companyRepository.getActiveOutputCompanyList(query, pageRequest));
+            return new CompanyListResponseDTO(companyRepository.findActiveOutputPageName(query, pageRequest));
         }
-        return new CompanyListResponseDTO(companyRepository.getOutputCompanyList(query, pageRequest));
+        return new CompanyListResponseDTO(companyRepository.findOutputPageByName(query, pageRequest));
     }
 
     @Transactional(readOnly = true)
@@ -117,7 +117,7 @@ public class CompanyService {
         LocalDate fromDate = LocalDateCreator.getDateOfFirstDay(year, month);
         LocalDate toDate = LocalDateCreator.getDateOfLastDay(year, month);
 
-        Page<Document> documentPage = documentRepository.findByCompanyId(companyId, fromDate, toDate, limit);
+        Page<Document> documentPage = documentRepository.findPageByCompanyId(companyId, fromDate, toDate, limit);
 
         return new ReadDocumentListResponseDTO(documentPage);
     }

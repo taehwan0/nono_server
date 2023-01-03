@@ -49,7 +49,7 @@ public class UserService {
         Pageable pageable =
             PageRequest.of(page, size, Sort.by(new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), column)));
 
-        Page<User> userPage = userRepository.readUserList(query, pageable);
+        Page<User> userPage = userRepository.findPageByName(query, pageable);
 
         return new GetUserListResponseDTO(userPage);
     }

@@ -54,9 +54,9 @@ public class ProductService {
             PageRequest.of(page, size, Sort.by(new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), column)));
 
         if (active) {
-            return new GetProductListResponseDTO(productRepository.readActiveProductList(query, pageable));
+            return new GetProductListResponseDTO(productRepository.findActivePageByName(query, pageable));
         }
-        return new GetProductListResponseDTO(productRepository.readProductList(query, pageable));
+        return new GetProductListResponseDTO(productRepository.findPageByName(query, pageable));
     }
 
     @Transactional(readOnly = true)
@@ -83,7 +83,7 @@ public class ProductService {
         Product product = productRepository.findById(productId)
             .orElseThrow(() -> new RuntimeException("Not Exist Product."));
 
-        List<Record> recordList = recordRepository.findByProductId(productId, fromDate, toDate);
+        List<Record> recordList = recordRepository.findAllByProductBetween(productId, fromDate, toDate);
 
         return new GetRecordListResponseDTO(product, recordList);
     }

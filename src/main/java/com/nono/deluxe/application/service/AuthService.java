@@ -272,7 +272,7 @@ public class AuthService {
     }
 
     private void deleteLegacyLoginCode(long userCode) {
-        List<AuthCode> authCodeList = authCodeRepository.findByUserCode(userCode);
+        List<AuthCode> authCodeList = authCodeRepository.findAllByUserCode(userCode);
         authCodeRepository.deleteAll(authCodeList);
     }
 

@@ -90,7 +90,7 @@ public class DocumentService {
         LocalDate toDate = LocalDateCreator.getDateOfLastDay(year, month);
 
         // 테스트 해보기
-        Page<Document> documentPage = documentRepository.readDocumentList(query, fromDate, toDate, limit);
+        Page<Document> documentPage = documentRepository.findPageByCompanyName(query, fromDate, toDate, limit);
 
         return new ReadDocumentListResponseDTO(documentPage);
     }
@@ -118,7 +118,7 @@ public class DocumentService {
                 .orElseThrow(() -> new RuntimeException("Not Found Product"));
             updateProductIdList.add(productId);
 
-            Optional<Record> optionalRecord = recordRepository.findUpdateTargetRecord(productId, documentId);
+            Optional<Record> optionalRecord = recordRepository.findAllByProductIdAndDocumentId(productId, documentId);
             Record record;
             if (optionalRecord.isEmpty()) {
                 // create 로직
@@ -138,7 +138,7 @@ public class DocumentService {
 
                 // product stock 반영
                 product.updateStock(product.getStock() + changeQuantity);
-                recordRepository.updateStockFutureDateRecord(productId, document.getDate(), changeQuantity);
+                recordRepository.updateAllStockAfterThan(productId, document.getDate(), changeQuantity);
             }
 
             // 기존 데이터는 존재하지만, 여기에 속하지 않는 Id 는 삭제처리 해야함
@@ -183,7 +183,7 @@ public class DocumentService {
      * 이후의 record stock 에 반영
      */
     private Record createRecord(Document document, Product product, RecordRequestDTO recordRequestDto) {
-        List<Record> futureDateRecordList = recordRepository.findFutureDateRecordList(product.getId(),
+        List<Record> futureDateRecordList = recordRepository.findAllAfterThan(product.getId(),
             document.getDate());
 
         Record record;
@@ -215,7 +215,7 @@ public class DocumentService {
             long changeQuantity = recordRequestDto.getQuantity() * typeSwitch;
             product.updateStock(product.getStock() + changeQuantity);
             // 현재 생성된 record 의 date 이후 날짜가 되는 모든 레코드 stock 에 연산
-            recordRepository.updateStockFutureDateRecord(product.getId(), document.getDate(), changeQuantity);
+            recordRepository.updateAllStockAfterThan(product.getId(), document.getDate(), changeQuantity);
         }
         return record;
     }
@@ -234,7 +234,7 @@ public class DocumentService {
         long changeQuantity = record.getQuantity() * deleteTypeSwitch;
 
         product.updateStock(product.getStock() + changeQuantity);
-        recordRepository.updateStockFutureDateRecord(productId, document.getDate(), changeQuantity);
+        recordRepository.updateAllStockAfterThan(productId, document.getDate(), changeQuantity);
         recordRepository.delete(record);
     }
 

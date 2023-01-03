@@ -98,13 +98,13 @@ public class ExcelClient {
     }
 
     private long getRecentStock(int year, int month, Product product) {
-        return recordRepository.findRecentStock(
+        return recordRepository.findRecentStockByProductId(
             LocalDateCreator.getDateOfFirstDay(year, month),
             product.getId()).orElse(0L);
     }
 
     private long getTotalQuantityOfDate(int year, int month, int day, Product product, DocumentType type) {
-        return recordRepository.sumTotalQuantityOfDate(
+        return recordRepository.findSumOfQuantityOfDateByProductIdAndType(
             LocalDate.of(year, month, day),
             product.getId(),
             type.toString()
