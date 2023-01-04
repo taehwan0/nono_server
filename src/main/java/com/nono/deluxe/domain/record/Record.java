@@ -27,7 +27,7 @@ public class Record {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "document_id", nullable = false, foreignKey = @ForeignKey(name = "record_document"))
     private Document document;
 

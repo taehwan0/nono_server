@@ -31,6 +31,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT p FROM Product p WHERE p.name LIKE CONCAT('%', :query, '%') AND p.deleted = false")
     Page<Product> findPageByName(@Param("query") String query, Pageable pageable);
 
-    @Query("SELECT p FROM Product p ORDER BY p.productCode ASC")
+    @Query("SELECT p "
+        + "FROM Product p "
+        + "WHERE p.deleted = false "
+        + "ORDER BY p.productCode ASC ")
     List<Product> findAllOrderByProductCodeASC();
 }

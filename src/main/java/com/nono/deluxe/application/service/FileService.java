@@ -121,12 +121,12 @@ public class FileService {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new NotFoundException("NotFountUser"));
 
-        String subject = subjectBuilder(year, month);
+        String subject = createSubject(year, month);
 
         mailClient.postExcelFile(user.getEmail(), subject, excelFile);
     }
 
-    private String subjectBuilder(int year, int month) {
+    private String createSubject(int year, int month) {
         return year + "년 " + month + "월 노노유통 월간 문서";
     }
 }
