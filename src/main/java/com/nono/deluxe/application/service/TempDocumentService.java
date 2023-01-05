@@ -1,6 +1,5 @@
 package com.nono.deluxe.application.service;
 
-import com.amazonaws.services.kms.model.NotFoundException;
 import com.nono.deluxe.domain.company.Company;
 import com.nono.deluxe.domain.company.CompanyRepository;
 import com.nono.deluxe.domain.document.DocumentType;
@@ -12,6 +11,7 @@ import com.nono.deluxe.domain.record.temp.TempRecord;
 import com.nono.deluxe.domain.record.temp.TempRecordRepository;
 import com.nono.deluxe.domain.user.User;
 import com.nono.deluxe.domain.user.UserRepository;
+import com.nono.deluxe.exception.NotFoundException;
 import com.nono.deluxe.presentation.dto.MessageResponseDTO;
 import com.nono.deluxe.presentation.dto.record.RecordRequestDTO;
 import com.nono.deluxe.presentation.dto.tempdocument.CreateTempDocumentRequestDTO;

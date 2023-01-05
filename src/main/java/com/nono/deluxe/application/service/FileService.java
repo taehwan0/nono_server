@@ -1,13 +1,12 @@
 package com.nono.deluxe.application.service;
 
-import com.amazonaws.services.kms.model.NotFoundException;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.nono.deluxe.application.client.ExcelClient;
 import com.nono.deluxe.application.client.MailClient;
 import com.nono.deluxe.domain.imagefile.ImageFile;
 import com.nono.deluxe.domain.imagefile.ImageFileRepository;
 import com.nono.deluxe.domain.user.User;
 import com.nono.deluxe.domain.user.UserRepository;
+import com.nono.deluxe.exception.NotFoundException;
 import com.nono.deluxe.presentation.dto.imagefile.ImageFileResponseDTO;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -18,7 +17,6 @@ import javax.imageio.ImageIO;
 import javax.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import net.coobird.thumbnailator.Thumbnails;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
@@ -42,13 +40,9 @@ public class FileService {
 
     private final ExcelClient excelClient;
     private final MailClient mailClient;
-    private final AmazonS3Client amazonS3Client;
 
     private final ImageFileRepository imageFileRepository;
     private final UserRepository userRepository;
-
-    @Value("${cloud.aws.s3.bucket}")
-    private String bucket;
 
     @Transactional
     public ImageFileResponseDTO uploadImageFile(MultipartFile imageFile) throws IOException {
@@ -97,13 +91,14 @@ public class FileService {
     }
 
     private String putS3(BufferedImage bufferedImage, String fileName) throws IOException {
-        File file = File.createTempFile(fileName, SUFFIX);
-        ImageIO.write(bufferedImage, "png", file);
-
-        amazonS3Client.putObject(bucket, fileName, file);
-        deleteFile(file);
-
-        return amazonS3Client.getUrl(bucket, fileName).toString();
+//        File file = File.createTempFile(fileName, SUFFIX);
+//        ImageIO.write(bufferedImage, "png", file);
+//
+//        amazonS3Client.putObject(bucket, fileName, file);
+//        deleteFile(file);
+//
+//        return amazonS3Client.getUrl(bucket, fileName).toString();
+        return "1";
     }
 
     private void deleteFile(File file) {
