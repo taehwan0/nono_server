@@ -8,6 +8,8 @@ import com.nono.deluxe.presentation.dto.document.CreateDocumentRequestDTO;
 import com.nono.deluxe.presentation.dto.document.DocumentResponseDTO;
 import com.nono.deluxe.presentation.dto.document.ReadDocumentListResponseDTO;
 import com.nono.deluxe.presentation.dto.document.UpdateDocumentRequestDTO;
+import java.io.IOException;
+import javax.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -98,12 +100,20 @@ public class DocumentController {
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 
-    /**
-     * 어떤 값들을 입력 받아서 처리할지 기준 필요. full Data, 월별 데이터, 일별 데이터, 상품별 데이터 등 document 에서는 full, 월별, 일별 데이터를 처리하게 될 수 있음.
-     */
-    @GetMapping("/{documentId}/xls")
-    public void exportDocumentToExcel() {
+    @GetMapping(value = "/excel")
+    public ResponseEntity<MessageResponseDTO> postMonthlyDocument(
+        @RequestHeader(name = "Authorization") String token,
+        @RequestParam int year,
+        @RequestParam int month)
+        throws IOException, MessagingException {
 
+        long userId = authService.validateTokenOverManagerRole(token);
+
+        documentService.postMonthDocument(userId, year, month);
+
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(new MessageResponseDTO(true, "request success"));
     }
 
     @PostMapping("/legacy/trans")

@@ -3,13 +3,16 @@ package com.nono.deluxe.presentation;
 import com.nono.deluxe.application.service.AuthService;
 import com.nono.deluxe.application.service.ProductService;
 import com.nono.deluxe.presentation.dto.MessageResponseDTO;
+import com.nono.deluxe.presentation.dto.imagefile.ImageFileResponseDTO;
 import com.nono.deluxe.presentation.dto.product.CreateProductRequestDto;
 import com.nono.deluxe.presentation.dto.product.GetProductListResponseDTO;
 import com.nono.deluxe.presentation.dto.product.GetRecordListResponseDTO;
 import com.nono.deluxe.presentation.dto.product.ProductResponseDTO;
 import com.nono.deluxe.presentation.dto.product.UpdateProductRequestDTO;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -22,7 +25,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @RequestMapping("/api/v1/product")
@@ -134,5 +139,29 @@ public class ProductController {
         MessageResponseDTO responseDTO = productService.deleteProduct(productId);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+    }
+
+    @PostMapping("/image")
+    public ResponseEntity<ImageFileResponseDTO> saveImage(
+        @RequestHeader(name = "Authorization") String token,
+        @RequestPart MultipartFile imageFile) throws IOException {
+        authService.validateTokenOverManagerRole(token);
+
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(productService.saveImage(imageFile));
+    }
+
+    @GetMapping("/image/{imageId}")
+    public ResponseEntity<byte[]> getImage(
+        @RequestHeader(name = "Authorization") String token,
+        @PathVariable(name = "imageId") long imageId,
+        @RequestParam(name = "thumbnail", required = false, defaultValue = "false") boolean isThumbnail) {
+        authService.validateTokenOverParticipantRole(token);
+
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .header(HttpHeaders.CONTENT_TYPE, "image/png")
+            .body(productService.getImage(imageId, isThumbnail));
     }
 }

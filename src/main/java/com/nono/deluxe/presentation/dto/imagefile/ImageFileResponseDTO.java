@@ -6,16 +6,12 @@ import lombok.Data;
 @Data
 public class ImageFileResponseDTO {
 
-    private Long fileId;
-    private String originalUrl;
-    private String thumbnailUrl;
+    private Long imageId;
 
     public ImageFileResponseDTO() {
     }
 
     public ImageFileResponseDTO(ImageFile imageFile) {
-        this.fileId = imageFile.getId();
-        this.originalUrl = imageFile.getOriginalUrl();
-        this.thumbnailUrl = imageFile.getThumbnailUrl();
+        this.imageId = imageFile.getId();
     }
 }
