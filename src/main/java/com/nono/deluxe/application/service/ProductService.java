@@ -1,5 +1,7 @@
 package com.nono.deluxe.application.service;
 
+import com.nono.deluxe.application.client.ImageFileClient;
+import com.nono.deluxe.domain.imagefile.ImageFile;
 import com.nono.deluxe.domain.imagefile.ImageFileRepository;
 import com.nono.deluxe.domain.product.Product;
 import com.nono.deluxe.domain.product.ProductRepository;
@@ -7,24 +9,32 @@ import com.nono.deluxe.domain.record.Record;
 import com.nono.deluxe.domain.record.RecordRepository;
 import com.nono.deluxe.exception.NotFoundException;
 import com.nono.deluxe.presentation.dto.MessageResponseDTO;
+import com.nono.deluxe.presentation.dto.imagefile.ImageFileResponseDTO;
 import com.nono.deluxe.presentation.dto.product.CreateProductRequestDto;
 import com.nono.deluxe.presentation.dto.product.GetProductListResponseDTO;
 import com.nono.deluxe.presentation.dto.product.GetRecordListResponseDTO;
 import com.nono.deluxe.presentation.dto.product.ProductResponseDTO;
 import com.nono.deluxe.presentation.dto.product.UpdateProductRequestDTO;
 import com.nono.deluxe.utils.LocalDateCreator;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @Service
 public class ProductService {
+
+    private final ImageFileClient imageFileClient;
 
     private final ProductRepository productRepository;
     private final RecordRepository recordRepository;
@@ -111,5 +121,38 @@ public class ProductService {
             .ifPresent(Product::delete);
 
         return new MessageResponseDTO(true, "deleted");
+    }
+
+    @Transactional
+    public ImageFileResponseDTO saveImage(MultipartFile image) throws IOException {
+        String uuid = UUID.randomUUID().toString();
+        String originalUrl = imageFileClient.saveOriginal(image, uuid);
+        String thumbnailUrl = imageFileClient.saveThumbnail(image, uuid);
+
+        ImageFile imageFile = ImageFile.builder()
+            .originalUrl(originalUrl)
+            .thumbnailUrl(thumbnailUrl)
+            .build();
+        imageFileRepository.save(imageFile);
+
+        return new ImageFileResponseDTO(imageFile);
+    }
+
+    @Transactional
+    public byte[] getImage(long imageId, boolean isThumbnail) {
+        ImageFile imageFile = imageFileRepository.findById(imageId)
+            .orElseThrow(() -> new NotFoundException("NotFoundImage"));
+
+        String imageFileUrl = isThumbnail
+            ? imageFile.getThumbnailUrl()
+            : imageFile.getOriginalUrl();
+
+        File file = new File(imageFileUrl);
+
+        try (FileInputStream fileInputStream = new FileInputStream(file)) {
+            return fileInputStream.readAllBytes();
+        } catch (IOException e) {
+            return null;
+        }
     }
 }

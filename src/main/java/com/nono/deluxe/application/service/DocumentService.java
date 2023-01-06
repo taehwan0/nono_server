@@ -1,5 +1,7 @@
 package com.nono.deluxe.application.service;
 
+import com.nono.deluxe.application.client.ExcelClient;
+import com.nono.deluxe.application.client.MailClient;
 import com.nono.deluxe.domain.company.Company;
 import com.nono.deluxe.domain.company.CompanyRepository;
 import com.nono.deluxe.domain.document.Document;
@@ -19,24 +21,33 @@ import com.nono.deluxe.presentation.dto.document.ReadDocumentListResponseDTO;
 import com.nono.deluxe.presentation.dto.document.UpdateDocumentRequestDTO;
 import com.nono.deluxe.presentation.dto.record.RecordRequestDTO;
 import com.nono.deluxe.utils.LocalDateCreator;
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import javax.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
+@EnableAsync
 @RequiredArgsConstructor
 @Service
 public class DocumentService {
+
+    private final MailClient mailClient;
+    private final ExcelClient excelClient;
 
     private final DocumentRepository documentRepository;
     private final RecordRepository recordRepository;
@@ -246,5 +257,23 @@ public class DocumentService {
             return 1;
         }
         return -1;
+    }
+
+    @Async
+    @Transactional(readOnly = true)
+    public void postMonthDocument(long userId, int year, int month)
+        throws MessagingException, IOException {
+        Optional<File> excelFile = excelClient.createMonthlyDocumentFile(year, month);
+
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new NotFoundException("NotFountUser"));
+
+        String subject = createSubject(year, month);
+
+        mailClient.postExcelFile(user.getEmail(), subject, excelFile);
+    }
+
+    private String createSubject(int year, int month) {
+        return year + "년 " + month + "월 노노유통 월간 문서";
     }
 }
