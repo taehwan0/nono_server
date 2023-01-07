@@ -70,7 +70,7 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public ProductResponseDTO getProductInfo(long productId) {
+    public ProductResponseDTO getProductById(long productId) {
         Product product = productRepository.findById(productId)
             .orElseThrow(() -> new NotFoundException("not exist data"));
 
@@ -78,7 +78,7 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public ProductResponseDTO getProductInfoByBarcode(String barcode) {
+    public ProductResponseDTO getProductByBarcode(String barcode) {
         Product product = productRepository.findByBarcode(barcode)
             .orElseThrow(() -> new NotFoundException("not exist data"));
 
@@ -86,7 +86,7 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public GetRecordListResponseDTO readProductRecord(long productId, int year, int month) {
+    public GetRecordListResponseDTO gerProductRecord(long productId, int year, int month) {
         LocalDate fromDate = LocalDateCreator.getDateOfFirstDay(year, month);
         LocalDate toDate = LocalDateCreator.getDateOfLastDay(year, month);
 

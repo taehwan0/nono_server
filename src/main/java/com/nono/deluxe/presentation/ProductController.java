@@ -83,24 +83,24 @@ public class ProductController {
 
     /// Product 상세 정보 조회.
     @GetMapping("/{productId}")
-    public ResponseEntity<ProductResponseDTO> getProductInfo(
+    public ResponseEntity<ProductResponseDTO> getProductById(
         @RequestHeader(value = "Authorization") String token,
         @PathVariable(name = "productId") long productId) {
         authService.validateTokenOverParticipantRole(token);
 
-        ProductResponseDTO responseDTO = productService.getProductInfo(productId);
+        ProductResponseDTO responseDTO = productService.getProductById(productId);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
     /// Product 상세 정보 조회.
     @GetMapping("/barcode/{barcode}")
-    public ResponseEntity<ProductResponseDTO> getProductInfoByBarcode(
+    public ResponseEntity<ProductResponseDTO> getProductByBarcode(
         @RequestHeader(value = "Authorization") String token,
         @PathVariable(name = "barcode") String barcode) {
         authService.validateTokenOverParticipantRole(token);
 
-        ProductResponseDTO responseDTO = productService.getProductInfoByBarcode(barcode);
+        ProductResponseDTO responseDTO = productService.getProductByBarcode(barcode);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
@@ -113,7 +113,7 @@ public class ProductController {
         @RequestParam(required = false, defaultValue = "0") int month) {
         authService.validateTokenOverParticipantRole(token);
 
-        GetRecordListResponseDTO responseDTO = productService.readProductRecord(productId, year, month);
+        GetRecordListResponseDTO responseDTO = productService.gerProductRecord(productId, year, month);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }

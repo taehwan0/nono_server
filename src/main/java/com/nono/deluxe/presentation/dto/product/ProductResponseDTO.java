@@ -2,7 +2,6 @@ package com.nono.deluxe.presentation.dto.product;
 
 import com.nono.deluxe.domain.product.Product;
 import com.nono.deluxe.domain.product.StorageType;
-import com.nono.deluxe.presentation.dto.imagefile.ImageFileResponseDTO;
 import lombok.Data;
 
 @Data
@@ -23,7 +22,7 @@ public class ProductResponseDTO {
     private double outputPrice;
     private double margin;
     private boolean active;
-    private ImageFileResponseDTO image;
+    private Long imageId;
 
     public ProductResponseDTO(Product product) {
         this.productId = product.getId();
@@ -43,9 +42,9 @@ public class ProductResponseDTO {
         this.active = product.isActive();
 
         if (product.getFile() == null) {
-            this.image = new ImageFileResponseDTO();
+            this.imageId = null;
         } else {
-            this.image = new ImageFileResponseDTO(product.getFile());
+            this.imageId = product.getFile().getId();
         }
     }
 }
