@@ -9,6 +9,8 @@ import com.nono.deluxe.presentation.dto.notice.ReadNoticeListResponseDTO;
 import com.nono.deluxe.presentation.dto.notice.UpdateNoticeRequestDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -32,33 +34,19 @@ public class NoticeController {
     private final NoticeService noticeService;
     private final AuthService authService;
 
-    /**
-     * 필요 권한: admin
-     *
-     * @param token
-     * @param requestDto
-     * @return
-     */
     @PostMapping("")
     public ResponseEntity<NoticeResponseDTO> createNotice(
         @RequestHeader(value = "Authorization") String token,
-        @Validated @RequestBody CreateNoticeRequestDTO requestDto) {
-
+        @Validated @RequestBody CreateNoticeRequestDTO createNoticeRequestDTO) {
         long userId = authService.validateTokenOverAdminRole(token);
 
-        NoticeResponseDTO responseDto = noticeService.createNotice(userId, requestDto);
-
-        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(noticeService.createNotice(userId, createNoticeRequestDTO));
     }
 
-    /**
-     * 필요권한: participant, manager, admin
-     *
-     * @param token
-     * @return
-     */
     @GetMapping("")
-    public ResponseEntity<ReadNoticeListResponseDTO> readNoticeList(
+    public ResponseEntity<ReadNoticeListResponseDTO> getNoticeList(
         @RequestHeader(value = "Authorization") String token,
         @RequestParam(required = false, defaultValue = "") String query,
         @RequestParam(required = false, defaultValue = "createdAt") String column,
@@ -69,81 +57,57 @@ public class NoticeController {
         @RequestParam(required = false, defaultValue = "false") boolean content) {
         authService.validateTokenOverParticipantRole(token);
 
-        ReadNoticeListResponseDTO responseDto =
-            noticeService.readNoticeList(query, column, order, size, (page - 1), focus, content);
+        PageRequest pageRequest = PageRequest.of(
+            page - 1,
+            size,
+            Sort.by(new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), column)));
 
-        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(noticeService.getNoticeList(pageRequest, query, focus, content));
     }
 
-    /**
-     * 필요권한: participant, manager, admin
-     *
-     * @param token
-     * @param noticeId
-     * @return
-     */
     @GetMapping("/{noticeId}")
-    public ResponseEntity<NoticeResponseDTO> readNotice(
+    public ResponseEntity<NoticeResponseDTO> getNoticeById(
         @RequestHeader(value = "Authorization") String token,
         @PathVariable(name = "noticeId") long noticeId) {
         authService.validateTokenOverParticipantRole(token);
 
-        NoticeResponseDTO responseDto = noticeService.readNotice(noticeId);
-
-        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(noticeService.getNoticeById(noticeId));
     }
 
-    /**
-     * 필요권한: participant, manager, admin
-     *
-     * @param token
-     * @return
-     */
     @GetMapping("/recent")
-    public ResponseEntity<NoticeResponseDTO> readNoticeRecent(
+    public ResponseEntity<NoticeResponseDTO> getRecentNotice(
         @RequestHeader(value = "Authorization") String token) {
         authService.validateTokenOverParticipantRole(token);
 
-        NoticeResponseDTO responseDto = noticeService.readNoticeRecent();
-
-        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(noticeService.getRecentNotice());
     }
 
-    /**
-     * 필요권한: admin
-     *
-     * @param token
-     * @param noticeId
-     * @param requestDto
-     * @return
-     */
     @PutMapping("/{noticeId}")
     public ResponseEntity<NoticeResponseDTO> updateNotice(
         @RequestHeader(value = "Authorization") String token,
         @PathVariable(name = "noticeId") long noticeId,
-        @Validated @RequestBody UpdateNoticeRequestDTO requestDto) {
+        @Validated @RequestBody UpdateNoticeRequestDTO updateNoticeRequestDTO) {
         authService.validateTokenOverAdminRole(token);
 
-        NoticeResponseDTO responseDto = noticeService.updateNotice(noticeId, requestDto);
-
-        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(noticeService.updateNotice(noticeId, updateNoticeRequestDTO));
     }
 
-    /**
-     * 필요권한: admin
-     *
-     * @param token
-     * @param noticeId
-     * @return
-     */
     @DeleteMapping("/{noticeId}")
     public ResponseEntity<MessageResponseDTO> deleteNotice(
         @RequestHeader(value = "Authorization") String token,
         @PathVariable(name = "noticeId") long noticeId) {
         authService.validateTokenOverAdminRole(token);
 
-        MessageResponseDTO responseDto = noticeService.deleteNotice(noticeId);
-
-        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(noticeService.deleteNotice(noticeId));
     }
 }

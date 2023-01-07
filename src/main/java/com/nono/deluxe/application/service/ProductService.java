@@ -24,8 +24,6 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,11 +39,11 @@ public class ProductService {
     private final ImageFileRepository imageFileRepository;
 
     @Transactional
-    public ProductResponseDTO createProduct(CreateProductRequestDto requestDto) {
-        Product product = requestDto.toEntity();
+    public ProductResponseDTO createProduct(CreateProductRequestDto createProductRequestDto) {
+        Product product = createProductRequestDto.toEntity();
 
-        if (requestDto.getImageFileId() != null) {
-            imageFileRepository.findById(requestDto.getImageFileId())
+        if (createProductRequestDto.getImageFileId() != null) {
+            imageFileRepository.findById(createProductRequestDto.getImageFileId())
                 .ifPresent(product::updateImageFile);
         }
 
@@ -54,19 +52,14 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public GetProductListResponseDTO getProductList(
+        PageRequest pageRequest,
         String query,
-        String column,
-        String order,
-        int size,
-        int page,
         boolean active) {
-        Pageable pageable =
-            PageRequest.of(page, size, Sort.by(new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), column)));
 
         if (active) {
-            return new GetProductListResponseDTO(productRepository.findActivePageByName(query, pageable));
+            return new GetProductListResponseDTO(productRepository.findActivePageByName(query, pageRequest));
         }
-        return new GetProductListResponseDTO(productRepository.findPageByName(query, pageable));
+        return new GetProductListResponseDTO(productRepository.findPageByName(query, pageRequest));
     }
 
     @Transactional(readOnly = true)
@@ -99,28 +92,30 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductResponseDTO updateProduct(long productId, UpdateProductRequestDTO requestDTO) {
-        Product updatedProduct = productRepository.findById(productId)
+    public ProductResponseDTO updateProduct(long productId, UpdateProductRequestDTO updateProductRequestDTO) {
+        Product product = productRepository.findById(productId)
             .orElseThrow(() -> new NotFoundException("Not Exist product."));
 
-        updatedProduct.updateInfo(requestDTO);
+        product.updateInfo(updateProductRequestDTO);
 
-        if (requestDTO.getImageFileId() != null) {
-            imageFileRepository.findById(requestDTO.getImageFileId())
-                .ifPresent(updatedProduct::updateImageFile);
+        if (updateProductRequestDTO.getImageFileId() != null) {
+            imageFileRepository.findById(updateProductRequestDTO.getImageFileId())
+                .ifPresent(product::updateImageFile);
         }
 
-        productRepository.save(updatedProduct);
+        productRepository.save(product);
 
-        return new ProductResponseDTO(updatedProduct);
+        return new ProductResponseDTO(product);
     }
 
     @Transactional
     public MessageResponseDTO deleteProduct(long productId) {
-        productRepository.findById(productId)
-            .ifPresent(Product::delete);
+        Product product = productRepository.findById(productId)
+            .orElseThrow(() -> new NotFoundException("Not Found Product"));
 
-        return new MessageResponseDTO(true, "deleted");
+        productRepository.delete(product);
+
+        return MessageResponseDTO.ofSuccess("success");
     }
 
     @Transactional

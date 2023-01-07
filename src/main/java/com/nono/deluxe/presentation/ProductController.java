@@ -12,6 +12,8 @@ import com.nono.deluxe.presentation.dto.product.UpdateProductRequestDTO;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,32 +40,17 @@ public class ProductController {
     private final ProductService productService;
     private final AuthService authService;
 
-    /// product 생성
     @PostMapping("")
     public ResponseEntity<ProductResponseDTO> createProduct(
         @RequestHeader(value = "Authorization") String token,
-        @Validated @RequestBody CreateProductRequestDto requestDto) {
+        @Validated @RequestBody CreateProductRequestDto productRequestDto) {
         authService.validateTokenOverManagerRole(token);
 
-        ProductResponseDTO responseDTO = productService.createProduct(requestDto);
-
-        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(productService.createProduct(productRequestDto));
     }
 
-    /**
-     * GetProductList
-     *
-     * @param token  : access Token
-     * @param query  : productName Filter Query
-     * @param column : filter category
-     * @param order  : order by
-     * @param size   : how many data in one page
-     * @param page   : Which page want.
-     * @param active : Need activate data?
-     * @return Product List
-     */
-
-    // product 리스트 가져오기.
     @GetMapping("")
     public ResponseEntity<GetProductListResponseDTO> getProductList(
         @RequestHeader(value = "Authorization") String token,
@@ -75,22 +62,24 @@ public class ProductController {
         @RequestParam(value = "active", defaultValue = "false") boolean active) {
         authService.validateTokenOverParticipantRole(token);
 
-        GetProductListResponseDTO responseDTO =
-            productService.getProductList(query, column, order, size, (page - 1), active);
+        PageRequest pageRequest = PageRequest.of(page - 1,
+            size,
+            Sort.by(new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), column)));
 
-        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(productService.getProductList(pageRequest, query, active));
     }
 
-    /// Product 상세 정보 조회.
     @GetMapping("/{productId}")
     public ResponseEntity<ProductResponseDTO> getProductById(
         @RequestHeader(value = "Authorization") String token,
         @PathVariable(name = "productId") long productId) {
         authService.validateTokenOverParticipantRole(token);
 
-        ProductResponseDTO responseDTO = productService.getProductById(productId);
-
-        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(productService.getProductById(productId));
     }
 
     /// Product 상세 정보 조회.
@@ -100,9 +89,9 @@ public class ProductController {
         @PathVariable(name = "barcode") String barcode) {
         authService.validateTokenOverParticipantRole(token);
 
-        ProductResponseDTO responseDTO = productService.getProductByBarcode(barcode);
-
-        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(productService.getProductByBarcode(barcode));
     }
 
     @GetMapping("/{productId}/record")
@@ -113,21 +102,21 @@ public class ProductController {
         @RequestParam(required = false, defaultValue = "0") int month) {
         authService.validateTokenOverParticipantRole(token);
 
-        GetRecordListResponseDTO responseDTO = productService.gerProductRecord(productId, year, month);
-
-        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(productService.gerProductRecord(productId, year, month));
     }
 
     @PutMapping("/{productId}")
     public ResponseEntity<ProductResponseDTO> updateProduct(
         @RequestHeader(value = "Authorization") String token,
         @PathVariable(name = "productId") long productId,
-        @Validated @RequestBody UpdateProductRequestDTO requestDto) {
+        @Validated @RequestBody UpdateProductRequestDTO updateProductRequestDTO) {
         authService.validateTokenOverManagerRole(token);
 
-        ProductResponseDTO responseDTO = productService.updateProduct(productId, requestDto);
-
-        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(productService.updateProduct(productId, updateProductRequestDTO));
     }
 
     @DeleteMapping("/{productId}")
@@ -136,9 +125,9 @@ public class ProductController {
         @PathVariable(name = "productId") long productId) {
         authService.validateTokenOverManagerRole(token);
 
-        MessageResponseDTO responseDTO = productService.deleteProduct(productId);
-
-        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(productService.deleteProduct(productId));
     }
 
     @PostMapping("/image")

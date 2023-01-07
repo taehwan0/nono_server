@@ -9,6 +9,8 @@ import com.nono.deluxe.presentation.dto.tempdocument.TempDocumentResponseDTO;
 import com.nono.deluxe.presentation.dto.tempdocument.UpdateTempDocumentRequestDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -35,51 +37,57 @@ public class TempDocumentController {
     @PostMapping("")
     public ResponseEntity<TempDocumentResponseDTO> createTempDocument(
         @RequestHeader(name = "Authorization") String token,
-        @Validated @RequestBody CreateTempDocumentRequestDTO requestDto) {
+        @Validated @RequestBody CreateTempDocumentRequestDTO createTempDocumentRequestDTO) {
         long userId = authService.validateTokenOverParticipantRole(token);
 
-        TempDocumentResponseDTO responseDto = tempDocumentService.createDocument(userId, requestDto);
-
-        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(tempDocumentService.createDocument(userId, createTempDocumentRequestDTO));
     }
 
     @GetMapping("/{documentId}")
-    public ResponseEntity<TempDocumentResponseDTO> readTempDocument(
+    public ResponseEntity<TempDocumentResponseDTO> getTempDocumentById(
         @RequestHeader(name = "Authorization") String token,
         @PathVariable(name = "documentId") long documentId) {
         authService.validateTokenOverParticipantRole(token);
 
-        TempDocumentResponseDTO responseDto = tempDocumentService.readDocument(documentId);
-
-        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(tempDocumentService.getTempDocumentById(documentId));
     }
 
     @GetMapping("")
-    public ResponseEntity<ReadTempDocumentListResponseDTO> readTempDocumentList(
+    public ResponseEntity<ReadTempDocumentListResponseDTO> getTempDocumentList(
         @RequestHeader(name = "Authorization") String token,
         @RequestParam(required = false, defaultValue = "") String query,
         @RequestParam(required = false, defaultValue = "date") String column,
         @RequestParam(required = false, defaultValue = "DESC") String order,
         @RequestParam(required = false, defaultValue = "10") int size,
-        @RequestParam(required = false, defaultValue = "0") int page) {
+        @RequestParam(required = false, defaultValue = "1") int page) {
         authService.validateTokenOverParticipantRole(token);
 
-        ReadTempDocumentListResponseDTO responseDto =
-            tempDocumentService.readDocumentList(query, column, order, size, page);
+        PageRequest pageRequest = PageRequest.of(
+            page - 1,
+            size,
+            Sort.by(
+                new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), column),
+                new Sort.Order(Sort.Direction.ASC, "createdAt")));
 
-        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(tempDocumentService.getTempDocumentList(pageRequest, query));
     }
 
     @PutMapping("/{documentId}")
     public ResponseEntity<TempDocumentResponseDTO> updateTempDocument(
         @RequestHeader(name = "Authorization") String token,
         @PathVariable(name = "documentId") long documentId,
-        @Validated @RequestBody UpdateTempDocumentRequestDTO requestDto) {
+        @Validated @RequestBody UpdateTempDocumentRequestDTO updateTempDocumentRequestDTO) {
         long userId = authService.validateTokenOverParticipantRole(token);
 
-        TempDocumentResponseDTO responseDto = tempDocumentService.updateDocument(documentId, userId, requestDto);
-
-        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(tempDocumentService.updateDocument(documentId, userId, updateTempDocumentRequestDTO));
     }
 
     @DeleteMapping("/{documentId}")
@@ -88,9 +96,8 @@ public class TempDocumentController {
         @PathVariable(name = "documentId") long documentId) {
         authService.validateTokenOverManagerRole(token);
 
-        MessageResponseDTO responseDto = tempDocumentService.deleteDocument(documentId);
-
-        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(tempDocumentService.deleteDocument(documentId));
     }
 }
-
