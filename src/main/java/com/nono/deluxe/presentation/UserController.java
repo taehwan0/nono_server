@@ -11,6 +11,8 @@ import com.nono.deluxe.presentation.dto.user.UpdateUserRequestDTO;
 import com.nono.deluxe.presentation.dto.user.UserResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -37,62 +39,66 @@ public class UserController {
     @PostMapping()
     public ResponseEntity<UserResponseDTO> createParticipant(
         @RequestHeader(value = "Authorization") String token,
-        @Validated @RequestBody CreateParticipantRequestDTO userRequestDTO) {
+        @Validated @RequestBody CreateParticipantRequestDTO createParticipantRequestDTO) {
         authService.validateTokenOverManagerRole(token);
 
-        UserResponseDTO responseDTO = userService.createParticipant(userRequestDTO);
-
-        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(userService.createParticipant(createParticipantRequestDTO));
     }
 
-    // 유저 리스트 조회.
     @GetMapping()
     public ResponseEntity<GetUserListResponseDTO> getUserList(
         @RequestHeader(value = "Authorization") String token,
         @RequestParam(required = false, defaultValue = "") String query,
-        @RequestParam(required = false, defaultValue = "userName") String column,
+        @RequestParam(required = false, defaultValue = "name") String column,
         @RequestParam(required = false, defaultValue = "ASC") String order,
         @RequestParam(required = false, defaultValue = "10") int size,
         @RequestParam(required = false, defaultValue = "1") int page) {
         authService.validateTokenOverManagerRole(token);
 
-        GetUserListResponseDTO userList = userService.getUserList(query, column, order, size, (page - 1));
+        PageRequest pageRequest = PageRequest.of(
+            page - 1,
+            size,
+            Sort.by(new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), column)));
 
-        return ResponseEntity.status(HttpStatus.OK).body(userList);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(userService.getUserList(pageRequest, query));
     }
 
-    @GetMapping("/{userCode}")
-    public ResponseEntity<UserResponseDTO> getUser(
+    @GetMapping("/{userId}")
+    public ResponseEntity<UserResponseDTO> getUserById(
         @RequestHeader(value = "Authorization") String token,
-        @PathVariable(name = "userCode") long userCode) {
+        @PathVariable(name = "userId") long userID) {
         authService.validateTokenOverManagerRole(token);
 
-        UserResponseDTO responseDTO = userService.getUser(userCode);
-
-        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(userService.getUserById(userID));
     }
 
-    @PutMapping("/{userCode}")
+    @PutMapping("/{userId}")
     public ResponseEntity<UserResponseDTO> updateUser(
         @RequestHeader(value = "Authorization") String token,
-        @PathVariable(name = "userCode") long userCode,
-        @Validated @RequestBody UpdateUserRequestDTO userRequestDTO) {
+        @PathVariable(name = "userId") long userId,
+        @Validated @RequestBody UpdateUserRequestDTO updateUserRequestDTO) {
         authService.validateTokenOverManagerRole(token);
 
-        UserResponseDTO responseDTO = userService.updateUser(userCode, userRequestDTO);
-
-        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(userService.updateUser(userId, updateUserRequestDTO));
     }
 
-    @DeleteMapping("/{userCode}")
+    @DeleteMapping("/{userId}")
     public ResponseEntity<MessageResponseDTO> deleteParticipant(
         @RequestHeader(name = "Authorization") String token,
-        @PathVariable(name = "userCode") long userCode) {
+        @PathVariable(name = "userId") long userId) {
         authService.validateTokenOverAdminRole(token);
 
-        MessageResponseDTO responseDto = userService.deleteParticipant(userCode);
-
-        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(userService.deleteParticipant(userId));
     }
 
     @GetMapping("/me")
@@ -102,7 +108,7 @@ public class UserController {
 
         return ResponseEntity
             .status(HttpStatus.OK)
-            .body(userService.getUser(userId));
+            .body(userService.getUserById(userId));
     }
 
     @PutMapping("/me")

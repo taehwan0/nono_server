@@ -1,6 +1,5 @@
 package com.nono.deluxe.application.service;
 
-import com.amazonaws.services.kms.model.NotFoundException;
 import com.nono.deluxe.domain.company.Company;
 import com.nono.deluxe.domain.company.CompanyRepository;
 import com.nono.deluxe.domain.document.DocumentType;
@@ -12,6 +11,7 @@ import com.nono.deluxe.domain.record.temp.TempRecord;
 import com.nono.deluxe.domain.record.temp.TempRecordRepository;
 import com.nono.deluxe.domain.user.User;
 import com.nono.deluxe.domain.user.UserRepository;
+import com.nono.deluxe.exception.NotFoundException;
 import com.nono.deluxe.presentation.dto.MessageResponseDTO;
 import com.nono.deluxe.presentation.dto.record.RecordRequestDTO;
 import com.nono.deluxe.presentation.dto.tempdocument.CreateTempDocumentRequestDTO;
@@ -24,8 +24,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -74,43 +72,33 @@ public class TempDocumentService {
 
         long totalPrice = getTotalPrice(createdRecordList);
         long totalCount = createdRecordList.size();
-        return new TempDocumentResponseDTO(document,
-            totalCount,
-            totalPrice,
-            createdRecordList);
+
+        return new TempDocumentResponseDTO(document, totalCount, totalPrice, createdRecordList);
     }
 
     @Transactional(readOnly = true)
-    public TempDocumentResponseDTO readDocument(long documentId) {
+    public TempDocumentResponseDTO getTempDocumentById(long documentId) {
         TempDocument document = tempDocumentRepository.findById(documentId)
             .orElseThrow(() -> new NotFoundException("Not Found Document"));
+
         List<TempRecord> recordList = tempRecordRepository.findByDocumentId(documentId);
 
         long totalPrice = getTotalPrice(recordList);
         long totalCount = recordList.size();
 
-        return new TempDocumentResponseDTO(document,
-            totalCount,
-            totalPrice,
-            recordList);
+        return new TempDocumentResponseDTO(document, totalCount, totalPrice, recordList);
     }
 
     @Transactional(readOnly = true)
-    public ReadTempDocumentListResponseDTO readDocumentList(String query,
-        String column,
-        String order,
-        int size,
-        int page) {
-        Pageable limit = PageRequest.of(page, size, Sort.by(
-            new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), column),
-            new Sort.Order(Sort.Direction.ASC, "createdAt")));
+    public ReadTempDocumentListResponseDTO getTempDocumentList(PageRequest pageRequest, String query) {
 
-        Page<TempDocument> documentPage;
-        if (query.isEmpty()) {
-            documentPage = tempDocumentRepository.findAll(limit);
-        } else {
-            documentPage = tempDocumentRepository.readTempDocumentList(query, limit);
-        }
+        Page<TempDocument> documentPage = tempDocumentRepository.readTempDocumentList(query, pageRequest);
+
+//        if (query.isEmpty()) {
+//            documentPage = tempDocumentRepository.findAll(pageRequest);
+//        } else {
+//            documentPage = tempDocumentRepository.readTempDocumentList(query, pageRequest);
+//        }
 
         return new ReadTempDocumentListResponseDTO(documentPage);
     }
@@ -194,7 +182,7 @@ public class TempDocumentService {
 
         tempDocumentRepository.delete(document);
 
-        return new MessageResponseDTO(true, "deleted");
+        return MessageResponseDTO.ofSuccess("deleted");
     }
 
     /**

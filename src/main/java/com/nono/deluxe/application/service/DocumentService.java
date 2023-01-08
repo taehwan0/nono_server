@@ -1,6 +1,7 @@
 package com.nono.deluxe.application.service;
 
-import com.amazonaws.services.kms.model.NotFoundException;
+import com.nono.deluxe.application.client.ExcelClient;
+import com.nono.deluxe.application.client.MailClient;
 import com.nono.deluxe.domain.company.Company;
 import com.nono.deluxe.domain.company.CompanyRepository;
 import com.nono.deluxe.domain.document.Document;
@@ -12,6 +13,7 @@ import com.nono.deluxe.domain.record.Record;
 import com.nono.deluxe.domain.record.RecordRepository;
 import com.nono.deluxe.domain.user.User;
 import com.nono.deluxe.domain.user.UserRepository;
+import com.nono.deluxe.exception.NotFoundException;
 import com.nono.deluxe.presentation.dto.MessageResponseDTO;
 import com.nono.deluxe.presentation.dto.document.CreateDocumentRequestDTO;
 import com.nono.deluxe.presentation.dto.document.DocumentResponseDTO;
@@ -19,24 +21,31 @@ import com.nono.deluxe.presentation.dto.document.ReadDocumentListResponseDTO;
 import com.nono.deluxe.presentation.dto.document.UpdateDocumentRequestDTO;
 import com.nono.deluxe.presentation.dto.record.RecordRequestDTO;
 import com.nono.deluxe.utils.LocalDateCreator;
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import javax.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
+@EnableAsync
 @RequiredArgsConstructor
 @Service
 public class DocumentService {
+
+    private final MailClient mailClient;
+    private final ExcelClient excelClient;
 
     private final DocumentRepository documentRepository;
     private final RecordRepository recordRepository;
@@ -45,16 +54,16 @@ public class DocumentService {
     private final ProductRepository productRepository;
 
     @Transactional
-    public DocumentResponseDTO createDocument(long userId, CreateDocumentRequestDTO requestDto) {
+    public DocumentResponseDTO createDocument(long userId, CreateDocumentRequestDTO createDocumentRequestDTO) {
         User writer = userRepository.findById(userId)
             .orElseThrow(() -> new NotFoundException("Not Found User"));
-        Company company = companyRepository.findById(requestDto.getCompanyId())
+        Company company = companyRepository.findById(createDocumentRequestDTO.getCompanyId())
             .orElseThrow(() -> new NotFoundException("Not Found Company"));
-        Document document = requestDto.toEntity(writer, company);
+        Document document = createDocumentRequestDTO.toEntity(writer, company);
 
         documentRepository.save(document);
 
-        List<RecordRequestDTO> recordRequestDtoList = requestDto.getRecordList();
+        List<RecordRequestDTO> recordRequestDtoList = createDocumentRequestDTO.getRecordList();
 
         List<Record> records = new ArrayList<>();
 
@@ -72,7 +81,7 @@ public class DocumentService {
     }
 
     @Transactional(readOnly = true)
-    public DocumentResponseDTO readDocument(long documentId) {
+    public DocumentResponseDTO getDocument(long documentId) {
         Document document = documentRepository.findById(documentId)
             .orElseThrow(() -> new NotFoundException("Not Found Document"));
 
@@ -80,34 +89,29 @@ public class DocumentService {
     }
 
     @Transactional(readOnly = true)
-    public ReadDocumentListResponseDTO readDocumentList(String query, String column, String order, int size, int page,
-        int year, int month) {
-        Pageable limit = PageRequest.of(page, size, Sort.by(
-            new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), column),
-            new Sort.Order(Sort.Direction.ASC, "createdAt")));
-
+    public ReadDocumentListResponseDTO getDocumentList(PageRequest pageRequest, String query, int year, int month) {
         LocalDate fromDate = LocalDateCreator.getDateOfFirstDay(year, month);
         LocalDate toDate = LocalDateCreator.getDateOfLastDay(year, month);
 
         // 테스트 해보기
-        Page<Document> documentPage = documentRepository.findPageByCompanyName(query, fromDate, toDate, limit);
+        Page<Document> documentPage = documentRepository.findPageByCompanyName(query, fromDate, toDate, pageRequest);
 
         return new ReadDocumentListResponseDTO(documentPage);
     }
 
     // TODO: 로직 확인 필요!
     @Transactional
-    public DocumentResponseDTO updateDocument(long documentId, UpdateDocumentRequestDTO requestDto) {
+    public DocumentResponseDTO updateDocument(long documentId, UpdateDocumentRequestDTO updateDocumentRequestDTO) {
         Document document = documentRepository.findById(documentId)
             .orElseThrow(() -> new NotFoundException("Not Found Document"));
 
-        long companyId = requestDto.getCompanyId();
+        long companyId = updateDocumentRequestDTO.getCompanyId();
         Company company = companyRepository.findById(companyId)
             .orElseThrow(() -> new NotFoundException("Not Found Company"));
 
         document.updateCompany(company);
 
-        List<RecordRequestDTO> recordList = requestDto.getRecordList();
+        List<RecordRequestDTO> recordList = updateDocumentRequestDTO.getRecordList();
         List<Long> updateProductIdList = new ArrayList<>(); // 새로이 변경될 record 들의 productId List
         for (RecordRequestDTO recordRequestDto : recordList) {
             // update 목록에 있는 record 가 db 에 존재하면 update
@@ -151,7 +155,7 @@ public class DocumentService {
             Product product = documentRecord.getProduct();
             long productId = product.getId();
 
-            // requestDto 에 속하지 않는 record 는 삭제처리
+            // updateDocumentRequestDTO 에 속하지 않는 record 는 삭제처리
             if (!updateProductIdList.contains(productId)) {
                 deleteRecord(documentRecord);
             }
@@ -166,15 +170,12 @@ public class DocumentService {
     public MessageResponseDTO deleteDocument(long documentId) {
         Document document = documentRepository.findById(documentId)
             .orElseThrow(() -> new RuntimeException("Not Found Document"));
-        List<Record> documentRecordList = recordRepository.findByDocumentId(documentId);
 
-        for (Record record : documentRecordList) {
-            deleteRecord(record);
-        }
+        recordRepository.deleteAll(recordRepository.findByDocumentId(documentId));
 
         documentRepository.delete(document);
 
-        return new MessageResponseDTO(true, "deleted");
+        return MessageResponseDTO.ofSuccess("deleted");
     }
 
     /**
@@ -246,5 +247,23 @@ public class DocumentService {
             return 1;
         }
         return -1;
+    }
+
+    @Async
+    @Transactional(readOnly = true)
+    public void postMonthDocument(long userId, int year, int month)
+        throws MessagingException, IOException {
+        Optional<File> excelFile = excelClient.createMonthlyDocumentFile(year, month);
+
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new NotFoundException("NotFountUser"));
+
+        String subject = createSubject(year, month);
+
+        mailClient.postExcelFile(user.getEmail(), subject, excelFile);
+    }
+
+    private String createSubject(int year, int month) {
+        return year + "년 " + month + "월 노노유통 월간 문서";
     }
 }

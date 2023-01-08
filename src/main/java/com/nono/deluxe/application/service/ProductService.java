@@ -1,41 +1,49 @@
 package com.nono.deluxe.application.service;
 
-import com.amazonaws.services.kms.model.NotFoundException;
+import com.nono.deluxe.application.client.ImageFileClient;
+import com.nono.deluxe.domain.imagefile.ImageFile;
 import com.nono.deluxe.domain.imagefile.ImageFileRepository;
 import com.nono.deluxe.domain.product.Product;
 import com.nono.deluxe.domain.product.ProductRepository;
 import com.nono.deluxe.domain.record.Record;
 import com.nono.deluxe.domain.record.RecordRepository;
+import com.nono.deluxe.exception.NotFoundException;
 import com.nono.deluxe.presentation.dto.MessageResponseDTO;
+import com.nono.deluxe.presentation.dto.imagefile.ImageFileResponseDTO;
 import com.nono.deluxe.presentation.dto.product.CreateProductRequestDto;
 import com.nono.deluxe.presentation.dto.product.GetProductListResponseDTO;
 import com.nono.deluxe.presentation.dto.product.GetRecordListResponseDTO;
 import com.nono.deluxe.presentation.dto.product.ProductResponseDTO;
 import com.nono.deluxe.presentation.dto.product.UpdateProductRequestDTO;
 import com.nono.deluxe.utils.LocalDateCreator;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @Service
 public class ProductService {
+
+    private final ImageFileClient imageFileClient;
 
     private final ProductRepository productRepository;
     private final RecordRepository recordRepository;
     private final ImageFileRepository imageFileRepository;
 
     @Transactional
-    public ProductResponseDTO createProduct(CreateProductRequestDto requestDto) {
-        Product product = requestDto.toEntity();
+    public ProductResponseDTO createProduct(CreateProductRequestDto createProductRequestDto) {
+        Product product = createProductRequestDto.toEntity();
 
-        if (requestDto.getImageFileId() != null) {
-            imageFileRepository.findById(requestDto.getImageFileId())
+        if (createProductRequestDto.getImageFileId() != null) {
+            imageFileRepository.findById(createProductRequestDto.getImageFileId())
                 .ifPresent(product::updateImageFile);
         }
 
@@ -44,23 +52,18 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public GetProductListResponseDTO getProductList(
+        PageRequest pageRequest,
         String query,
-        String column,
-        String order,
-        int size,
-        int page,
         boolean active) {
-        Pageable pageable =
-            PageRequest.of(page, size, Sort.by(new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), column)));
 
         if (active) {
-            return new GetProductListResponseDTO(productRepository.findActivePageByName(query, pageable));
+            return new GetProductListResponseDTO(productRepository.findActivePageByName(query, pageRequest));
         }
-        return new GetProductListResponseDTO(productRepository.findPageByName(query, pageable));
+        return new GetProductListResponseDTO(productRepository.findPageByName(query, pageRequest));
     }
 
     @Transactional(readOnly = true)
-    public ProductResponseDTO getProductInfo(long productId) {
+    public ProductResponseDTO getProductById(long productId) {
         Product product = productRepository.findById(productId)
             .orElseThrow(() -> new NotFoundException("not exist data"));
 
@@ -68,7 +71,7 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public ProductResponseDTO getProductInfoByBarcode(String barcode) {
+    public ProductResponseDTO getProductByBarcode(String barcode) {
         Product product = productRepository.findByBarcode(barcode)
             .orElseThrow(() -> new NotFoundException("not exist data"));
 
@@ -76,7 +79,7 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public GetRecordListResponseDTO readProductRecord(long productId, int year, int month) {
+    public GetRecordListResponseDTO gerProductRecord(long productId, int year, int month) {
         LocalDate fromDate = LocalDateCreator.getDateOfFirstDay(year, month);
         LocalDate toDate = LocalDateCreator.getDateOfLastDay(year, month);
 
@@ -89,27 +92,62 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductResponseDTO updateProduct(long productId, UpdateProductRequestDTO requestDTO) {
-        Product updatedProduct = productRepository.findById(productId)
+    public ProductResponseDTO updateProduct(long productId, UpdateProductRequestDTO updateProductRequestDTO) {
+        Product product = productRepository.findById(productId)
             .orElseThrow(() -> new NotFoundException("Not Exist product."));
 
-        updatedProduct.updateInfo(requestDTO);
+        product.updateInfo(updateProductRequestDTO);
 
-        if (requestDTO.getImageFileId() != null) {
-            imageFileRepository.findById(requestDTO.getImageFileId())
-                .ifPresent(updatedProduct::updateImageFile);
+        if (updateProductRequestDTO.getImageFileId() != null) {
+            imageFileRepository.findById(updateProductRequestDTO.getImageFileId())
+                .ifPresent(product::updateImageFile);
         }
 
-        productRepository.save(updatedProduct);
+        productRepository.save(product);
 
-        return new ProductResponseDTO(updatedProduct);
+        return new ProductResponseDTO(product);
     }
 
     @Transactional
     public MessageResponseDTO deleteProduct(long productId) {
-        productRepository.findById(productId)
-            .ifPresent(Product::delete);
+        Product product = productRepository.findById(productId)
+            .orElseThrow(() -> new NotFoundException("Not Found Product"));
 
-        return new MessageResponseDTO(true, "deleted");
+        productRepository.delete(product);
+
+        return MessageResponseDTO.ofSuccess("success");
+    }
+
+    @Transactional
+    public ImageFileResponseDTO saveImage(MultipartFile image) throws IOException {
+        String uuid = UUID.randomUUID().toString();
+        String originalUrl = imageFileClient.saveOriginal(image, uuid);
+        String thumbnailUrl = imageFileClient.saveThumbnail(image, uuid);
+
+        ImageFile imageFile = ImageFile.builder()
+            .originalUrl(originalUrl)
+            .thumbnailUrl(thumbnailUrl)
+            .build();
+        imageFileRepository.save(imageFile);
+
+        return new ImageFileResponseDTO(imageFile);
+    }
+
+    @Transactional
+    public byte[] getImage(long imageId, boolean isThumbnail) {
+        ImageFile imageFile = imageFileRepository.findById(imageId)
+            .orElseThrow(() -> new NotFoundException("NotFoundImage"));
+
+        String imageFileUrl = isThumbnail
+            ? imageFile.getThumbnailUrl()
+            : imageFile.getOriginalUrl();
+
+        File file = new File(imageFileUrl);
+
+        try (FileInputStream fileInputStream = new FileInputStream(file)) {
+            return fileInputStream.readAllBytes();
+        } catch (IOException e) {
+            return null;
+        }
     }
 }

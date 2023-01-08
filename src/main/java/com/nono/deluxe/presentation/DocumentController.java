@@ -8,8 +8,12 @@ import com.nono.deluxe.presentation.dto.document.CreateDocumentRequestDTO;
 import com.nono.deluxe.presentation.dto.document.DocumentResponseDTO;
 import com.nono.deluxe.presentation.dto.document.ReadDocumentListResponseDTO;
 import com.nono.deluxe.presentation.dto.document.UpdateDocumentRequestDTO;
+import java.io.IOException;
+import javax.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -37,28 +41,27 @@ public class DocumentController {
     @PostMapping("")
     public ResponseEntity<Object> createDocument(
         @RequestHeader(name = "Authorization") String token,
-        @Validated @RequestBody CreateDocumentRequestDTO requestDto) {
-
+        @Validated @RequestBody CreateDocumentRequestDTO createDocumentRequestDTO) {
         long userId = authService.validateTokenOverParticipantRole(token);
 
-        DocumentResponseDTO responseDto = documentService.createDocument(userId, requestDto);
-
-        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(documentService.createDocument(userId, createDocumentRequestDTO));
     }
 
     @GetMapping("/{documentId}")
-    public ResponseEntity<DocumentResponseDTO> readDocument(
+    public ResponseEntity<DocumentResponseDTO> getDocumentById(
         @RequestHeader(name = "Authorization") String token,
         @PathVariable(name = "documentId") long documentId) {
         authService.validateTokenOverParticipantRole(token);
 
-        DocumentResponseDTO responseDto = documentService.readDocument(documentId);
-
-        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(documentService.getDocument(documentId));
     }
 
     @GetMapping("")
-    public ResponseEntity<ReadDocumentListResponseDTO> readDocumentList(
+    public ResponseEntity<ReadDocumentListResponseDTO> getDocumentList(
         @RequestHeader(name = "Authorization") String token,
         @RequestParam(required = false, defaultValue = "") String query,
         @RequestParam(required = false, defaultValue = "date") String column,
@@ -69,22 +72,28 @@ public class DocumentController {
         @RequestParam(required = false, defaultValue = "0") int month) {
         authService.validateTokenOverParticipantRole(token);
 
-        ReadDocumentListResponseDTO responseDto =
-            documentService.readDocumentList(query, column, order, size, (page - 1), year, month);
+        PageRequest pageRequest = PageRequest.of(
+            page - 1,
+            size,
+            Sort.by(
+                new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), column),
+                new Sort.Order(Sort.Direction.ASC, "createdAt")));
 
-        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(documentService.getDocumentList(pageRequest, query, year, month));
     }
 
     @PutMapping("/{documentId}")
     public ResponseEntity<DocumentResponseDTO> updateDocument(
         @RequestHeader(name = "Authorization") String token,
         @PathVariable(name = "documentId") long documentId,
-        @Validated @RequestBody UpdateDocumentRequestDTO requestDto) {
+        @Validated @RequestBody UpdateDocumentRequestDTO updateDocumentRequestDTO) {
         authService.validateTokenOverParticipantRole(token);
 
-        DocumentResponseDTO responseDto = documentService.updateDocument(documentId, requestDto);
-
-        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(documentService.updateDocument(documentId, updateDocumentRequestDTO));
     }
 
     @DeleteMapping("/{documentId}")
@@ -93,23 +102,35 @@ public class DocumentController {
         @PathVariable(name = "documentId") long documentId) {
         authService.validateTokenOverAdminRole(token);
 
-        MessageResponseDTO responseDto = documentService.deleteDocument(documentId);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(documentService.deleteDocument(documentId));
+    }
 
-        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+    @GetMapping("/excel")
+    public ResponseEntity<MessageResponseDTO> postMonthlyDocument(
+        @RequestHeader(name = "Authorization") String token,
+        @RequestParam int year,
+        @RequestParam int month)
+        throws IOException, MessagingException {
+        long userId = authService.validateTokenOverManagerRole(token);
+
+        documentService.postMonthDocument(userId, year, month);
+
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(MessageResponseDTO.ofSuccess("request success"));
     }
 
     /**
-     * 어떤 값들을 입력 받아서 처리할지 기준 필요. full Data, 월별 데이터, 일별 데이터, 상품별 데이터 등 document 에서는 full, 월별, 일별 데이터를 처리하게 될 수 있음.
+     * TODO live 서버에서 삭제 할 것!!!
      */
-    @GetMapping("/{documentId}/xls")
-    public void exportDocumentToExcel() {
-
-    }
-
     @PostMapping("/legacy/trans")
     public ResponseEntity<String> transLegacyDocument() {
         legacyDocumentService.importLegacyDocument();
 
-        return ResponseEntity.status(HttpStatus.OK).body("SUCCESS");
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body("SUCCESS");
     }
 }

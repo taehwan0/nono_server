@@ -1,10 +1,10 @@
 package com.nono.deluxe.application.service;
 
-import com.amazonaws.services.kms.model.NotFoundException;
 import com.nono.deluxe.application.client.MailClient;
 import com.nono.deluxe.domain.user.Role;
 import com.nono.deluxe.domain.user.User;
 import com.nono.deluxe.domain.user.UserRepository;
+import com.nono.deluxe.exception.NotFoundException;
 import com.nono.deluxe.presentation.dto.MessageResponseDTO;
 import com.nono.deluxe.presentation.dto.user.CreateParticipantRequestDTO;
 import com.nono.deluxe.presentation.dto.user.DeleteMeRequestDTO;
@@ -15,8 +15,6 @@ import com.nono.deluxe.presentation.dto.user.UserResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,21 +39,15 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public GetUserListResponseDTO getUserList(String query, String column, String order, int size, int page) {
-        if (column.equals("userName")) {
-            column = "name";
-        }
+    public GetUserListResponseDTO getUserList(PageRequest pageRequest, String query) {
 
-        Pageable pageable =
-            PageRequest.of(page, size, Sort.by(new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), column)));
-
-        Page<User> userPage = userRepository.findPageByName(query, pageable);
+        Page<User> userPage = userRepository.findPageByName(query, pageRequest);
 
         return new GetUserListResponseDTO(userPage);
     }
 
     @Transactional(readOnly = true)
-    public UserResponseDTO getUser(long userCode) {
+    public UserResponseDTO getUserById(long userCode) {
         User user = userRepository.findById(userCode)
             .orElseThrow(() -> new NotFoundException("Not exist data."));
 
@@ -83,7 +75,7 @@ public class UserService {
 
         user.delete();
 
-        return new MessageResponseDTO(true, "Deleted");
+        return MessageResponseDTO.ofSuccess("deleted");
     }
 
     @Transactional

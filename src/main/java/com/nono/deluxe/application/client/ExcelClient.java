@@ -21,11 +21,11 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 @EnableAsync
 @RequiredArgsConstructor
-@Service
+@Component
 public class ExcelClient {
 
     private static final int INDEX_OF_NAME = 0;

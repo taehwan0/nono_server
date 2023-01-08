@@ -1,10 +1,10 @@
 package com.nono.deluxe.application.service;
 
-import com.amazonaws.services.kms.model.NotFoundException;
 import com.nono.deluxe.domain.notice.Notice;
 import com.nono.deluxe.domain.notice.NoticeRepository;
 import com.nono.deluxe.domain.user.User;
 import com.nono.deluxe.domain.user.UserRepository;
+import com.nono.deluxe.exception.NotFoundException;
 import com.nono.deluxe.presentation.dto.MessageResponseDTO;
 import com.nono.deluxe.presentation.dto.notice.CreateNoticeRequestDTO;
 import com.nono.deluxe.presentation.dto.notice.NoticeResponseDTO;
@@ -13,8 +13,6 @@ import com.nono.deluxe.presentation.dto.notice.UpdateNoticeRequestDTO;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,25 +33,20 @@ public class NoticeService {
     }
 
     @Transactional(readOnly = true)
-    public ReadNoticeListResponseDTO readNoticeList(
+    public ReadNoticeListResponseDTO getNoticeList(
+        PageRequest pageRequest,
         String query,
-        String column,
-        String order,
-        int size,
-        int page,
         boolean focus,
         boolean content) {
-        Pageable limit = PageRequest.of(page, size,
-            Sort.by(new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), column)));
 
         if (focus) {
-            return new ReadNoticeListResponseDTO(noticeRepository.findFocusPageByTitle(query, limit), content);
+            return new ReadNoticeListResponseDTO(noticeRepository.findFocusPageByTitle(query, pageRequest), content);
         }
-        return new ReadNoticeListResponseDTO(noticeRepository.findPageByTitle(query, limit), content);
+        return new ReadNoticeListResponseDTO(noticeRepository.findPageByTitle(query, pageRequest), content);
     }
 
     @Transactional(readOnly = true)
-    public NoticeResponseDTO readNotice(long noticeId) {
+    public NoticeResponseDTO getNoticeById(long noticeId) {
         Notice notice = noticeRepository.findById(noticeId)
             .orElseThrow(() -> new NotFoundException("Not Found Notice"));
 
@@ -61,7 +54,7 @@ public class NoticeService {
     }
 
     @Transactional(readOnly = true)
-    public NoticeResponseDTO readNoticeRecent() {
+    public NoticeResponseDTO getRecentNotice() {
         Optional<Notice> notice = noticeRepository.findRecent();
 
         return notice.map(NoticeResponseDTO::new).orElseGet(NoticeResponseDTO::new);
@@ -72,14 +65,14 @@ public class NoticeService {
     saveAndFlush 로 명시적인 저장을 하면 @LastModifiedAt 이 정상적으로 동작함
      */
     @Transactional
-    public NoticeResponseDTO updateNotice(long noticeId, UpdateNoticeRequestDTO requestDto) {
+    public NoticeResponseDTO updateNotice(long noticeId, UpdateNoticeRequestDTO updateNoticeRequestDTO) {
         Notice notice = noticeRepository.findById(noticeId)
             .orElseThrow(() -> new NotFoundException("Not Found Notice"));
 
         notice.update(
-            requestDto.getTitle(),
-            requestDto.getContent(),
-            requestDto.isFocus()
+            updateNoticeRequestDTO.getTitle(),
+            updateNoticeRequestDTO.getContent(),
+            updateNoticeRequestDTO.isFocus()
         );
 
         noticeRepository.saveAndFlush(notice);
@@ -94,6 +87,6 @@ public class NoticeService {
 
         noticeRepository.delete(notice);
 
-        return new MessageResponseDTO(true, "deleted");
+        return MessageResponseDTO.ofSuccess("deleted");
     }
 }

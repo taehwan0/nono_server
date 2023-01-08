@@ -1,6 +1,5 @@
 package com.nono.deluxe.application.service;
 
-import com.amazonaws.services.kms.model.NotFoundException;
 import com.nono.deluxe.domain.company.Company;
 import com.nono.deluxe.domain.company.CompanyRepository;
 import com.nono.deluxe.domain.document.Document;
@@ -15,6 +14,7 @@ import com.nono.deluxe.domain.record.legacy.LegacyRecord;
 import com.nono.deluxe.domain.record.legacy.LegacyRecordRepository;
 import com.nono.deluxe.domain.user.User;
 import com.nono.deluxe.domain.user.UserRepository;
+import com.nono.deluxe.exception.NotFoundException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

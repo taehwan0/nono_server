@@ -1,6 +1,5 @@
 package com.nono.deluxe.presentation.dto.company;
 
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import lombok.Getter;
@@ -17,6 +16,6 @@ public class UpdateCompanyRequestDTO {
     @Size(max = 30)
     private String category;
 
-    @NotBlank
+    @NotNull
     private boolean active;
 }
