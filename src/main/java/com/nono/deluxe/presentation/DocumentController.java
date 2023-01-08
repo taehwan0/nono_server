@@ -107,7 +107,7 @@ public class DocumentController {
             .body(documentService.deleteDocument(documentId));
     }
 
-    @GetMapping(value = "/excel")
+    @GetMapping("/excel")
     public ResponseEntity<MessageResponseDTO> postMonthlyDocument(
         @RequestHeader(name = "Authorization") String token,
         @RequestParam int year,
