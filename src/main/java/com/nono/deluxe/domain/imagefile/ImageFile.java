@@ -1,6 +1,5 @@
 package com.nono.deluxe.domain.imagefile;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -18,14 +17,28 @@ public class ImageFile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(nullable = false)
     private String originalUrl;
 
-    @Column(nullable = false)
     private String thumbnailUrl;
 
+    private String originalPath;
+
+    private String thumbnailPath;
+
     @Builder
-    public ImageFile(String originalUrl, String thumbnailUrl) {
+    public ImageFile(String originalUrl, String thumbnailUrl, String originalPath, String thumbnailPath) {
+        this.originalUrl = originalUrl;
+        this.thumbnailUrl = thumbnailUrl;
+        this.originalPath = originalPath;
+        this.thumbnailPath = thumbnailPath;
+    }
+
+    public void updatePath(String originalPath, String thumbnailPath) {
+        this.originalPath = originalPath;
+        this.thumbnailPath = thumbnailPath;
+    }
+
+    public void updateUrl(String originalUrl, String thumbnailUrl) {
         this.originalUrl = originalUrl;
         this.thumbnailUrl = thumbnailUrl;
     }

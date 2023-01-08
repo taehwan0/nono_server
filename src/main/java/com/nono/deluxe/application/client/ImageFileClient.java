@@ -24,10 +24,17 @@ public class ImageFileClient {
     private static final int THUMBNAIL_IMAGE_HEIGHT = 800;
     private static final double THUMBNAIL_OUTPUT_QUALITY = 0.7;
 
-    private final String localPath;
+    private final String LOCAL_PATH;
+    private final String URL_PREFIX;
+    private final String THUMBNAIL_URL_SUFFIX;
 
-    public ImageFileClient(@Value("${file.path}") String localPath) {
-        this.localPath = localPath;
+    public ImageFileClient(
+        @Value("${image.path}") String LOCAL_PATH,
+        @Value("${image.prefix}") String URL_PREFIX,
+        @Value("${image.thumbnail.suffix}") String THUMBNAIL_URL_SUFFIX) {
+        this.LOCAL_PATH = LOCAL_PATH;
+        this.URL_PREFIX = URL_PREFIX;
+        this.THUMBNAIL_URL_SUFFIX = THUMBNAIL_URL_SUFFIX;
     }
 
     public String saveOriginal(MultipartFile imageFile, String fileName) throws IOException {
@@ -35,7 +42,7 @@ public class ImageFileClient {
 
         BufferedImage bufferedImage = ImageIO.read(imageFile.getInputStream());
 
-        String filePath = localPath + fileName + SUFFIX;
+        String filePath = LOCAL_PATH + fileName + SUFFIX;
         save(convertToOriginal(bufferedImage), filePath);
 
         return filePath;
@@ -46,7 +53,7 @@ public class ImageFileClient {
 
         BufferedImage bufferedImage = ImageIO.read(imageFile.getInputStream());
 
-        String filePath = localPath + fileName + THUMBNAIL_TAIL + SUFFIX;
+        String filePath = LOCAL_PATH + fileName + THUMBNAIL_TAIL + SUFFIX;
         save(convertToThumbnail(bufferedImage), filePath);
 
         return filePath;
@@ -83,5 +90,12 @@ public class ImageFileClient {
         if (file.createNewFile()) {
             ImageIO.write(convertToThumbnail(bufferedImage), EXTENSION, file);
         }
+    }
+
+    public String createImageFileUrl(long imageFileId, boolean isThumbnail) {
+        if (isThumbnail) {
+            return URL_PREFIX + imageFileId + THUMBNAIL_URL_SUFFIX;
+        }
+        return URL_PREFIX + imageFileId;
     }
 }

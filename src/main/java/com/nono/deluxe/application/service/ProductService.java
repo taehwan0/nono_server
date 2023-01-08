@@ -32,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class ProductService {
 
+
     private final ImageFileClient imageFileClient;
 
     private final ProductRepository productRepository;
@@ -121,14 +122,20 @@ public class ProductService {
     @Transactional
     public ImageFileResponseDTO saveImage(MultipartFile image) throws IOException {
         String uuid = UUID.randomUUID().toString();
-        String originalUrl = imageFileClient.saveOriginal(image, uuid);
-        String thumbnailUrl = imageFileClient.saveThumbnail(image, uuid);
+        String originalPath = imageFileClient.saveOriginal(image, uuid);
+        String thumbnailPath = imageFileClient.saveThumbnail(image, uuid);
 
+        // TODO 추후에 DB에 로컬 path 저장 로직 만들기! (현재는 핫 픽스 임시 데이터..ㅠ)
         ImageFile imageFile = ImageFile.builder()
-            .originalUrl(originalUrl)
-            .thumbnailUrl(thumbnailUrl)
+            .originalPath(originalPath)
+            .thumbnailPath(thumbnailPath)
             .build();
         imageFileRepository.save(imageFile);
+
+        String originalUrl = imageFileClient.createImageFileUrl(imageFile.getId(), false);
+        String thumbnailUrl = imageFileClient.createImageFileUrl(imageFile.getId(), true);
+
+        imageFile.updateUrl(originalUrl, thumbnailUrl);
 
         return new ImageFileResponseDTO(imageFile);
     }
@@ -138,11 +145,11 @@ public class ProductService {
         ImageFile imageFile = imageFileRepository.findById(imageId)
             .orElseThrow(() -> new NotFoundException("NotFoundImage"));
 
-        String imageFileUrl = isThumbnail
-            ? imageFile.getThumbnailUrl()
-            : imageFile.getOriginalUrl();
+        String imageFilePath = isThumbnail
+            ? imageFile.getThumbnailPath()
+            : imageFile.getOriginalPath();
 
-        File file = new File(imageFileUrl);
+        File file = new File(imageFilePath);
 
         try (FileInputStream fileInputStream = new FileInputStream(file)) {
             return fileInputStream.readAllBytes();
