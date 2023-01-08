@@ -2,7 +2,6 @@ package com.nono.deluxe.domain.product;
 
 import com.nono.deluxe.domain.imagefile.ImageFile;
 import com.nono.deluxe.presentation.dto.product.UpdateProductRequestDTO;
-import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -27,10 +26,10 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(nullable = false, unique = true, length = 20)
+    @Column(unique = true, length = 20)
     private String productCode;
 
-    @Column(nullable = false, length = 30)
+    @Column(length = 30)
     private String name;
 
     @Column(nullable = true, length = 255)
@@ -136,7 +135,8 @@ public class Product {
     public void delete() {
         this.deleted = true;
         this.active = false;
-        this.productCode = UUID.randomUUID().toString().substring(0, 18);
+        this.productCode = null;
         this.barcode = null;
+        this.name = null;
     }
 }

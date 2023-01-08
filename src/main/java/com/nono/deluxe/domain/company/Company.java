@@ -1,6 +1,5 @@
 package com.nono.deluxe.domain.company;
 
-import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -21,7 +20,7 @@ public class Company {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(nullable = false, unique = true, length = 30)
+    @Column(unique = true, length = 30)
     private String name;
 
     @Enumerated(EnumType.STRING)
@@ -58,6 +57,6 @@ public class Company {
     public void delete() {
         this.deleted = true;
         this.active = false;
-        this.name = UUID.randomUUID().toString().substring(0, 18);
+        this.name = null;
     }
 }

@@ -22,7 +22,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(nullable = false, length = 20)
+    @Column(length = 20)
     private String name;
 
     @Column(nullable = false, unique = true)
@@ -72,7 +72,7 @@ public class User {
     public void delete() {
         this.deleted = true;
         this.active = false;
-        this.name = UUID.randomUUID().toString().substring(0, 18);
+        this.name = null;
     }
 
     public void updateByAdmin(String name, boolean active) {
