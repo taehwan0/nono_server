@@ -18,8 +18,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT p FROM Product p WHERE p.barcode LIKE :barcode AND p.deleted = false")
     Optional<Product> findByBarcode(@Param("barcode") String barcode);
 
-    // delete 된 상품도 포함해야 함
-    @Query("SELECT p FROM Product p WHERE p.productCode LIKE (:productCode)")
+    // delete 된 상품 미포함!!
+    @Query("SELECT p FROM Product p WHERE p.productCode LIKE (:productCode) AND p.deleted = false")
     Optional<Product> findByProductCode(@Param("productCode") String productCode);
 
     @Query("SELECT p "

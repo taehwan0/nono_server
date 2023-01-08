@@ -45,7 +45,9 @@ public class LegacyDocumentService {
 
             List<LegacyRecord> legacyRecords = legacyRecordRepository.findAllByDocsCode(legacyDocument.getDocsCode());
 
+            // 삭제된 상품은 제외시킴!
             legacyRecords.stream()
+                .filter(legacyRecord -> productRepository.findByProductCode(legacyRecord.getPrdCode()).isPresent())
                 .map(record -> transLegacyRecord(record, document))
                 .forEach(recordRepository::save);
 
