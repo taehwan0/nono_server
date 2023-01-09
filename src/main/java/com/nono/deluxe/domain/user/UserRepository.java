@@ -11,8 +11,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    @Query("SELECT u FROM User u WHERE u.id = :userCode AND u.deleted = false")
-    Optional<User> findById(@Param("userCode") long userCode);
+    @Query("SELECT u FROM User u WHERE u.id = :userId AND u.deleted = false")
+    Optional<User> findById(@Param("userId") long userId);
 
     @Query("SELECT u FROM User u WHERE u.name LIKE (:name) AND u.deleted = false")
     Optional<User> findByName(@Param("name") String name);

@@ -1,6 +1,5 @@
 package com.nono.deluxe.application.service;
 
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.nono.deluxe.application.client.MailClient;
 import com.nono.deluxe.application.client.TokenClient;
 import com.nono.deluxe.domain.authcode.AuthCode;
@@ -92,6 +91,10 @@ public class AuthService {
 
         User user = userRepository.findById(userCode)
             .orElseThrow(() -> new RuntimeException("Not Found User"));
+
+        if (!user.isActive()) {
+            throw new IllegalStateException("Not Active User");
+        }
 
         String verifyCode = createRandomString("1234567890", 6);
 
@@ -298,19 +301,26 @@ public class AuthService {
         checkEmailRepository.deleteAll(checkEmailList);
     }
 
-    public DecodedJWT decodeJwt(String token) {
-        return tokenClient.decodeAccessJwtByRequestHeader(token);
-    }
-
     public long validateTokenOverParticipantRole(String token) {
-        return tokenClient.validateParticipantToken(token);
+        return validateUserById(tokenClient.validateParticipantToken(token));
     }
 
     public long validateTokenOverManagerRole(String token) {
-        return tokenClient.validateManagerToken(token);
+        return validateUserById(tokenClient.validateManagerToken(token));
     }
 
     public long validateTokenOverAdminRole(String token) {
-        return tokenClient.validateAdminToken(token);
+        return validateUserById(tokenClient.validateAdminToken(token));
+    }
+
+    private long validateUserById(long userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new NotFoundException("Not Found User"));
+
+        if (!user.isActive()) {
+            throw new IllegalStateException("Not Active User");
+        }
+
+        return userId;
     }
 }

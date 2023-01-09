@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class TokenClient {
 
+    private static final String TOKEN_TYPE = "bearer";
     private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000L * 60 * 60 * 2;
     private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000L * 60 * 60 * 24 * 30;
 
@@ -38,17 +39,19 @@ public class TokenClient {
      * access Token 유효시간 2시간, refresh Token 유효시간 30일
      */
     public TokenResponseDTO createToken(User user) {
+        if (!user.isActive()) {
+            throw new IllegalStateException("Not Active User");
+        }
         String accessToken = createAccessToken(user.getName(), user.getId(), user.getRole());
         String refreshToken = createRefreshToken(user.getName(), user.getId(), user.getRole());
 
-        TokenResponseDTO responseDTO = new TokenResponseDTO();
-        responseDTO.setToken_type("bearer");
-        responseDTO.setAccess_token(accessToken);
-        responseDTO.setRefresh_token(refreshToken);
-        responseDTO.setExpires_in(decodeJwt(accessToken, accessKey).getExpiresAt().getTime());
-        responseDTO.setRefresh_token_expires_in(decodeJwt(refreshToken, refreshKey).getExpiresAt().getTime());
-
-        return responseDTO;
+        return new TokenResponseDTO(
+            TOKEN_TYPE,
+            accessToken,
+            decodeJwt(accessToken, accessKey).getExpiresAt().getTime(),
+            refreshToken,
+            decodeJwt(refreshToken, refreshKey).getExpiresAt().getTime()
+        );
     }
 
     private String createAccessToken(String username, long userId, Role userRole) {
