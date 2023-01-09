@@ -21,6 +21,14 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
 
     @Query("SELECT d "
         + "FROM Document d "
+        + "WHERE d.date BETWEEN :fromDate AND :toDate")
+    Page<Document> findPageBetween(
+        @Param("fromDate") LocalDate fromDate,
+        @Param("toDate") LocalDate toDate,
+        Pageable pageable);
+
+    @Query("SELECT d "
+        + "FROM Document d "
         + "WHERE d.company.id = :companyId "
         + "AND d.date BETWEEN :fromMonth AND :toMonth")
     Page<Document> findPageByCompanyId(

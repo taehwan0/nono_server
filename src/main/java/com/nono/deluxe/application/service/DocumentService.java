@@ -31,7 +31,6 @@ import java.util.Optional;
 import javax.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -85,18 +84,21 @@ public class DocumentService {
         Document document = documentRepository.findById(documentId)
             .orElseThrow(() -> new NotFoundException("Not Found Document"));
 
-        return new DocumentResponseDTO(document);
+        return new DocumentResponseDTO(document, true);
     }
 
     @Transactional(readOnly = true)
-    public ReadDocumentListResponseDTO getDocumentList(PageRequest pageRequest, String query, int year, int month) {
+    public ReadDocumentListResponseDTO getDocumentList(
+        PageRequest pageRequest, String query, int year, int month, boolean withRecord) {
         LocalDate fromDate = LocalDateCreator.getDateOfFirstDay(year, month);
         LocalDate toDate = LocalDateCreator.getDateOfLastDay(year, month);
 
-        // 테스트 해보기
-        Page<Document> documentPage = documentRepository.findPageByCompanyName(query, fromDate, toDate, pageRequest);
-
-        return new ReadDocumentListResponseDTO(documentPage);
+        if (query.equals("")) {
+            return new ReadDocumentListResponseDTO(
+                documentRepository.findPageBetween(fromDate, toDate, pageRequest), withRecord);
+        }
+        return new ReadDocumentListResponseDTO(
+            documentRepository.findPageByCompanyName(query, fromDate, toDate, pageRequest), withRecord);
     }
 
     // TODO: 로직 확인 필요!
@@ -163,7 +165,7 @@ public class DocumentService {
 
         document.setUpdatedAt(LocalDateTime.now());
 
-        return new DocumentResponseDTO(document);
+        return new DocumentResponseDTO(document, true);
     }
 
     @Transactional

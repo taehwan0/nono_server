@@ -16,32 +16,43 @@ public class DocumentResponseDTO {
     long documentId;
     LocalDate date;
     DocumentType type;
+    LocalDateTime createdAt;
+    LocalDateTime updatedAt;
+    long companyId;
     String companyName;
+    long writerId;
     String writer;
     long recordCount;
     double totalPrice;
-    LocalDateTime createdAt;
-    LocalDateTime updatedAt;
 
     List<RecordResponseDTO> recordList = new ArrayList<>();
 
-    public DocumentResponseDTO(Document document) {
+    public DocumentResponseDTO(Document document, boolean withRecord) {
         this.documentId = document.getId();
         this.date = document.getDate();
         this.type = document.getType();
-        this.companyName = document.getCompany().getName();
-        this.writer = document.getWriter().getName();
         this.createdAt = document.getCreatedAt();
         this.updatedAt = document.getUpdatedAt();
 
-        for (Record record : document.getRecords()) {
-            this.recordList.add(new RecordResponseDTO(record));
-        }
+        this.writerId = document.getWriter().getId();
+        this.writer = document.getWriter().getName();
 
-        this.recordCount = recordList.size();
-        this.totalPrice = recordList.stream()
-            .mapToDouble(record -> record.getPrice() * record.getQuantity())
-            .sum();
+        this.companyId = document.getCompany().getId();
+        this.companyName = document.getCompany().getName();
+
+        if (withRecord) {
+            for (Record record : document.getRecords()) {
+                this.recordList.add(new RecordResponseDTO(record));
+            }
+
+            this.recordCount = recordList.size();
+            this.totalPrice = recordList.stream()
+                .mapToDouble(record -> record.getPrice() * record.getQuantity())
+                .sum();
+        } else {
+            this.recordCount = 0;
+            this.totalPrice = 0;
+        }
     }
 
     public DocumentResponseDTO(Document document, List<Record> records) {

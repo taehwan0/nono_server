@@ -77,12 +77,17 @@ public class CompanyService {
         PageRequest pageRequest,
         long companyId,
         int year,
-        int month) {
+        int month,
+        boolean withRecord) {
+        companyRepository.findById(companyId)
+            .orElseThrow(() -> new NotFoundException("Not Found Company"));
+
         LocalDate fromDate = LocalDateCreator.getDateOfFirstDay(year, month);
         LocalDate toDate = LocalDateCreator.getDateOfLastDay(year, month);
 
         return new ReadDocumentListResponseDTO(
-            documentRepository.findPageByCompanyId(companyId, fromDate, toDate, pageRequest));
+            documentRepository.findPageByCompanyId(companyId, fromDate, toDate, pageRequest)
+            , withRecord);
     }
 
     @Transactional

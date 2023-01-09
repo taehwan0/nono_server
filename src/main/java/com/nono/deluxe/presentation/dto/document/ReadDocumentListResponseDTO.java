@@ -13,10 +13,10 @@ public class ReadDocumentListResponseDTO {
     private Meta meta;
     private List<DocumentResponseDTO> documentList = new ArrayList<>();
 
-    public ReadDocumentListResponseDTO(Page<Document> documentPage) {
+    public ReadDocumentListResponseDTO(Page<Document> documentPage, boolean withRecord) {
         List<Document> documentList = documentPage.getContent();
         documentList.forEach(document -> {
-            this.documentList.add(new DocumentResponseDTO(document));
+            this.documentList.add(new DocumentResponseDTO(document, withRecord));
         });
         this.meta = new Meta(
             documentPage.getPageable().getPageNumber() + 1,

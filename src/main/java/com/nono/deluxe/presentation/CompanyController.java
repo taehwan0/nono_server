@@ -126,7 +126,8 @@ public class CompanyController {
         @RequestParam(required = false, defaultValue = "10") int size,
         @RequestParam(required = false, defaultValue = "1") int page,
         @RequestParam(required = false, defaultValue = "0") int year,
-        @RequestParam(required = false, defaultValue = "0") int month) {
+        @RequestParam(required = false, defaultValue = "0") int month,
+        @RequestParam(required = false, defaultValue = "true") boolean record) {
         authService.validateTokenOverParticipantRole(token);
 
         PageRequest pageRequest = PageRequest.of(
@@ -138,7 +139,7 @@ public class CompanyController {
 
         return ResponseEntity
             .status(HttpStatus.OK)
-            .body(companyService.getCompanyDocument(pageRequest, companyId, year, month));
+            .body(companyService.getCompanyDocument(pageRequest, companyId, year, month, record));
     }
 
     @PutMapping("/{companyId}")

@@ -39,7 +39,7 @@ public class DocumentController {
     private final LegacyDocumentService legacyDocumentService;
 
     @PostMapping("")
-    public ResponseEntity<Object> createDocument(
+    public ResponseEntity<DocumentResponseDTO> createDocument(
         @RequestHeader(name = "Authorization") String token,
         @Validated @RequestBody CreateDocumentRequestDTO createDocumentRequestDTO) {
         long userId = authService.validateTokenOverParticipantRole(token);
@@ -69,7 +69,8 @@ public class DocumentController {
         @RequestParam(required = false, defaultValue = "10") int size,
         @RequestParam(required = false, defaultValue = "1") int page,
         @RequestParam(required = false, defaultValue = "0") int year,
-        @RequestParam(required = false, defaultValue = "0") int month) {
+        @RequestParam(required = false, defaultValue = "0") int month,
+        @RequestParam(required = false, defaultValue = "true") boolean record) {
         authService.validateTokenOverParticipantRole(token);
 
         PageRequest pageRequest = PageRequest.of(
@@ -81,7 +82,7 @@ public class DocumentController {
 
         return ResponseEntity
             .status(HttpStatus.OK)
-            .body(documentService.getDocumentList(pageRequest, query, year, month));
+            .body(documentService.getDocumentList(pageRequest, query, year, month, record));
     }
 
     @PutMapping("/{documentId}")

@@ -13,6 +13,7 @@ public class NoticeResponseDTO {
     private Boolean focus;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Long writerId;
     private String writer;
 
     public NoticeResponseDTO() {
@@ -25,6 +26,7 @@ public class NoticeResponseDTO {
         this.focus = notice.isFocus();
         this.createdAt = notice.getCreatedAt();
         this.updatedAt = notice.getUpdatedAt();
+        this.writerId = notice.getWriter().getId();
         this.writer = notice.getWriter().getName();
     }
 
@@ -34,6 +36,7 @@ public class NoticeResponseDTO {
         this.focus = notice.isFocus();
         this.createdAt = notice.getCreatedAt();
         this.updatedAt = notice.getUpdatedAt();
+        this.writerId = notice.getWriter().getId();
         this.writer = notice.getWriter().getName();
 
         if (content) {
