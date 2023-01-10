@@ -2,6 +2,8 @@ package com.nono.deluxe.presentation;
 
 import com.nono.deluxe.application.service.AuthService;
 import com.nono.deluxe.application.service.TempDocumentService;
+import com.nono.deluxe.configuration.annotation.Auth;
+import com.nono.deluxe.domain.user.Role;
 import com.nono.deluxe.presentation.dto.MessageResponseDTO;
 import com.nono.deluxe.presentation.dto.tempdocument.CreateTempDocumentRequestDTO;
 import com.nono.deluxe.presentation.dto.tempdocument.ReadTempDocumentListResponseDTO;
@@ -34,6 +36,7 @@ public class TempDocumentController {
     private final TempDocumentService tempDocumentService;
     private final AuthService authService;
 
+    @Auth
     @PostMapping("")
     public ResponseEntity<TempDocumentResponseDTO> createTempDocument(
         @RequestHeader(name = "Authorization") String token,
@@ -45,27 +48,23 @@ public class TempDocumentController {
             .body(tempDocumentService.createDocument(userId, createTempDocumentRequestDTO));
     }
 
+    @Auth
     @GetMapping("/{documentId}")
     public ResponseEntity<TempDocumentResponseDTO> getTempDocumentById(
-        @RequestHeader(name = "Authorization") String token,
         @PathVariable(name = "documentId") long documentId) {
-        authService.validateTokenOverParticipantRole(token);
-
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(tempDocumentService.getTempDocumentById(documentId));
     }
 
+    @Auth
     @GetMapping("")
     public ResponseEntity<ReadTempDocumentListResponseDTO> getTempDocumentList(
-        @RequestHeader(name = "Authorization") String token,
         @RequestParam(required = false, defaultValue = "") String query,
         @RequestParam(required = false, defaultValue = "date") String column,
         @RequestParam(required = false, defaultValue = "DESC") String order,
         @RequestParam(required = false, defaultValue = "10") int size,
         @RequestParam(required = false, defaultValue = "1") int page) {
-        authService.validateTokenOverParticipantRole(token);
-
         PageRequest pageRequest = PageRequest.of(
             page - 1,
             size,
@@ -78,6 +77,7 @@ public class TempDocumentController {
             .body(tempDocumentService.getTempDocumentList(pageRequest, query));
     }
 
+    @Auth
     @PutMapping("/{documentId}")
     public ResponseEntity<TempDocumentResponseDTO> updateTempDocument(
         @RequestHeader(name = "Authorization") String token,
@@ -90,12 +90,9 @@ public class TempDocumentController {
             .body(tempDocumentService.updateDocument(documentId, userId, updateTempDocumentRequestDTO));
     }
 
+    @Auth(role = Role.ROLE_MANAGER)
     @DeleteMapping("/{documentId}")
-    public ResponseEntity<MessageResponseDTO> deleteTempDocument(
-        @RequestHeader(name = "Authorization") String token,
-        @PathVariable(name = "documentId") long documentId) {
-        authService.validateTokenOverManagerRole(token);
-
+    public ResponseEntity<MessageResponseDTO> deleteTempDocument(@PathVariable(name = "documentId") long documentId) {
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(tempDocumentService.deleteDocument(documentId));

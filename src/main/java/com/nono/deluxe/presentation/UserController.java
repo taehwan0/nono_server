@@ -2,6 +2,8 @@ package com.nono.deluxe.presentation;
 
 import com.nono.deluxe.application.service.AuthService;
 import com.nono.deluxe.application.service.UserService;
+import com.nono.deluxe.configuration.annotation.Auth;
+import com.nono.deluxe.domain.user.Role;
 import com.nono.deluxe.presentation.dto.MessageResponseDTO;
 import com.nono.deluxe.presentation.dto.user.CreateParticipantRequestDTO;
 import com.nono.deluxe.presentation.dto.user.DeleteMeRequestDTO;
@@ -36,27 +38,23 @@ public class UserController {
     private final UserService userService;
     private final AuthService authService;
 
+    @Auth(role = Role.ROLE_MANAGER)
     @PostMapping()
     public ResponseEntity<UserResponseDTO> createParticipant(
-        @RequestHeader(value = "Authorization") String token,
         @Validated @RequestBody CreateParticipantRequestDTO createParticipantRequestDTO) {
-        authService.validateTokenOverManagerRole(token);
-
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(userService.createParticipant(createParticipantRequestDTO));
     }
 
+    @Auth(role = Role.ROLE_MANAGER)
     @GetMapping()
     public ResponseEntity<GetUserListResponseDTO> getUserList(
-        @RequestHeader(value = "Authorization") String token,
         @RequestParam(required = false, defaultValue = "") String query,
         @RequestParam(required = false, defaultValue = "name") String column,
         @RequestParam(required = false, defaultValue = "ASC") String order,
         @RequestParam(required = false, defaultValue = "10") int size,
         @RequestParam(required = false, defaultValue = "1") int page) {
-        authService.validateTokenOverManagerRole(token);
-
         PageRequest pageRequest = PageRequest.of(
             page - 1,
             size,
@@ -67,40 +65,33 @@ public class UserController {
             .body(userService.getUserList(pageRequest, query));
     }
 
+    @Auth(role = Role.ROLE_MANAGER)
     @GetMapping("/{userId}")
-    public ResponseEntity<UserResponseDTO> getUserById(
-        @RequestHeader(value = "Authorization") String token,
-        @PathVariable(name = "userId") long userID) {
-        authService.validateTokenOverManagerRole(token);
-
+    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable(name = "userId") long userID) {
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(userService.getUserById(userID));
     }
 
+    @Auth(role = Role.ROLE_MANAGER)
     @PutMapping("/{userId}")
     public ResponseEntity<UserResponseDTO> updateUser(
-        @RequestHeader(value = "Authorization") String token,
         @PathVariable(name = "userId") long userId,
         @Validated @RequestBody UpdateUserRequestDTO updateUserRequestDTO) {
-        authService.validateTokenOverManagerRole(token);
-
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(userService.updateUser(userId, updateUserRequestDTO));
     }
 
+    @Auth(role = Role.ROLE_ADMIN)
     @DeleteMapping("/{userId}")
-    public ResponseEntity<MessageResponseDTO> deleteParticipant(
-        @RequestHeader(name = "Authorization") String token,
-        @PathVariable(name = "userId") long userId) {
-        authService.validateTokenOverAdminRole(token);
-
+    public ResponseEntity<MessageResponseDTO> deleteParticipant(@PathVariable(name = "userId") long userId) {
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(userService.deleteParticipant(userId));
     }
 
+    @Auth
     @GetMapping("/me")
     public ResponseEntity<UserResponseDTO> getMe(
         @RequestHeader(value = "Authorization") String token) {
@@ -111,6 +102,7 @@ public class UserController {
             .body(userService.getUserById(userId));
     }
 
+    @Auth
     @PutMapping("/me")
     public ResponseEntity<UserResponseDTO> updateMe(
         @RequestHeader(value = "Authorization") String token,
@@ -122,6 +114,7 @@ public class UserController {
             .body(userService.updateMe(userId, updateUserRequestDTO));
     }
 
+    @Auth(role = Role.ROLE_MANAGER)
     @PutMapping("/me/password")
     public ResponseEntity<MessageResponseDTO> updatePassword(
         @RequestHeader(value = "Authorization") String token,
@@ -133,6 +126,7 @@ public class UserController {
             .body(userService.updatePassword(userId, updatePasswordRequestDTO));
     }
 
+    @Auth(role = Role.ROLE_MANAGER)
     @DeleteMapping("/me")
     public ResponseEntity<MessageResponseDTO> deleteMe(
         @RequestHeader(value = "Authorization") String token,

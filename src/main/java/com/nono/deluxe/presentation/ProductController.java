@@ -2,6 +2,8 @@ package com.nono.deluxe.presentation;
 
 import com.nono.deluxe.application.service.AuthService;
 import com.nono.deluxe.application.service.ProductService;
+import com.nono.deluxe.configuration.annotation.Auth;
+import com.nono.deluxe.domain.user.Role;
 import com.nono.deluxe.presentation.dto.MessageResponseDTO;
 import com.nono.deluxe.presentation.dto.imagefile.ImageFileResponseDTO;
 import com.nono.deluxe.presentation.dto.product.CreateProductRequestDto;
@@ -24,7 +26,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -40,28 +41,24 @@ public class ProductController {
     private final ProductService productService;
     private final AuthService authService;
 
+    @Auth(role = Role.ROLE_MANAGER)
     @PostMapping("")
     public ResponseEntity<ProductResponseDTO> createProduct(
-        @RequestHeader(value = "Authorization") String token,
         @Validated @RequestBody CreateProductRequestDto productRequestDto) {
-        authService.validateTokenOverManagerRole(token);
-
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(productService.createProduct(productRequestDto));
     }
 
+    @Auth(role = Role.ROLE_ADMIN)
     @GetMapping("")
     public ResponseEntity<GetProductListResponseDTO> getProductList(
-        @RequestHeader(value = "Authorization") String token,
         @RequestParam(value = "query", defaultValue = "") String query,
         @RequestParam(value = "column", defaultValue = "name") String column,
         @RequestParam(value = "order", defaultValue = "asc") String order,
         @RequestParam(value = "size", defaultValue = "10") int size,
         @RequestParam(value = "page", defaultValue = "1") int page,
         @RequestParam(value = "active", defaultValue = "false") boolean active) {
-        authService.validateTokenOverParticipantRole(token);
-
         PageRequest pageRequest = PageRequest.of(page - 1,
             size,
             Sort.by(new Sort.Order(Sort.Direction.valueOf(order.toUpperCase()), column)));
@@ -71,82 +68,64 @@ public class ProductController {
             .body(productService.getProductList(pageRequest, query, active));
     }
 
+    @Auth
     @GetMapping("/{productId}")
-    public ResponseEntity<ProductResponseDTO> getProductById(
-        @RequestHeader(value = "Authorization") String token,
-        @PathVariable(name = "productId") long productId) {
-        authService.validateTokenOverParticipantRole(token);
-
+    public ResponseEntity<ProductResponseDTO> getProductById(@PathVariable(name = "productId") long productId) {
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(productService.getProductById(productId));
     }
 
-    /// Product 상세 정보 조회.
+    @Auth
     @GetMapping("/barcode/{barcode}")
-    public ResponseEntity<ProductResponseDTO> getProductByBarcode(
-        @RequestHeader(value = "Authorization") String token,
-        @PathVariable(name = "barcode") String barcode) {
-        authService.validateTokenOverParticipantRole(token);
-
+    public ResponseEntity<ProductResponseDTO> getProductByBarcode(@PathVariable(name = "barcode") String barcode) {
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(productService.getProductByBarcode(barcode));
     }
 
+    @Auth
     @GetMapping("/{productId}/record")
     public ResponseEntity<GetRecordListResponseDTO> getProductRecord(
-        @RequestHeader(value = "Authorization") String token,
         @PathVariable(name = "productId") long productId,
         @RequestParam(required = false, defaultValue = "0") int year,
         @RequestParam(required = false, defaultValue = "0") int month) {
-        authService.validateTokenOverParticipantRole(token);
-
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(productService.gerProductRecord(productId, year, month));
     }
 
+    @Auth(role = Role.ROLE_MANAGER)
     @PutMapping("/{productId}")
     public ResponseEntity<ProductResponseDTO> updateProduct(
-        @RequestHeader(value = "Authorization") String token,
         @PathVariable(name = "productId") long productId,
         @Validated @RequestBody UpdateProductRequestDTO updateProductRequestDTO) {
-        authService.validateTokenOverManagerRole(token);
-
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(productService.updateProduct(productId, updateProductRequestDTO));
     }
 
+    @Auth(role = Role.ROLE_MANAGER)
     @DeleteMapping("/{productId}")
-    public ResponseEntity<MessageResponseDTO> deleteProduct(
-        @RequestHeader(value = "Authorization") String token,
-        @PathVariable(name = "productId") long productId) {
-        authService.validateTokenOverManagerRole(token);
-
+    public ResponseEntity<MessageResponseDTO> deleteProduct(@PathVariable(name = "productId") long productId) {
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(productService.deleteProduct(productId));
     }
 
+    @Auth(role = Role.ROLE_MANAGER)
     @PostMapping("/image")
-    public ResponseEntity<ImageFileResponseDTO> saveImage(
-        @RequestHeader(name = "Authorization") String token,
-        @RequestPart MultipartFile imageFile) throws IOException {
-        authService.validateTokenOverManagerRole(token);
-
+    public ResponseEntity<ImageFileResponseDTO> saveImage(@RequestPart MultipartFile imageFile) throws IOException {
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(productService.saveImage(imageFile));
     }
 
+    @Auth
     @GetMapping("/image/{imageId}")
     public ResponseEntity<byte[]> getImage(
-        @RequestHeader(name = "Authorization") String token,
         @PathVariable(name = "imageId") long imageId,
         @RequestParam(name = "thumbnail", required = false, defaultValue = "false") boolean isThumbnail) {
-        authService.validateTokenOverParticipantRole(token);
 
         return ResponseEntity
             .status(HttpStatus.OK)

@@ -3,6 +3,8 @@ package com.nono.deluxe.presentation;
 import com.nono.deluxe.application.service.AuthService;
 import com.nono.deluxe.application.service.DocumentService;
 import com.nono.deluxe.application.service.LegacyDocumentService;
+import com.nono.deluxe.configuration.annotation.Auth;
+import com.nono.deluxe.domain.user.Role;
 import com.nono.deluxe.presentation.dto.MessageResponseDTO;
 import com.nono.deluxe.presentation.dto.document.CreateDocumentRequestDTO;
 import com.nono.deluxe.presentation.dto.document.DocumentResponseDTO;
@@ -38,6 +40,7 @@ public class DocumentController {
     private final AuthService authService;
     private final LegacyDocumentService legacyDocumentService;
 
+    @Auth
     @PostMapping("")
     public ResponseEntity<DocumentResponseDTO> createDocument(
         @RequestHeader(name = "Authorization") String token,
@@ -49,20 +52,17 @@ public class DocumentController {
             .body(documentService.createDocument(userId, createDocumentRequestDTO));
     }
 
+    @Auth
     @GetMapping("/{documentId}")
-    public ResponseEntity<DocumentResponseDTO> getDocumentById(
-        @RequestHeader(name = "Authorization") String token,
-        @PathVariable(name = "documentId") long documentId) {
-        authService.validateTokenOverParticipantRole(token);
-
+    public ResponseEntity<DocumentResponseDTO> getDocumentById(@PathVariable(name = "documentId") long documentId) {
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(documentService.getDocument(documentId));
     }
 
+    @Auth
     @GetMapping("")
     public ResponseEntity<ReadDocumentListResponseDTO> getDocumentList(
-        @RequestHeader(name = "Authorization") String token,
         @RequestParam(required = false, defaultValue = "") String query,
         @RequestParam(required = false, defaultValue = "date") String column,
         @RequestParam(required = false, defaultValue = "DESC") String order,
@@ -71,8 +71,6 @@ public class DocumentController {
         @RequestParam(required = false, defaultValue = "0") int year,
         @RequestParam(required = false, defaultValue = "0") int month,
         @RequestParam(required = false, defaultValue = "true") boolean record) {
-        authService.validateTokenOverParticipantRole(token);
-
         PageRequest pageRequest = PageRequest.of(
             page - 1,
             size,
@@ -85,29 +83,25 @@ public class DocumentController {
             .body(documentService.getDocumentList(pageRequest, query, year, month, record));
     }
 
+    @Auth
     @PutMapping("/{documentId}")
     public ResponseEntity<DocumentResponseDTO> updateDocument(
-        @RequestHeader(name = "Authorization") String token,
         @PathVariable(name = "documentId") long documentId,
         @Validated @RequestBody UpdateDocumentRequestDTO updateDocumentRequestDTO) {
-        authService.validateTokenOverParticipantRole(token);
-
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(documentService.updateDocument(documentId, updateDocumentRequestDTO));
     }
 
+    @Auth(role = Role.ROLE_ADMIN)
     @DeleteMapping("/{documentId}")
-    public ResponseEntity<MessageResponseDTO> deleteDocument(
-        @RequestHeader(name = "Authorization") String token,
-        @PathVariable(name = "documentId") long documentId) {
-        authService.validateTokenOverAdminRole(token);
-
+    public ResponseEntity<MessageResponseDTO> deleteDocument(@PathVariable(name = "documentId") long documentId) {
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(documentService.deleteDocument(documentId));
     }
 
+    @Auth(role = Role.ROLE_MANAGER)
     @GetMapping("/excel")
     public ResponseEntity<MessageResponseDTO> postMonthlyDocument(
         @RequestHeader(name = "Authorization") String token,

@@ -6,8 +6,10 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.nono.deluxe.domain.user.Role;
 import com.nono.deluxe.domain.user.User;
+import com.nono.deluxe.domain.user.UserRepository;
 import com.nono.deluxe.exception.InvalidTokenException;
 import com.nono.deluxe.exception.NoAuthorityException;
+import com.nono.deluxe.exception.NotFoundException;
 import com.nono.deluxe.presentation.dto.auth.TokenResponseDTO;
 import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
@@ -25,14 +27,17 @@ public class TokenClient {
     private final String accessKey;
     private final String refreshKey;
     private final String issuer;
+    private final UserRepository userRepository;
 
     public TokenClient(
         @Value("${auth.accessKey}") String accessKey,
         @Value("${auth.refreshKey}") String refreshKey,
-        @Value("${auth.issuer}") String issuer) {
+        @Value("${auth.issuer}") String issuer,
+        UserRepository userRepository) {
         this.accessKey = accessKey;
         this.refreshKey = refreshKey;
         this.issuer = issuer;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -160,5 +165,24 @@ public class TokenClient {
 
     private boolean isParticipant(DecodedJWT jwt) {
         return getRoleByJwt(jwt).equals(Role.ROLE_PARTICIPANT.toString());
+    }
+
+    public boolean isActiveParticipant(String token) {
+        return isActiveUser(validateParticipantToken(token));
+    }
+
+    public boolean isActiveManager(String token) {
+        return isActiveUser(validateManagerToken(token));
+    }
+
+    public boolean isActiveAdmin(String token) {
+        return isActiveUser(validateAdminToken(token));
+    }
+
+    private boolean isActiveUser(long userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new NotFoundException("Not Found User"));
+
+        return user.isActive();
     }
 }

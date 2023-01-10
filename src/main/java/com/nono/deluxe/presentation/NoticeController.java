@@ -2,6 +2,8 @@ package com.nono.deluxe.presentation;
 
 import com.nono.deluxe.application.service.AuthService;
 import com.nono.deluxe.application.service.NoticeService;
+import com.nono.deluxe.configuration.annotation.Auth;
+import com.nono.deluxe.domain.user.Role;
 import com.nono.deluxe.presentation.dto.MessageResponseDTO;
 import com.nono.deluxe.presentation.dto.notice.CreateNoticeRequestDTO;
 import com.nono.deluxe.presentation.dto.notice.NoticeResponseDTO;
@@ -34,6 +36,7 @@ public class NoticeController {
     private final NoticeService noticeService;
     private final AuthService authService;
 
+    @Auth(role = Role.ROLE_ADMIN)
     @PostMapping("")
     public ResponseEntity<NoticeResponseDTO> createNotice(
         @RequestHeader(value = "Authorization") String token,
@@ -45,9 +48,9 @@ public class NoticeController {
             .body(noticeService.createNotice(userId, createNoticeRequestDTO));
     }
 
+    @Auth
     @GetMapping("")
     public ResponseEntity<ReadNoticeListResponseDTO> getNoticeList(
-        @RequestHeader(value = "Authorization") String token,
         @RequestParam(required = false, defaultValue = "") String query,
         @RequestParam(required = false, defaultValue = "createdAt") String column,
         @RequestParam(required = false, defaultValue = "DESC") String order,
@@ -55,8 +58,6 @@ public class NoticeController {
         @RequestParam(required = false, defaultValue = "1") int page,
         @RequestParam(required = false, defaultValue = "false") boolean focus,
         @RequestParam(required = false, defaultValue = "false") boolean content) {
-        authService.validateTokenOverParticipantRole(token);
-
         PageRequest pageRequest = PageRequest.of(
             page - 1,
             size,
@@ -67,45 +68,37 @@ public class NoticeController {
             .body(noticeService.getNoticeList(pageRequest, query, focus, content));
     }
 
+    @Auth
     @GetMapping("/{noticeId}")
     public ResponseEntity<NoticeResponseDTO> getNoticeById(
-        @RequestHeader(value = "Authorization") String token,
         @PathVariable(name = "noticeId") long noticeId) {
-        authService.validateTokenOverParticipantRole(token);
-
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(noticeService.getNoticeById(noticeId));
     }
 
+    @Auth
     @GetMapping("/recent")
-    public ResponseEntity<NoticeResponseDTO> getRecentNotice(
-        @RequestHeader(value = "Authorization") String token) {
-        authService.validateTokenOverParticipantRole(token);
-
+    public ResponseEntity<NoticeResponseDTO> getRecentNotice() {
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(noticeService.getRecentNotice());
     }
 
+    @Auth(role = Role.ROLE_ADMIN)
     @PutMapping("/{noticeId}")
     public ResponseEntity<NoticeResponseDTO> updateNotice(
-        @RequestHeader(value = "Authorization") String token,
         @PathVariable(name = "noticeId") long noticeId,
         @Validated @RequestBody UpdateNoticeRequestDTO updateNoticeRequestDTO) {
-        authService.validateTokenOverAdminRole(token);
-
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(noticeService.updateNotice(noticeId, updateNoticeRequestDTO));
     }
 
+    @Auth(role = Role.ROLE_ADMIN)
     @DeleteMapping("/{noticeId}")
     public ResponseEntity<MessageResponseDTO> deleteNotice(
-        @RequestHeader(value = "Authorization") String token,
         @PathVariable(name = "noticeId") long noticeId) {
-        authService.validateTokenOverAdminRole(token);
-
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(noticeService.deleteNotice(noticeId));
