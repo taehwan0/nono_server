@@ -32,7 +32,6 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class ProductService {
 
-
     private final ImageFileClient imageFileClient;
 
     private final ProductRepository productRepository;

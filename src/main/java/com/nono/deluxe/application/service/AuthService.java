@@ -44,11 +44,12 @@ public class AuthService {
     private static final long LOGIN_CODE_VALID_MILLISECOND = 1000L * 60 * 10;
 
     private final TokenClient tokenClient;
+    private final MailClient mailClient;
+    private final BCryptPasswordEncoder encoder;
+
     private final UserRepository userRepository;
     private final CheckEmailRepository checkEmailRepository;
     private final AuthCodeRepository authCodeRepository;
-    private final MailClient mailClient;
-    private final BCryptPasswordEncoder encoder;
 
     @Transactional
     public JoinResponseDTO joinUser(JoinRequestDTO requestDTO) {
@@ -299,28 +300,5 @@ public class AuthService {
         // 이미 이메일에 발송된 코드라면 삭제하고 최신화
         List<CheckEmail> checkEmailList = checkEmailRepository.findAllByEmail(email);
         checkEmailRepository.deleteAll(checkEmailList);
-    }
-
-    public long validateTokenOverParticipantRole(String token) {
-        return validateUserById(tokenClient.validateParticipantToken(token));
-    }
-
-    public long validateTokenOverManagerRole(String token) {
-        return validateUserById(tokenClient.validateManagerToken(token));
-    }
-
-    public long validateTokenOverAdminRole(String token) {
-        return validateUserById(tokenClient.validateAdminToken(token));
-    }
-
-    private long validateUserById(long userId) {
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new NotFoundException("Not Found User"));
-
-        if (!user.isActive()) {
-            throw new IllegalStateException("Not Active User");
-        }
-
-        return userId;
     }
 }

@@ -1,6 +1,6 @@
 package com.nono.deluxe.presentation;
 
-import com.nono.deluxe.application.service.AuthService;
+import com.nono.deluxe.application.client.TokenClient;
 import com.nono.deluxe.application.service.UserService;
 import com.nono.deluxe.configuration.annotation.Auth;
 import com.nono.deluxe.domain.user.Role;
@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     private final UserService userService;
-    private final AuthService authService;
+    private final TokenClient tokenClient;
 
     @Auth(role = Role.ROLE_MANAGER)
     @PostMapping()
@@ -95,7 +95,7 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<UserResponseDTO> getMe(
         @RequestHeader(value = "Authorization") String token) {
-        long userId = authService.validateTokenOverParticipantRole(token);
+        long userId = tokenClient.getUserIdByToken(token);
 
         return ResponseEntity
             .status(HttpStatus.OK)
@@ -107,7 +107,7 @@ public class UserController {
     public ResponseEntity<UserResponseDTO> updateMe(
         @RequestHeader(value = "Authorization") String token,
         @Validated @RequestBody UpdateUserRequestDTO updateUserRequestDTO) {
-        long userId = authService.validateTokenOverParticipantRole(token);
+        long userId = tokenClient.getUserIdByToken(token);
 
         return ResponseEntity
             .status(HttpStatus.OK)
@@ -119,7 +119,7 @@ public class UserController {
     public ResponseEntity<MessageResponseDTO> updatePassword(
         @RequestHeader(value = "Authorization") String token,
         @Validated @RequestBody UpdatePasswordRequestDTO updatePasswordRequestDTO) {
-        long userId = authService.validateTokenOverManagerRole(token);
+        long userId = tokenClient.getUserIdByToken(token);
 
         return ResponseEntity
             .status(HttpStatus.OK)
@@ -131,7 +131,7 @@ public class UserController {
     public ResponseEntity<MessageResponseDTO> deleteMe(
         @RequestHeader(value = "Authorization") String token,
         @RequestBody DeleteMeRequestDTO deleteMeRequestDTO) {
-        long userId = authService.validateTokenOverManagerRole(token);
+        long userId = tokenClient.getUserIdByToken(token);
 
         return ResponseEntity
             .status(HttpStatus.OK)

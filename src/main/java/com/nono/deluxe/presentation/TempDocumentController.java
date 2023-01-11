@@ -1,6 +1,6 @@
 package com.nono.deluxe.presentation;
 
-import com.nono.deluxe.application.service.AuthService;
+import com.nono.deluxe.application.client.TokenClient;
 import com.nono.deluxe.application.service.TempDocumentService;
 import com.nono.deluxe.configuration.annotation.Auth;
 import com.nono.deluxe.domain.user.Role;
@@ -34,14 +34,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class TempDocumentController {
 
     private final TempDocumentService tempDocumentService;
-    private final AuthService authService;
+    private final TokenClient tokenClient;
 
     @Auth
     @PostMapping("")
     public ResponseEntity<TempDocumentResponseDTO> createTempDocument(
         @RequestHeader(name = "Authorization") String token,
         @Validated @RequestBody CreateTempDocumentRequestDTO createTempDocumentRequestDTO) {
-        long userId = authService.validateTokenOverParticipantRole(token);
+        long userId = tokenClient.getUserIdByToken(token);
 
         return ResponseEntity
             .status(HttpStatus.OK)
@@ -83,7 +83,7 @@ public class TempDocumentController {
         @RequestHeader(name = "Authorization") String token,
         @PathVariable(name = "documentId") long documentId,
         @Validated @RequestBody UpdateTempDocumentRequestDTO updateTempDocumentRequestDTO) {
-        long userId = authService.validateTokenOverParticipantRole(token);
+        long userId = tokenClient.getUserIdByToken(token);
 
         return ResponseEntity
             .status(HttpStatus.OK)

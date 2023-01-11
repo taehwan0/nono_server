@@ -1,6 +1,5 @@
 package com.nono.deluxe.presentation;
 
-import com.nono.deluxe.application.service.AuthService;
 import com.nono.deluxe.application.service.ProductService;
 import com.nono.deluxe.configuration.annotation.Auth;
 import com.nono.deluxe.domain.user.Role;
@@ -39,7 +38,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class ProductController {
 
     private final ProductService productService;
-    private final AuthService authService;
 
     @Auth(role = Role.ROLE_MANAGER)
     @PostMapping("")

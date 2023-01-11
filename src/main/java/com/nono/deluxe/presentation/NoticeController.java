@@ -1,6 +1,6 @@
 package com.nono.deluxe.presentation;
 
-import com.nono.deluxe.application.service.AuthService;
+import com.nono.deluxe.application.client.TokenClient;
 import com.nono.deluxe.application.service.NoticeService;
 import com.nono.deluxe.configuration.annotation.Auth;
 import com.nono.deluxe.domain.user.Role;
@@ -34,14 +34,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class NoticeController {
 
     private final NoticeService noticeService;
-    private final AuthService authService;
+    private final TokenClient tokenClient;
 
     @Auth(role = Role.ROLE_ADMIN)
     @PostMapping("")
     public ResponseEntity<NoticeResponseDTO> createNotice(
         @RequestHeader(value = "Authorization") String token,
         @Validated @RequestBody CreateNoticeRequestDTO createNoticeRequestDTO) {
-        long userId = authService.validateTokenOverAdminRole(token);
+        long userId = tokenClient.getUserIdByToken(token);
 
         return ResponseEntity
             .status(HttpStatus.OK)

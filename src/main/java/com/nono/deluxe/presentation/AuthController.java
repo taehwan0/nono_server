@@ -1,6 +1,8 @@
 package com.nono.deluxe.presentation;
 
 import com.nono.deluxe.application.service.AuthService;
+import com.nono.deluxe.configuration.annotation.Auth;
+import com.nono.deluxe.domain.user.Role;
 import com.nono.deluxe.presentation.dto.MessageResponseDTO;
 import com.nono.deluxe.presentation.dto.auth.AuthCodeResponseDTO;
 import com.nono.deluxe.presentation.dto.auth.CreateAuthCodeRequestDTO;
@@ -19,7 +21,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -73,12 +74,9 @@ public class AuthController {
             .body(authService.reissueUser(requestDTO));
     }
 
+    @Auth(role = Role.ROLE_MANAGER)
     @PostMapping("/code/{userCode}")
-    public ResponseEntity<AuthCodeResponseDTO> createAuthCode(
-        @RequestHeader(name = "Authorization") String token,
-        @PathVariable(name = "userCode") long userCode) {
-        authService.validateTokenOverAdminRole(token);
-
+    public ResponseEntity<AuthCodeResponseDTO> createAuthCode(@PathVariable(name = "userCode") long userCode) {
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(authService.createAuthCode(userCode));

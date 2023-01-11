@@ -24,10 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final MailClient mailClient;
+    private final BCryptPasswordEncoder encoder;
 
     private final UserRepository userRepository;
-
-    private final BCryptPasswordEncoder encoder;
 
     @Transactional
     public UserResponseDTO createParticipant(CreateParticipantRequestDTO createParticipantRequestDTO) {

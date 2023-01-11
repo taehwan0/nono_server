@@ -96,19 +96,19 @@ public class TokenClient {
         }
     }
 
-    public long validateAdminToken(String token) {
+    private long validateAdminToken(String token) {
         return validateAdminRole(decodeAccessJwtByRequestHeader(token));
     }
 
-    public long validateManagerToken(String token) {
+    private long validateManagerToken(String token) {
         return validateManagerRole(decodeAccessJwtByRequestHeader(token));
     }
 
-    public long validateParticipantToken(String token) {
+    private long validateParticipantToken(String token) {
         return validateParticipantRole(decodeAccessJwtByRequestHeader(token));
     }
 
-    public DecodedJWT decodeAccessJwtByRequestHeader(String token) {
+    private DecodedJWT decodeAccessJwtByRequestHeader(String token) {
         String extractedToken = extractToken(token);
 
         return getVerifier(accessKey).verify(extractedToken);
@@ -184,5 +184,9 @@ public class TokenClient {
             .orElseThrow(() -> new NotFoundException("Not Found User"));
 
         return user.isActive();
+    }
+
+    public long getUserIdByToken(String token) {
+        return getUserIdByDecodedToken(decodeAccessJwtByRequestHeader(token));
     }
 }

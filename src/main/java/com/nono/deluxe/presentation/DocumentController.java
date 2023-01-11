@@ -1,6 +1,6 @@
 package com.nono.deluxe.presentation;
 
-import com.nono.deluxe.application.service.AuthService;
+import com.nono.deluxe.application.client.TokenClient;
 import com.nono.deluxe.application.service.DocumentService;
 import com.nono.deluxe.application.service.LegacyDocumentService;
 import com.nono.deluxe.configuration.annotation.Auth;
@@ -37,15 +37,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class DocumentController {
 
     private final DocumentService documentService;
-    private final AuthService authService;
     private final LegacyDocumentService legacyDocumentService;
+    private final TokenClient tokenClient;
+
 
     @Auth
     @PostMapping("")
     public ResponseEntity<DocumentResponseDTO> createDocument(
         @RequestHeader(name = "Authorization") String token,
         @Validated @RequestBody CreateDocumentRequestDTO createDocumentRequestDTO) {
-        long userId = authService.validateTokenOverParticipantRole(token);
+        long userId = tokenClient.getUserIdByToken(token);
 
         return ResponseEntity
             .status(HttpStatus.OK)
@@ -108,7 +109,7 @@ public class DocumentController {
         @RequestParam int year,
         @RequestParam int month)
         throws IOException, MessagingException {
-        long userId = authService.validateTokenOverManagerRole(token);
+        long userId = tokenClient.getUserIdByToken(token);
 
         documentService.postMonthDocument(userId, year, month);
 
