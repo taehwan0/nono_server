@@ -37,6 +37,12 @@ public class ExcelClient {
     private final ProductRepository productRepository;
 
     public Optional<File> createMonthlyDocumentFile(int year, int month) {
+        try {
+            validateMonth(month);
+        } catch (IllegalArgumentException e) {
+            return Optional.empty();
+        }
+
         try (Workbook workbook = new SXSSFWorkbook()) {
             CellStyle style = createCellStyle(workbook);
 
@@ -86,6 +92,12 @@ public class ExcelClient {
             return Optional.of(exportWorkbook(workbook));
         } catch (Exception e) {
             return Optional.empty();
+        }
+    }
+
+    private static void validateMonth(int month) {
+        if (month < 1 || month > 12) {
+            throw new IllegalArgumentException("1~12의 월만 입력 가능합니다.");
         }
     }
 

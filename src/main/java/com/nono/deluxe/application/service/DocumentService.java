@@ -255,7 +255,6 @@ public class DocumentService {
     @Transactional(readOnly = true)
     public void postMonthDocument(long userId, int year, int month)
         throws MessagingException, IOException {
-
         Optional<File> excelFile = excelClient.createMonthlyDocumentFile(year, month);
 
         User user = userRepository.findById(userId)
