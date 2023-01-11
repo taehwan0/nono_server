@@ -97,9 +97,9 @@ public class UserService {
             user.encodePassword(encoder);
             mailClient.postUpdatePasswordMail(user.getEmail());
 
-            return new MessageResponseDTO(true, "success");
+            return MessageResponseDTO.ofSuccess("success");
         }
-        return new MessageResponseDTO(false, "fail");
+        return MessageResponseDTO.ofFail("fail");
     }
 
     @Transactional
@@ -109,8 +109,8 @@ public class UserService {
 
         if (encoder.matches(deleteMeRequestDTO.getPassword(), user.getPassword())) {
             user.delete();
-            return new MessageResponseDTO(true, "success");
+            return MessageResponseDTO.ofSuccess("success");
         }
-        return new MessageResponseDTO(false, "fail");
+        return MessageResponseDTO.ofFail("fail");
     }
 }

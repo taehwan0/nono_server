@@ -8,7 +8,10 @@ public class MessageResponseDTO {
     private boolean result;
     private String message;
 
-    public MessageResponseDTO(boolean result, String message) {
+    public MessageResponseDTO() {
+    }
+
+    private MessageResponseDTO(boolean result, String message) {
         this.result = result;
         this.message = message;
     }

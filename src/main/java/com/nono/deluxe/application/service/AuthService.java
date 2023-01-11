@@ -155,9 +155,9 @@ public class AuthService {
         Optional<User> optionalUser = userRepository.findByEmail(email);
 
         if (optionalUser.isEmpty()) {
-            return new MessageResponseDTO(true, "enable email");
+            return MessageResponseDTO.ofSuccess("enable email");
         }
-        return new MessageResponseDTO(false, "already used email");
+        return MessageResponseDTO.ofFail("already used email");
     }
 
     @Transactional
@@ -178,7 +178,7 @@ public class AuthService {
 
         postEmail(checkEmail);
 
-        return new MessageResponseDTO(true, "mail posted");
+        return MessageResponseDTO.ofSuccess("mail posted");
     }
 
     private void postEmail(CheckEmail checkEmail) {
@@ -214,9 +214,9 @@ public class AuthService {
             validateEmailCodeExpireTime(checkEmail);
 
             checkEmail.verify();
-            return new MessageResponseDTO(true, "success");
+            return MessageResponseDTO.ofSuccess("success");
         }
-        return new MessageResponseDTO(false, "fail");
+        return MessageResponseDTO.ofFail("fail");
     }
 
     private void validateEmailCodeExpireTime(CheckEmail checkEmail) {
@@ -247,7 +247,7 @@ public class AuthService {
 
             checkEmailRepository.delete(checkEmail);
 
-            return new MessageResponseDTO(true, "password reset");
+            return MessageResponseDTO.ofSuccess("password reset");
         }
         throw new RuntimeException("Email Not Verified OR Verify Code Not Collect");
     }
