@@ -119,7 +119,6 @@ public class ProductController {
             .body(productService.saveImage(imageFile));
     }
 
-    @Auth
     @GetMapping("/image/{imageId}")
     public ResponseEntity<byte[]> getImage(
         @PathVariable(name = "imageId") long imageId,

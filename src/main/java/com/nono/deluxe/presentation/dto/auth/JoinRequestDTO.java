@@ -32,7 +32,7 @@ public class JoinRequestDTO {
             .email(this.email)
             .password(this.password)
             .role(Role.ROLE_ADMIN)
-            .active(true)
+            .active(false)
             .build();
     }
 }
