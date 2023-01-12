@@ -122,6 +122,9 @@ public class Product {
         this.inputPrice = requestDTO.getInputPrice();
         this.outputPrice = requestDTO.getOutputPrice();
         this.margin = requestDTO.getMargin();
+        if (requestDTO.getImageFileId() == null) {
+            this.file = null;
+        }
     }
 
     public void updateStock(long stock) {
