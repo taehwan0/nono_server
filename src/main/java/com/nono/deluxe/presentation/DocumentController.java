@@ -118,15 +118,12 @@ public class DocumentController {
             .body(MessageResponseDTO.ofSuccess("request success"));
     }
 
-    /**
-     * TODO live 서버에서 삭제 할 것!!!
-     */
-    @PostMapping("/legacy/trans")
-    public ResponseEntity<String> transLegacyDocument() {
-        legacyDocumentService.importLegacyDocument();
-
-        return ResponseEntity
-            .status(HttpStatus.OK)
-            .body("SUCCESS");
-    }
+//    @PostMapping("/legacy/trans")
+//    public ResponseEntity<String> transLegacyDocument() {
+//        legacyDocumentService.importLegacyDocument();
+//
+//        return ResponseEntity
+//            .status(HttpStatus.OK)
+//            .body("SUCCESS");
+//    }
 }

@@ -61,11 +61,10 @@ public class LegacyDocumentService {
 
     private Document transLegacyDocument(LegacyDocument legacyDocument) {
         Company company = companyRepository.findByName(legacyDocument.getCompanyName())
-            .orElse(companyRepository.findById(1).get());
+            .orElseThrow(() -> new NotFoundException(""));
 
-        User writer = userRepository.findByName(legacyDocument.getCompanyName())
-            .orElse(userRepository.findByName("taehwan")
-                .orElseThrow(() -> new NotFoundException("")));
+        User writer = userRepository.findByName("taehwan")
+            .orElseThrow(() -> new NotFoundException(""));
 
         return Document.of(legacyDocument, writer, company);
     }
