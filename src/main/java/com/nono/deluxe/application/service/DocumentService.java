@@ -260,9 +260,7 @@ public class DocumentService {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new NotFoundException("NotFountUser"));
 
-        String subject = createSubject(year, month);
-
-        mailClient.postExcelFile(user.getEmail(), subject, excelFile);
+        mailClient.postMonthlyDocumentMail(user.getEmail(), year, month, excelFile);
     }
 
     private String createSubject(int year, int month) {

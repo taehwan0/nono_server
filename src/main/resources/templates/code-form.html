@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>NONO</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&display=swap"
+        rel="stylesheet">
+</head>
+<body
+    style="display: flex; justify-content: center; align-content: center; background-color: #e9eaef; font-family: 'Noto Sans KR', sans-serif;">
+<div style="width: 500px; background: #fff; border-radius: 7px;">
+  <div style="padding: 25px 15px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin: 20px;">
+      <div style="border-radius: 7px;">
+        <img src="https://user-images.githubusercontent.com/81221429/212109120-ea8eb8a5-baf0-4d50-9061-1a7c5bc833f5.png"
+             width="60px" height="60px">
+      </div>
+      <div>
+        <div
+            style="font-size: 20px; font-weight: 600; padding-left: 20px; border-bottom: 1px solid #f96d39; margin-bottom: 5px;">
+          화성시니어클럽
+        </div>
+        <div style="float: right; font-size: 15px;">노노유통</div>
+      </div>
+    </div>
+    <div
+        style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 10px; padding: 30px 0 65px; background-color: #e9eaef; border-radius: 7px; position: relative;">
+      <div style="display: flex; flex-direction: column; margin: 30px;">
+        <span style="font-size: 14px; font-weight: 500; padding-bottom: 10px;" th:text="${subject}"></span>
+        <div
+            style="font-size: 26px; font-weight: 500; color: #1f6de2; padding: 17px 45px; background-color: #fff; border-radius: 7px; line-height: 32px;"
+            th:text="${content}">
+        </div>
+      </div>
+      <div style="position: absolute; bottom: 15px; font-size: 12px; color: #7a7a7d;">문의 : cornflo3er@gmail.com
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+<script>
+  const authNumBox = document.querySelector("#js-auth-num");
+  authNumBox.innerHTML = generateStrRandomNum();
+
+  function generateStrRandomNum() {
+    const random = Math.floor(Math.random() * 900_000) + 100_000;
+    const strRandom = random.toString();
+    return strRandom.slice(0, 3) + " " + strRandom.slice(3);
+  }
+</script>
+</html>

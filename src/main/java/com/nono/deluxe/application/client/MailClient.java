@@ -23,64 +23,76 @@ import org.thymeleaf.context.Context;
 @Component
 public class MailClient {
 
-    private static final String JOIN_CHECK_MAIL_SUBJECT = "NONO DELUXE 회원가입 인증 메일입니다.";
-    private static final String REISSUE_CHECK_MAIL_SUBJECT = "NONO DELUXE 비밀번호 재설정 인증 메일입니다.";
-    private static final String REISSUE_PASSWORD_MAIL_SUBJECT = "NONO DELUXE 재설정된 비밀번호 메일입니다.";
-    private static final String UPDATE_PASSWORD_MAIL_SUBJECT = "NONO DELUXE 비밀번호가 변경 되었습니다.";
-    private static final String UPDATE_PASSWORD_MAIL_CONTENT = "비밀번호 변경을 요청하지 않았다면 비밀번호를 재발급하거나 관리자에 문의하세요.";
-    private static final String EXCEPTION_MAIL_SUBJECT = "NONO DELUXE 오류 메일입니다.";
-    private static final String EXCEPTION_MAIL_CONTENT = "해당 메일을 받았다면 관리자에 문의하세요.";
+    private static final String JOIN_CHECK_MAIL_SUBJECT = "[노노유통] 회원가입 인증 메일입니다.";
+    private static final String REISSUE_CHECK_MAIL_SUBJECT = "[노노유통] 비밀번호 초기화 인증 메일입니다.";
+    private static final String REISSUE_PASSWORD_MAIL_SUBJECT = "[노노유통] 비밀번호가 변경되었습니다.";
+    private static final String UPDATE_PASSWORD_MAIL_SUBJECT = "[노노유통] 비밀번호가 변경되었습니다.";
+    private static final String UPDATE_PASSWORD_MAIL_CONTENT = "비밀번호 변경을 요청하지 않았다면, 비밀번호를 재 설정 하거나 관리자에게 문의하세요.";
+    private static final String EXCEPTION_MAIL_SUBJECT = "[노노유통] [알 수 없는 오류]";
+    private static final String EXCEPTION_MAIL_CONTENT = "노노유통 서버에서 오류가 발생했습니다.관리자에게 문의하세요.";
+    private static final String MONTHLY_DOCUMENT_MAIL_SUBJECT_SUCCESS_FORMAT = "[노노유통] %d년 %d월 노노유통 입/출고 현황";
+    private static final String MONTHLY_DOCUMENT_MAIL_CONTENT_SUCCESS_FORMAT = "%d년 %d월 노노유통 입/출고 현황을 정리한 문서입니다.첨부파일을 확인 해 주세요.";
+    private static final String MONTHLY_DOCUMENT_MAIL_SUBJECT_FAIL = "[노노유통] 월별 문서 생성 실패";
+    private static final String MONTHLY_DOCUMENT_MAIL_CONTENT_FAIL_FORMAT = "%d년 %d월 입/출고 현황 문서 생성 과정에서 오류가 발생했습니다. 잠시 후 다시 시도해주세요. 만약 오류가 계속 될 경우, 관리자에게 문의하세요.";
 
     private final JavaMailSender javaMailSender;
     private final TemplateEngine templateEngine;
 
     @Async("mailExecutor")
-    public void postExcelFile(String email, String subject, Optional<File> file)
+    public void postMonthlyDocumentMail(String email, int year, int month, Optional<File> file)
         throws MessagingException, UnsupportedEncodingException {
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, "UTF-8");
 
         messageHelper.setTo(email);
-        messageHelper.setSubject(subject);
 
         if (file.isPresent()) {
-            messageHelper.setText("success", true);
+            messageHelper.setSubject(String.format(MONTHLY_DOCUMENT_MAIL_SUBJECT_SUCCESS_FORMAT, year, month));
+            messageHelper.setText(
+                getTextWithTemplate(
+                    String.format(MONTHLY_DOCUMENT_MAIL_CONTENT_SUCCESS_FORMAT, year, month),
+                    false),
+                true);
             messageHelper.addAttachment(MimeUtility.encodeText("excel.xlsx"), file.get());
         } else {
-            messageHelper.setText("fail", true);
+            messageHelper.setSubject(MONTHLY_DOCUMENT_MAIL_SUBJECT_FAIL);
+            messageHelper.setText(
+                getTextWithTemplate(
+                    String.format(MONTHLY_DOCUMENT_MAIL_CONTENT_FAIL_FORMAT, year, month),
+                    false),
+                true);
         }
-
         javaMailSender.send(message);
     }
 
     @Async("mailExecutor")
     public void postJoinCheckMail(String email, String verifyCode) {
-        postMail(email, JOIN_CHECK_MAIL_SUBJECT, verifyCode);
+        postMail(email, JOIN_CHECK_MAIL_SUBJECT, verifyCode, true);
     }
 
     @Async("mailExecutor")
     public void postReissueCheckMail(String email, String verifyCode) {
-        postMail(email, REISSUE_CHECK_MAIL_SUBJECT, verifyCode);
+        postMail(email, REISSUE_CHECK_MAIL_SUBJECT, verifyCode, true);
     }
 
     @Async("mailExecutor")
     public void postReissuePasswordMail(String email, String newPassword) {
-        postMail(email, REISSUE_PASSWORD_MAIL_SUBJECT, newPassword);
+        postMail(email, REISSUE_PASSWORD_MAIL_SUBJECT, newPassword, false);
     }
 
     @Async("mailExecutor")
     public void postUpdatePasswordMail(String email) {
-        postMail(email, UPDATE_PASSWORD_MAIL_SUBJECT, UPDATE_PASSWORD_MAIL_CONTENT);
+        postMail(email, UPDATE_PASSWORD_MAIL_SUBJECT, UPDATE_PASSWORD_MAIL_CONTENT, false);
     }
 
-    private void postMail(String email, String subject, String content) {
+    private void postMail(String email, String subject, String content, boolean isCode) {
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper messageHelper = new MimeMessageHelper(message);
 
             messageHelper.setTo(email);
             messageHelper.setSubject(subject);
-            messageHelper.setText(getTextWithTemplate(content), true);
+            messageHelper.setText(getTextWithTemplate(content, isCode), true);
 
             javaMailSender.send(message);
 
@@ -90,11 +102,27 @@ public class MailClient {
         }
     }
 
-    private String getTextWithTemplate(String code) {
-        Context context = new Context();
-        context.setVariable("code", code);
+    private String getTextWithTemplate(String content, boolean isCode) {
+        if (isCode) {
+            return byCodeTemplate(content);
+        }
+        return byMessageTemplate(content);
+    }
 
-        return templateEngine.process("code-mail", context);
+    private String byCodeTemplate(String content) {
+        Context context = new Context();
+        context.setVariable("subject", "인증 번호");
+        context.setVariable("content", content);
+
+        return templateEngine.process("code-form", context);
+    }
+
+
+    private String byMessageTemplate(String content) {
+        Context context = new Context();
+        context.setVariable("content", content);
+
+        return templateEngine.process("message-form", context);
     }
 
     private void postExceptionMessage(String email) {

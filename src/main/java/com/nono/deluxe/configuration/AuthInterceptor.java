@@ -30,7 +30,6 @@ public class AuthInterceptor implements HandlerInterceptor {
         }
 
         String token = request.getHeader("Authorization");
-        System.out.println("token" + token);
 
         if (auth.role().equals(Role.ROLE_ADMIN)) {
             return tokenClient.isActiveAdmin(token);
