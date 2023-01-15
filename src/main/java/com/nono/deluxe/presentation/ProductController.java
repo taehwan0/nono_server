@@ -48,7 +48,7 @@ public class ProductController {
             .body(productService.createProduct(productRequestDto));
     }
 
-    @Auth(role = Role.ROLE_ADMIN)
+    @Auth
     @GetMapping("")
     public ResponseEntity<GetProductListResponseDTO> getProductList(
         @RequestParam(value = "query", defaultValue = "") String query,
