@@ -94,7 +94,7 @@ public class DocumentController {
             .body(documentService.updateDocument(documentId, updateDocumentRequestDTO));
     }
 
-    @Auth(role = Role.ROLE_ADMIN)
+    @Auth
     @DeleteMapping("/{documentId}")
     public ResponseEntity<MessageResponseDTO> deleteDocument(@PathVariable(name = "documentId") long documentId) {
         return ResponseEntity
