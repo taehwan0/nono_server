@@ -42,7 +42,7 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
         + "FROM Record r "
         + "WHERE r.product.id = :productId "
         + "AND r.document.date BETWEEN :fromMonth AND :toMonth "
-        + "ORDER BY r.document.date DESC")
+        + "ORDER BY r.document.date DESC, r.document.createdAt DESC")
     List<Record> findAllByProductBetween(
         @Param("productId") long productId,
         @Param("fromMonth") LocalDate fromMonth,
