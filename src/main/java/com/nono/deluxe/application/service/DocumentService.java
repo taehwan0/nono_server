@@ -173,7 +173,8 @@ public class DocumentService {
         Document document = documentRepository.findById(documentId)
             .orElseThrow(() -> new RuntimeException("Not Found Document"));
 
-        recordRepository.deleteAll(recordRepository.findByDocumentId(documentId));
+        recordRepository.findByDocumentId(documentId)
+            .forEach(this::deleteRecord);
 
         documentRepository.delete(document);
 
@@ -186,8 +187,8 @@ public class DocumentService {
      * 이후의 record stock 에 반영
      */
     private Record createRecord(Document document, Product product, RecordRequestDTO recordRequestDto) {
-        List<Record> futureDateRecordList = recordRepository.findAllAfterThan(product.getId(),
-            document.getDate());
+        List<Record> futureDateRecordList
+            = recordRepository.findAllAfterThan(product.getId(), document.getDate());
 
         Record record;
         if (futureDateRecordList.size() == 0) {
