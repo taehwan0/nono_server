@@ -2,7 +2,6 @@ package com.nono.deluxe.presentation;
 
 import com.nono.deluxe.application.client.TokenClient;
 import com.nono.deluxe.application.service.DocumentService;
-import com.nono.deluxe.application.service.LegacyDocumentService;
 import com.nono.deluxe.configuration.annotation.Auth;
 import com.nono.deluxe.domain.user.Role;
 import com.nono.deluxe.presentation.dto.MessageResponseDTO;
@@ -37,9 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class DocumentController {
 
     private final DocumentService documentService;
-    private final LegacyDocumentService legacyDocumentService;
     private final TokenClient tokenClient;
-
 
     @Auth
     @PostMapping("")
@@ -117,13 +114,4 @@ public class DocumentController {
             .status(HttpStatus.OK)
             .body(MessageResponseDTO.ofSuccess("request success"));
     }
-
-//    @PostMapping("/legacy/trans")
-//    public ResponseEntity<String> transLegacyDocument() {
-//        legacyDocumentService.importLegacyDocument();
-//
-//        return ResponseEntity
-//            .status(HttpStatus.OK)
-//            .body("SUCCESS");
-//    }
 }
