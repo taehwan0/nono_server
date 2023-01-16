@@ -13,7 +13,7 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
         + "FROM Record r "
         + "WHERE r.product.id = :productId "
         + "AND r.document.date > :date "
-        + "ORDER BY r.document.date ASC, r.document.createdAt ASC")
+        + "ORDER BY r.document.date ASC, r.document.createdAt ASC, r.id ASC")
     List<Record> findAllAfterThan(@Param("productId") long productId, @Param("date") LocalDate date);
 
     @Query(value = "UPDATE record  r "
@@ -42,7 +42,7 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
         + "FROM Record r "
         + "WHERE r.product.id = :productId "
         + "AND r.document.date BETWEEN :fromMonth AND :toMonth "
-        + "ORDER BY r.document.date DESC, r.document.createdAt DESC")
+        + "ORDER BY r.document.date DESC, r.document.createdAt DESC, r.id DESC")
     List<Record> findAllByProductBetween(
         @Param("productId") long productId,
         @Param("fromMonth") LocalDate fromMonth,
@@ -52,7 +52,7 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
         + "FROM document d INNER JOIN record r ON d.id = r.document_id "
         + "WHERE r.product_id = :productId "
         + "AND d.date < :date "
-        + "ORDER BY d.date DESC, d.created_at DESC "
+        + "ORDER BY d.date DESC, d.created_at DESC, d.id DESC "
         + "LIMIT 1;",
         nativeQuery = true)
     Optional<Long> findRecentStockByProductId(
