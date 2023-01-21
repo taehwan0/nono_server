@@ -1,23 +1,29 @@
-# NoNo Deluxe
+<div align="center">
+<br>
+<img src="https://user-images.githubusercontent.com/81221429/213846984-d902a3b9-4451-4320-b720-1d4104cfb734.png" width="200"/>
+<h2>NONO DELUXE</h2>
+<h3>화성시니어클럽 노노유통 재고 관리 시스템</h3>
+</div>
 
-- Java, OpenJDK@11
-- SpringBoot 2.7.0
-- Gradle
+---
 
-### Package 구조
+## 사용 기술
 
-- controller: `@Controller` 또는 `@RestController` url 에 매핑되는 컨트롤러 패키지
-    - Controller 클래스는 API 문서 항목에 해당하는 이름 + Controller 로 명명한다.
-        - (ex: noticeAPI -> noticeController, AuthAPI -> AuthController 등)
-    - dto: Http Request, Response 시 사용하는 DTO 를 관리하는 패키지
-- service: 비지니스 로직, `@Service` 가 위치하는 패키지
-    - Service 클래스는 API 문서 항목에 해당하는 이름 + Service 로 명명한다.
-    - (ex: noticeAPI -> noticeService, AuthAPI -> AuthService 등)
-- domain: 하위에 entity 와 repository 를 두는 Model
-    - entity(ex: notice): 실제 DB 와 매핑되는 `@Entity` 객체들을 담는 패키지
-- configuration: `@Configuration` 어노테이션을 사용하는 설정과 관련된 클래스들의 패키지
+| 종류          | 이름                                                                                     |
+|:------------|:---------------------------------------------------------------------------------------|
+| 언어          | Java(OpenJDK@11)                                                                       |
+| 프레임워크       | SpringBoot 2.7.0                                                                       |
+| 빌드 툴        | Gradle                                                                                 |
+| 인프라(라이브 서버) | nginx<br/>Ubuntu Linux                                                                 |
+| 인프라(테스트 서버) | nginx<br/>Ubuntu Linux<br/>AWS EC2, RDS, S3                                            
+| 데이터베이스      | MariaDB                                                                                |
+| 주요 라이브러리    | JPA<br/>thymeleaf<br/>JavaMailSender<br/>jwt0<br/>thumbnailator<br/>apache POI<br/>etc |
 
-### Pattern
+## 아키텍쳐
 
-- `@Builder`패턴은 `@Entity` 클래스의 객체를 생성 할 때만 사용한다.
-- `Dto` 클래스의 객체를 생성할 시에는 `new` 연산자를 사용해 생성한다.
+<img width="1050" alt="구조도" src="https://user-images.githubusercontent.com/81221429/213877879-6ad0bc51-62c4-4020-bc10-59be26e32e04.png">
+
+## 기능 목록
+
+<img width="756" alt="기능목록1" src="https://user-images.githubusercontent.com/81221429/213879104-f526e28f-eeaa-4549-b18a-acf0cadc4cdc.png">
+<img width="756" alt="기능목록2" src="https://user-images.githubusercontent.com/81221429/213879107-0fc6f8f5-d4dc-4040-b94a-c178907c0570.png">
