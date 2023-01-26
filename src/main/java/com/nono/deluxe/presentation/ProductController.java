@@ -103,7 +103,7 @@ public class ProductController {
             .body(productService.updateProduct(productId, updateProductRequestDTO));
     }
 
-    @Auth(role = Role.ROLE_MANAGER)
+    @Auth(role = Role.ROLE_ADMIN)
     @DeleteMapping("/{productId}")
     public ResponseEntity<MessageResponseDTO> deleteProduct(@PathVariable(name = "productId") long productId) {
         return ResponseEntity

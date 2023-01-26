@@ -7,6 +7,7 @@ import com.nono.deluxe.domain.authcode.AuthCodeRepository;
 import com.nono.deluxe.domain.checkemail.CheckEmail;
 import com.nono.deluxe.domain.checkemail.CheckEmailRepository;
 import com.nono.deluxe.domain.checkemail.CheckType;
+import com.nono.deluxe.domain.user.Role;
 import com.nono.deluxe.domain.user.User;
 import com.nono.deluxe.domain.user.UserRepository;
 import com.nono.deluxe.exception.NotFoundException;
@@ -81,6 +82,9 @@ public class AuthService {
             .orElseThrow(() -> new RuntimeException("Not Found User"));
 
         if (encoder.matches(password, user.getPassword())) {
+
+            validateUserState(user);
+
             return createAuthCode(user.getId());
         }
         throw new IllegalArgumentException("올바르지 않은 패스워드");
@@ -93,9 +97,7 @@ public class AuthService {
         User user = userRepository.findById(userCode)
             .orElseThrow(() -> new RuntimeException("Not Found User"));
 
-        if (!user.isActive()) {
-            throw new IllegalStateException("Not Active User");
-        }
+        validateUserState(user);
 
         String verifyCode = createRandomString("1234567890", 6);
 
@@ -106,6 +108,16 @@ public class AuthService {
         authCodeRepository.save(loginCode);
 
         return new AuthCodeResponseDTO(loginCode);
+    }
+
+    private static void validateUserState(User user) {
+        if (!user.isActive()) {
+            throw new IllegalStateException("Not Active User");
+        }
+
+        if (user.getRole() != Role.ROLE_PARTICIPANT) {
+            throw new IllegalStateException("해당 사용자의 권한이 참여자가 아닙니다.");
+        }
     }
 
     @Transactional
