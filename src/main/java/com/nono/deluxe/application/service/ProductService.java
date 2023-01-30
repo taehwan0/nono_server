@@ -113,8 +113,8 @@ public class ProductService {
         Product product = productRepository.findById(productId)
             .orElseThrow(() -> new NotFoundException("Not Found Product"));
 
-        productRepository.delete(product);
-
+        product.delete();
+        
         return MessageResponseDTO.ofSuccess("success");
     }
 
