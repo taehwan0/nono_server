@@ -36,7 +36,7 @@ public class AuthController {
     public ResponseEntity<AuthCodeResponseDTO> login(@Validated @RequestBody CreateAuthCodeRequestDTO requestDTO) {
         return ResponseEntity
             .status(HttpStatus.OK)
-            .body(authService.createAuthCode(requestDTO));
+            .body(authService.createAuthCodeBySignIn(requestDTO));
     }
 
     @PostMapping("/join")
@@ -79,7 +79,7 @@ public class AuthController {
     public ResponseEntity<AuthCodeResponseDTO> createAuthCode(@PathVariable(name = "userCode") long userCode) {
         return ResponseEntity
             .status(HttpStatus.OK)
-            .body(authService.createAuthCode(userCode));
+            .body(authService.createAuthCodeOfParticipant(userCode));
     }
 
     @PostMapping("/token")

@@ -7,6 +7,7 @@ import com.nono.deluxe.domain.authcode.AuthCodeRepository;
 import com.nono.deluxe.domain.checkemail.CheckEmail;
 import com.nono.deluxe.domain.checkemail.CheckEmailRepository;
 import com.nono.deluxe.domain.checkemail.CheckType;
+import com.nono.deluxe.domain.user.Role;
 import com.nono.deluxe.domain.user.User;
 import com.nono.deluxe.domain.user.UserRepository;
 import com.nono.deluxe.exception.NotFoundException;
@@ -72,26 +73,54 @@ public class AuthService {
         throw new RuntimeException("Email Not Verified OR Verify Code Not Collect");
     }
 
-    @Transactional(readOnly = true)
-    public AuthCodeResponseDTO createAuthCode(CreateAuthCodeRequestDTO requestDTO) {
+    @Transactional
+    public AuthCodeResponseDTO createAuthCodeBySignIn(CreateAuthCodeRequestDTO requestDTO) {
         String email = requestDTO.getEmail();
         String password = requestDTO.getPassword();
 
         User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new RuntimeException("Not Found User"));
+            .orElseThrow(() -> new NotFoundException("Not Found User"));
 
         if (encoder.matches(password, user.getPassword())) {
-            return createAuthCode(user.getId());
+            validateManagementUser(user);
+
+            return createAuthCode(user);
         }
         throw new IllegalArgumentException("올바르지 않은 패스워드");
     }
 
-    @Transactional
-    public AuthCodeResponseDTO createAuthCode(long userCode) {
-        deleteLegacyLoginCode(userCode);
+    private void validateManagementUser(User user) {
+        if (!user.isActive()) {
+            throw new IllegalStateException("사용자의 활성상태가 false 입니다.");
+        }
 
+        if (user.getRole().equals(Role.ROLE_PARTICIPANT)) {
+            throw new IllegalStateException("사용자의 권한이 매니저 이상이 아닙니다.");
+        }
+    }
+
+    @Transactional
+    public AuthCodeResponseDTO createAuthCodeOfParticipant(long userCode) {
         User user = userRepository.findById(userCode)
-            .orElseThrow(() -> new RuntimeException("Not Found User"));
+            .orElseThrow(() -> new NotFoundException("Not Found User"));
+
+        validateParticipant(user);
+
+        return createAuthCode(user);
+    }
+
+    private void validateParticipant(User user) {
+        if (!user.isActive()) {
+            throw new IllegalStateException("사용자의 활성상태가 false 입니다.");
+        }
+
+        if (!user.getRole().equals(Role.ROLE_PARTICIPANT)) {
+            throw new IllegalStateException("사용자의 권한이 참여자가 아닙니다.");
+        }
+    }
+
+    private AuthCodeResponseDTO createAuthCode(User user) {
+        deleteLegacyLoginCode(user);
 
         String verifyCode = createRandomString("1234567890", 6);
 
@@ -271,8 +300,8 @@ public class AuthService {
             && checkEmail.getType().equals(CheckType.REISSUE);
     }
 
-    private void deleteLegacyLoginCode(long userCode) {
-        List<AuthCode> authCodeList = authCodeRepository.findAllByUserCode(userCode);
+    private void deleteLegacyLoginCode(User user) {
+        List<AuthCode> authCodeList = authCodeRepository.findAllByUserCode(user.getId());
         authCodeRepository.deleteAll(authCodeList);
     }
 
