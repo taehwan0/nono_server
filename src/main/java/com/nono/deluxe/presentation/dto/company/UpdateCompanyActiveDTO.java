@@ -13,4 +13,9 @@ public class UpdateCompanyActiveDTO {
 
     @NotNull
     private boolean active;
+
+    public UpdateCompanyActiveDTO(long companyId, boolean active) {
+        this.companyId = companyId;
+        this.active = active;
+    }
 }

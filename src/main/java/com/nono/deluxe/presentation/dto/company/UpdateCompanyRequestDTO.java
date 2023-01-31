@@ -18,4 +18,10 @@ public class UpdateCompanyRequestDTO {
 
     @NotNull
     private boolean active;
+
+    public UpdateCompanyRequestDTO(String name, String category, boolean active) {
+        this.name = name;
+        this.category = category;
+        this.active = active;
+    }
 }

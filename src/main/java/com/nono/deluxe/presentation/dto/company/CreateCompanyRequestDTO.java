@@ -26,6 +26,12 @@ public class CreateCompanyRequestDTO {
     @Size(max = 30)
     private String category;
 
+    public CreateCompanyRequestDTO(String name, String type, String category) {
+        this.name = name;
+        this.type = type;
+        this.category = category;
+    }
+
     public Company toEntity() {
         return Company.builder()
             .name(this.name)
