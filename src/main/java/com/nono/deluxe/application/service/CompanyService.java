@@ -34,9 +34,7 @@ public class CompanyService {
     @Transactional
     public CompanyResponseDTO createCompany(CreateCompanyRequestDTO createCompanyRequestDTO) {
         Company company = createCompanyRequestDTO.toEntity();
-        companyRepository.save(company);
-
-        return new CompanyResponseDTO(company);
+        return new CompanyResponseDTO(companyRepository.save(company));
     }
 
     @Transactional(readOnly = true)
