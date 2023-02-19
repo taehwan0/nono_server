@@ -16,7 +16,7 @@ public class JoinRequestDTO {
     @Email
     private String email;
 
-    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()\\-_+=])[A-Za-z\\d!@#$%^&*()]{8,}$")
+    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()\\-_+=])[A-Za-z\\d!@#$%^&*()\\-_+=]{8,}$")
     private String password;
 
     @NotNull
