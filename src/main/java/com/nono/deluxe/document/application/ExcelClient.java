@@ -2,6 +2,7 @@ package com.nono.deluxe.document.application;
 
 import com.nono.deluxe.common.utils.LocalDateCreator;
 import com.nono.deluxe.document.domain.DocumentType;
+import com.nono.deluxe.document.domain.Record;
 import com.nono.deluxe.document.domain.repository.RecordRepository;
 import com.nono.deluxe.product.domain.Product;
 import com.nono.deluxe.product.domain.repository.ProductRepository;
@@ -9,6 +10,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +45,9 @@ public class ExcelClient {
             return Optional.empty();
         }
 
+        LocalDate fromDate = LocalDateCreator.getDateOfFirstDay(year, month);
+        LocalDate toDate = LocalDateCreator.getDateOfLastDay(year, month);
+
         try (Workbook workbook = new SXSSFWorkbook()) {
             CellStyle style = createCellStyle(workbook);
 
@@ -50,6 +55,7 @@ public class ExcelClient {
             setHeader(sheet, year, month);
 
             int rowIndex = 1; // header 를 제외한 시작 인덱스
+
             for (Product product : productRepository.findAllOrderByProductCodeASC()) {
                 // 해당 상품의 행 생성
                 Row stockRow = sheet.createRow(rowIndex);
@@ -71,13 +77,18 @@ public class ExcelClient {
                 totalStockCell.setCellValue(recentStock);
                 totalStockCell.setCellStyle(style);
 
+                List<Record> records = recordRepository
+                    .getRecordsByProductIdBetweenDates(fromDate, toDate, product.getId());
+
                 // input, output, stock row 의 day(column)에 해당하는 cell 을 채움
                 for (int day = 1; day <= LocalDate.of(year, month, 1).lengthOfMonth(); day++) {
-                    long inputQuantity = getTotalQuantityOfDate(year, month, day, product, DocumentType.INPUT);
+
+                    LocalDate date = LocalDate.of(year, month, day);
+                    long inputQuantity = getTotalQuantityOfDate(records, date, DocumentType.INPUT);
                     Cell inputCell = inputRow.createCell(day + 3);
                     inputCell.setCellValue(inputQuantity);
 
-                    long outputQuantity = getTotalQuantityOfDate(year, month, day, product, DocumentType.OUTPUT);
+                    long outputQuantity = getTotalQuantityOfDate(records, date, DocumentType.OUTPUT);
                     Cell outputCell = outputRow.createCell(day + 3);
                     outputCell.setCellValue(outputQuantity);
 
@@ -115,12 +126,10 @@ public class ExcelClient {
             product.getId()).orElse(0L);
     }
 
-    private long getTotalQuantityOfDate(int year, int month, int day, Product product, DocumentType type) {
-        return recordRepository.findSumOfQuantityOfDateByProductIdAndType(
-            LocalDate.of(year, month, day),
-            product.getId(),
-            type.toString()
-        ).orElse(0L);
+    private long getTotalQuantityOfDate(List<Record> records, LocalDate date, DocumentType type) {
+        return records.stream().filter(
+                record -> record.getDocument().getDate().equals(date) && record.getDocument().getType().equals(type))
+            .mapToLong(Record::getQuantity).sum();
     }
 
     private void setHeader(Sheet sheet, int year, int month) {
