@@ -60,15 +60,12 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
         @Param("date") LocalDate date,
         @Param("productId") long productId);
 
-    @Query(value = "SELECT sum(r.quantity) "
-        + "FROM record r INNER JOIN document d on r.document_id = d.id "
-        + "WHERE r.product_id = :productId "
-        + "AND d.type = :type "
-        + "AND d.date = :date",
-        nativeQuery = true)
-    Optional<Long> findSumOfQuantityOfDateByProductIdAndType(
-        @Param("date") LocalDate date,
-        @Param("productId") long productId,
-        @Param("type") String type
-    );
+    @Query("SELECT r "
+        + "FROM Record r "
+        + "WHERE r.document.date BETWEEN :fromDate AND :toDate "
+        + "AND r.product.id = :productId ")
+    List<Record> getRecordsByProductIdBetweenDates(
+        @Param("fromDate") LocalDate fromDate,
+        @Param("toDate") LocalDate toDate,
+        @Param("productId") long productId);
 }
