@@ -66,7 +66,8 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
     @Query("SELECT r "
         + "FROM Record r "
         + "WHERE r.document.date BETWEEN :fromDate AND :toDate "
-        + "AND r.product.id = :productId ")
+        + "AND r.product.id = :productId "
+        + "ORDER BY r.document.date ASC, r.document.createdAt ASC ")
     List<Record> getRecordsByProductIdBetweenDates(
         @Param("fromDate") LocalDate fromDate,
         @Param("toDate") LocalDate toDate,

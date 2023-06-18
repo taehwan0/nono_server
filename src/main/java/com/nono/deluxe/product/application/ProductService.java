@@ -3,6 +3,7 @@ package com.nono.deluxe.product.application;
 import com.nono.deluxe.common.exception.NotFoundException;
 import com.nono.deluxe.common.presentation.dto.MessageResponseDTO;
 import com.nono.deluxe.common.utils.LocalDateCreator;
+import com.nono.deluxe.document.domain.DocumentType;
 import com.nono.deluxe.document.domain.Record;
 import com.nono.deluxe.document.domain.repository.RecordRepository;
 import com.nono.deluxe.product.domain.ImageFile;
@@ -154,5 +155,35 @@ public class ProductService {
         } catch (IOException e) {
             return null;
         }
+    }
+
+    /**
+     * product에 해당하는 record의 stock을 다시 계산함
+     *
+     * @param productId
+     * @param fromDate
+     * @param toDate
+     * @return
+     */
+    @Transactional
+    public boolean summationRecordFrom(long productId, LocalDate fromDate, LocalDate toDate) {
+        productRepository.findById(productId)
+            .orElseThrow(() -> new NotFoundException("NotFountProduct"));
+
+        List<Record> records = recordRepository
+            .getRecordsByProductIdBetweenDates(fromDate, toDate, productId);
+
+        Long nextStock = null;
+        for (Record record : records) {
+            if (nextStock == null) {
+                nextStock = record.getStock();
+            } else {
+                DocumentType type = record.getDocument().getType();
+                long quantity = type == DocumentType.INPUT ? record.getQuantity() : record.getQuantity() * -1;
+                nextStock += quantity;
+                record.updateStock(nextStock);
+            }
+        }
+        return true;
     }
 }

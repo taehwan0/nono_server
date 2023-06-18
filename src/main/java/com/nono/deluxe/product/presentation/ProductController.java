@@ -11,10 +11,12 @@ import com.nono.deluxe.product.presentation.dto.product.ProductResponseDTO;
 import com.nono.deluxe.product.presentation.dto.product.UpdateProductRequestDTO;
 import com.nono.deluxe.user.domain.Role;
 import java.io.IOException;
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -128,5 +130,16 @@ public class ProductController {
             .status(HttpStatus.OK)
             .header(HttpHeaders.CONTENT_TYPE, "image/png")
             .body(productService.getImage(imageId, isThumbnail));
+    }
+
+    @Auth(role = Role.ROLE_ADMIN)
+    @GetMapping("/fix")
+    public ResponseEntity<Boolean> fix(
+        @RequestParam(name = "productId") long productId,
+        @RequestParam(name = "fromDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fromDate,
+        @RequestParam(name = "toDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate toDate) {
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(productService.summationRecordFrom(productId, fromDate, toDate));
     }
 }
