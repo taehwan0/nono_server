@@ -39,7 +39,7 @@ public class MailClient {
     private final TemplateEngine templateEngine;
 
     @Async("mailExecutor")
-    public void postMonthlyDocumentMail(String email, int year, int month, Optional<File> file)
+    public void postMonthlyDocumentMail(String email, int year, int month, Optional<File> file, String fileName)
         throws MessagingException, UnsupportedEncodingException {
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, "UTF-8");
@@ -53,7 +53,7 @@ public class MailClient {
                     String.format(MONTHLY_DOCUMENT_MAIL_CONTENT_SUCCESS_FORMAT, year, month),
                     false),
                 true);
-            messageHelper.addAttachment(MimeUtility.encodeText("excel.xlsx"), file.get());
+            messageHelper.addAttachment(MimeUtility.encodeText(fileName + ".xlsx"), file.get());
         } else {
             messageHelper.setSubject(MONTHLY_DOCUMENT_MAIL_SUBJECT_FAIL);
             messageHelper.setText(
