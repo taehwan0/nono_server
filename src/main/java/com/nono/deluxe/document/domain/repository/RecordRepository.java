@@ -2,6 +2,7 @@ package com.nono.deluxe.document.domain.repository;
 
 import com.nono.deluxe.document.domain.Record;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,21 +14,23 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
     @Query("SELECT r "
         + "FROM Record r "
         + "WHERE r.product.id = :productId "
-        + "AND r.document.date > :date "
+        + "AND ((r.document.date >= :date AND r.document.createdAt > :createdAt) OR (r.document.date > :date)) "
         + "ORDER BY r.document.date ASC, r.document.createdAt ASC, r.id ASC")
-    List<Record> findAllAfterThan(@Param("productId") long productId, @Param("date") LocalDate date);
+    List<Record> findAllAfterThan(@Param("productId") long productId, @Param("date") LocalDate date,
+        @Param("createdAt") LocalDateTime createdAt);
 
     @Query(value = "UPDATE record  r "
         + "INNER JOIN document d "
         + "ON r.document_id = d.id "
         + "SET r.stock = r.stock + :updateStock "
         + "WHERE r.product_id = :productId "
-        + "AND d.date > :date",
-        nativeQuery = true)
+        + "AND ((d.date >= :date AND d.created_at > :createdAt) OR (d.date > :date))"
+        , nativeQuery = true)
     void updateAllStockAfterThan(
         @Param("productId") long productId,
         @Param("date") LocalDate date,
-        @Param("updateStock") long updateStock);
+        @Param("updateStock") long updateStock,
+        @Param("createdAt") LocalDateTime createdAt);
 
     @Query("SELECT r "
         + "FROM Record r "
