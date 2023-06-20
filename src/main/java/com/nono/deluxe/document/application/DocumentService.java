@@ -269,6 +269,6 @@ public class DocumentService {
     }
 
     private String createSubject(int year, int month) {
-        return year + "년 " + month + "월 노노유통 월간 문서";
+        return "nono_" + year + "_" + month;
     }
 }
