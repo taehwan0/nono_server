@@ -7,6 +7,29 @@
 
 ---
 
+## how to run
+
+### 1. jar 빌드
+
+```shell
+./gradlew build -x test
+```
+
+### 2. docker image 빌드
+
+```shell
+docker build --build-arg JAR_FILE=build/libs/\*.jar -t nono-image .
+```
+
+### 3. docker image 실행
+
+```shell
+docker rm --force nono-container
+docker run -d --name nono-container -p 3000:3000 nono-image
+```
+
+---
+
 ## 사용 기술
 
 | 종류          | 이름                                                                                     |
