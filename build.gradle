@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.nono'
-version = '0.0.1-SNAPSHOT'
+version = '1.0'
 sourceCompatibility = '11'
 
 configurations {
@@ -42,4 +42,8 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+jar {
+    enabled = false
 }
