@@ -9,19 +9,35 @@
 
 ## how to run
 
-### 1. jar 빌드
+### local에서 이미지 생성하고 docker hub에 업로드하기
+
+#### 1. docker 로그인
+
+```shell
+docker login --username={docker-user-name}
+```
+
+#### 2. docker 이미지 빌드 및 푸시 스크립트 실행
+
+```shell
+$docker-image-build.sh
+```
+
+### local docker에서 빌드하고 실행하기
+
+#### 1. jar 빌드
 
 ```shell
 ./gradlew build -x test
 ```
 
-### 2. docker image 빌드
+#### 2. docker image 빌드
 
 ```shell
 docker build --build-arg JAR_FILE=build/libs/\*.jar -t nono-image .
 ```
 
-### 3. docker image 실행
+#### 3. docker image 실행
 
 ```shell
 docker rm --force nono-container
