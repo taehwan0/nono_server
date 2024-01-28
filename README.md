@@ -17,10 +17,10 @@
 docker login --username={docker-user-name}
 ```
 
-#### 2. docker 이미지 빌드 및 푸시 스크립트 실행
+#### 2. docker 이미지 빌드 및 푸시 스크립트 실행 (mac)
 
 ```shell
-$docker-image-build.sh
+source ./docker-image-build.sh
 ```
 
 ### local docker에서 빌드하고 실행하기
